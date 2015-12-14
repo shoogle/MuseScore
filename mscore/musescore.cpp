@@ -67,6 +67,7 @@
 #include "transposedialog.h"
 #include "metaedit.h"
 #include "inspector/inspector.h"
+#include "lyricseditor.h"
 #ifdef OMR
 #include "omrpanel.h"
 #endif
@@ -741,6 +742,10 @@ MuseScore::MuseScore()
       menuView->addAction(a);
 
       a = getAction("inspector");
+      a->setCheckable(true);
+      menuView->addAction(a);
+
+      a = getAction("toggle-lyricseditor");
       a->setCheckable(true);
       menuView->addAction(a);
 
@@ -2725,6 +2730,7 @@ void MuseScore::writeSettings()
       settings.setValue("maximized", isMaximized());
       settings.setValue("showPanel", paletteBox && paletteBox->isVisible());
       settings.setValue("showInspector", _inspector && _inspector->isVisible());
+      settings.setValue("showLyricsEditor", _lyricsEditor && _lyricsEditor->isVisible());
       settings.setValue("showPianoKeyboard", _pianoTools && _pianoTools->isVisible());
       settings.setValue("showSelectionWindow", selectionWindow && selectionWindow->isVisible());
       settings.setValue("state", saveState());
@@ -2809,6 +2815,7 @@ void MuseScore::readSettings()
             showMaximized();
       mscore->showPalette(settings.value("showPanel", "1").toBool());
       mscore->showInspector(settings.value("showInspector", "1").toBool());
+      mscore->showLyricsEditor(settings.value("showLyricsEditor", "1").toBool());
       mscore->showPianoKeyboard(settings.value("showPianoKeyboard", "0").toBool());
       mscore->showSelectionWindow(settings.value("showSelectionWindow", "0").toBool());
 
@@ -4117,6 +4124,8 @@ void MuseScore::cmd(QAction* a, const QString& cmd)
             showStartcenter(a->isChecked());
       else if (cmd == "inspector")
             showInspector(a->isChecked());
+      else if (cmd == "toggle-lyricseditor")
+            showLyricsEditor(a->isChecked());
 #ifdef OMR
       else if (cmd == "omr")
             showOmrPanel(a->isChecked());

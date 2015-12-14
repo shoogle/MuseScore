@@ -48,7 +48,7 @@ QT5_WRAP_UI (ui_headers
       editpitch.ui editstringdata.ui editraster.ui mediadialog.ui textstyle.ui albummanager.ui layer.ui
       omrpanel.ui startdialog.ui masterpalette.ui harmonyedit.ui pathlistdialog.ui
       note_groups.ui resourceManager.ui stafftypetemplates.ui
-      startcenter.ui scorePreview.ui scoreBrowser.ui
+      startcenter.ui scorePreview.ui scoreBrowser.ui lyricseditor.ui
       logindialog.ui uploadscoredialog.ui breaksdialog.ui
 
       importmidi/importmidi_panel.ui
@@ -225,7 +225,7 @@ add_executable ( ${ExecutableName}
       debugger/debugger.cpp menus.cpp
       musescore.cpp navigator.cpp pagesettings.cpp palette.cpp
       mixer.cpp playpanel.cpp selectionwindow.cpp preferences.cpp measureproperties.cpp
-      seq.cpp textpalette.cpp
+      seq.cpp textpalette.cpp lyricseditor.cpp
       timedialog.cpp symboldialog.cpp shortcutcapturedialog.cpp
       simplebutton.cpp musedata.cpp
       editdrumset.cpp editstaff.cpp voltaproperties.cpp
