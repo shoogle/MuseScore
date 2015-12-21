@@ -36,12 +36,12 @@ void MuseScore::showLyricsEditor(bool visible)
 //---------------------------------------------------------
 
 LyricsEditor::LyricsEditor(QWidget* parent)
-   : QDockWidget(tr("LyricsEditor"), parent)
+   : QDockWidget(tr("Lyrics Editor"), parent)
       {
       setObjectName("LyricsEditor");
       setAllowedAreas(Qt::DockWidgetAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea));
       sa = new QScrollArea;
-      sa->setAccessibleName(tr("LyricsEditor Subwindow"));
+      sa->setAccessibleName(tr("Lyrics Editor Subwindow"));
       sa->setFrameShape(QFrame::NoFrame);
       sa->setWidgetResizable(true);
       setWidget(sa);
