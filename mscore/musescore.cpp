@@ -1158,6 +1158,8 @@ void MuseScore::selectionChanged(SelState selectionState)
             drumrollEditor->changeSelection(selectionState);
       if (_inspector && _inspector->isVisible())
             updateInspector();
+      if (_lyricsEditor && _lyricsEditor->isVisible())//Occurs when typing words, selecting, closing, note deletion
+            updateLyricsEditor();//Doesn't occur on score load/close or on leaving edit mode
       }
 
 //---------------------------------------------------------
@@ -1179,6 +1181,20 @@ void MuseScore::updateInspector()
             }
       else
             _inspector->setElement(0);
+      }
+
+//---------------------------------------------------------
+//   updateLyricsEditor
+//---------------------------------------------------------
+
+void MuseScore::updateLyricsEditor()
+      {
+      if (!_lyricsEditor)
+            return;
+      if (cs)
+            _lyricsEditor->setLyrics(cs->extractLyrics());
+      else
+            _lyricsEditor->setLyrics("");
       }
 
 //---------------------------------------------------------
@@ -1355,6 +1371,8 @@ void MuseScore::setCurrentScoreView(ScoreView* view)
             seq->setScoreView(cv);
       if (playPanel)
             playPanel->setScore(cs);
+//      if (_lyricsEditor && _lyricsEditor->isVisible())//Occurs on score load/close/switch only
+//            updateLyricsEditor();
       if (synthControl)
             synthControl->setScore(cs);
       if (selectionWindow)
@@ -1377,6 +1395,8 @@ void MuseScore::setCurrentScoreView(ScoreView* view)
                   }
             if (_inspector)
                   _inspector->setElement(0);
+            if (_lyricsEditor && _lyricsEditor->isVisible())
+                  updateLyricsEditor();// Occurs only when score closed.
             viewModeCombo->setEnabled(false);
             if (_textTools) {
                   _textTools->hide();
@@ -1799,10 +1819,10 @@ void MuseScore::midiNoteReceived(int channel, int pitch, int velo)
             ++active;
             }
       else {
-      		/*
-		* Since a note may be assigned to a midi_remote, don't decrease active below zero
-		* on noteoff.
-		*/
+            /*
+      * Since a note may be assigned to a midi_remote, don't decrease active below zero
+      * on noteoff.
+      */
 
             if ((channel != 0x09) && (active > 0))
                   --active;
@@ -2588,6 +2608,8 @@ void MuseScore::changeState(ScoreState val)
 
       if (_sstate == STATE_FOTO)
             updateInspector();
+//      if (_sstate == STATE_LYRICS_EDIT)//Occurs when leaving lyrics edit and between typing words.
+//            updateLyricsEditor();//Doesn't occur on score load/close or note deletion
       if (_sstate == STATE_NOTE_ENTRY_DRUM)
             showDrumTools(0, 0);
 
@@ -3982,6 +4004,13 @@ void MuseScore::endCmd()
                         seq->initInstruments();
                   instrumentChanged();                // update mixer
                   cs->setInstrumentsChanged(false);
+                  }
+            if (cs->lyricsChanged()) {
+                  qDebug("Lyrics Changed!");
+                  if (_lyricsEditor && _lyricsEditor->isVisible()) {
+                        updateLyricsEditor();
+                        cs->setLyricsChanged(false);
+                        }
                   }
             if (cs->selectionChanged()) {
                   cs->setSelectionChanged(false);

@@ -935,12 +935,12 @@ void Score::addPitch(int step, bool addFlag)
                   return;
                   }
             }
-      
+
       pos.segment   = inputState().segment();
       pos.staffIdx  = inputState().track() / VOICES;
       ClefType clef = staff(pos.staffIdx)->clef(pos.segment->tick());
       pos.line      = relStep(step, clef);
-      
+
       if (inputState().repitchMode())
             repitchNote(pos, !addFlag);
       else
@@ -2412,6 +2412,7 @@ Lyrics* Score::addLyrics()
       lyrics->setNo(no);
       undoAddElement(lyrics);
       select(lyrics, SelectType::SINGLE, 0);
+//      score()->setLyricsChanged(true);//Occurance unknown
       return lyrics;
       }
 
@@ -2587,6 +2588,7 @@ void Score::cmdEnterRest(const TDuration& d)
 
 void Score::removeChordRest(ChordRest* cr, bool clearSegment)
       {
+      score()->setLyricsChanged(true);
       QList<Segment*> segments;
       for (ScoreElement* e : cr->linkList()) {
             undo(new RemoveElement(static_cast<Element*>(e)));

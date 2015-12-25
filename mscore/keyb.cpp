@@ -161,6 +161,9 @@ void ScoreView::editKey(QKeyEvent* ev)
                   ev->accept();
                   return;
                   }
+            else
+                  qDebug("keyb.cpp:editKey");
+                  score()->setLyricsChanged(true);//called after every ordinary keypress in lyrics mode
             }
       else if (editObject->type() == Element::Type::HARMONY) {
 /*

@@ -112,6 +112,7 @@ ChordRest::ChordRest(const ChordRest& cr, bool link)
             nl->setParent(this);
             nl->setTrack(track());
             _lyricsList.append(nl);
+//            _score->setLyricsChanged(true);//occurance unknown
             }
       }
 
@@ -138,8 +139,10 @@ ChordRest::~ChordRest()
       {
       foreach (Articulation* a,  _articulations)
             delete a;
-      foreach (Lyrics* l, _lyricsList)
+      foreach (Lyrics* l, _lyricsList) {
             delete l;
+//            _score->setLyricsChanged(true);//occurance unknown
+            }
       if (_tabDur)
             delete _tabDur;
       }
@@ -158,6 +161,7 @@ void ChordRest::scanElements(void* data, void (*func)(void*, Element*), bool all
       foreach(Lyrics* l, _lyricsList) {
             if (l)
                   l->scanElements(data, func, all);
+//            _score->setLyricsChanged(true);//occurs on CR element creation or 1st lyric letter typed
             }
       DurationElement* de = this;
       while (de->tuplet() && de->tuplet()->elements().front() == de) {
@@ -1134,6 +1138,7 @@ void ChordRest::setTrack(int val)
       foreach(Lyrics* l, _lyricsList) {
             if (l)
                   l->setTrack(val);
+//                  _score->setLyricsChanged(true);//occurs on paste
             }
       if (tuplet())
             tuplet()->setTrack(val);
@@ -1184,6 +1189,7 @@ void ChordRest::add(Element* e)
                         }
                   _lyricsList[l->no()] = l;
                   }
+//                  _score->setLyricsChanged(true);//occurs when new lyric added (not modified)
                   break;
             default:
                   qFatal("ChordRest::add: unknown element %s", e->name());
@@ -1214,6 +1220,7 @@ void ChordRest::remove(Element* e)
                               continue;
                         _lyricsList[i]->removeFromScore();
                         _lyricsList[i] = 0;
+//                        _score->setLyricsChanged(true);//occurs when lyric (not note) deleted (not modified)
                         while (!_lyricsList.isEmpty() && _lyricsList.back() == 0)
                               _lyricsList.takeLast();
                         return;
@@ -1407,6 +1414,7 @@ QString ChordRest::accessibleExtraInfo()
       foreach (Element* l, lyricsList()) {
             if (!l)
                   continue;
+//            _score->setLyricsChanged(true);//occurs specifically on note selection
             if (!score()->selectionFilter().canSelect(l)) continue;
             rez = QString("%1 %2").arg(rez).arg(l->screenReaderInfo());
             }

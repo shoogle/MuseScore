@@ -368,6 +368,7 @@ class Score : public QObject, public ScoreElement {
 
       bool _excerptsChanged;
       bool _instrumentsChanged;
+      bool _lyricsChanged;
       bool _selectionChanged;
 
       bool _showInvisible;
@@ -996,6 +997,8 @@ class Score : public QObject, public ScoreElement {
       void setExcerptsChanged(bool val)     { _excerptsChanged = val; }
       bool instrumentsChanged() const       { return _instrumentsChanged; }
       void setInstrumentsChanged(bool val)  { _instrumentsChanged = val; }
+      bool lyricsChanged() const       { return _lyricsChanged; }
+      void setLyricsChanged(bool val)  { _lyricsChanged = val; }
       bool selectionChanged() const         { return _selectionChanged; }
       void setSelectionChanged(bool val)    { _selectionChanged = val;  }
       void setSoloMute();

@@ -14,11 +14,13 @@ void MuseScore::showLyricsEditor(bool visible)
             _lyricsEditor = new LyricsEditor();
             connect(_lyricsEditor, SIGNAL(visibilityChanged(bool)), a, SLOT(setChecked(bool)));
             addDockWidget(Qt::RightDockWidgetArea, _lyricsEditor);
+            updateLyricsEditor();
             }
-      if (visible) {
-            //updateLyricsEditor();
-            }
+//      if (visible) {
+//            updateLyricsEditor();
+//            }
       if (_lyricsEditor)
+            updateLyricsEditor();
             _lyricsEditor->setVisible(visible);
       }
 
@@ -47,9 +49,21 @@ LyricsEditor::LyricsEditor(QWidget* parent)
       setWidget(sa);
       sa->setFocusPolicy(Qt::NoFocus);
 
+      le.setupUi(sa);
+      le.textEdit->setText("Hello world!");
+
 //      _LyricsEditorEdit = false;
 //      ie             = 0;
 //      _element       = 0;
+      }
+
+//---------------------------------------------------------
+//   sizeHint
+//---------------------------------------------------------
+
+QSize LyricsEditorEmpty::sizeHint() const
+      {
+      return QSize(255 * guiScaling, 170 * guiScaling);
       }
 
 //---------------------------------------------------------
@@ -60,6 +74,15 @@ void LyricsEditor::reset()
       {
 //      if (ie)
 //            ie->setElement();
+      }
+
+//---------------------------------------------------------
+//   setElement
+//---------------------------------------------------------
+
+void LyricsEditor::setLyrics(QString s)
+      {
+      le.textEdit->setText(s);
       }
 
 //---------------------------------------------------------

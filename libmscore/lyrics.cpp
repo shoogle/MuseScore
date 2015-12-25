@@ -80,12 +80,15 @@ Lyrics::Lyrics(const Lyrics& l)
             }
 #endif
       _separator = nullptr;
+//      score()->setLyricsChanged(true);//occurance unknown
       }
 
 Lyrics::~Lyrics()
       {
-      if (_separator != nullptr)
+      if (_separator != nullptr) {
             remove(_separator);
+//            score()->setLyricsChanged(true);//occurance unknown
+            }
       }
 
 //---------------------------------------------------------
@@ -184,9 +187,9 @@ void Lyrics::read(XmlReader& e)
 void Lyrics::add(Element* el)
       {
       el->setParent(this);
-      if (el->type() == Element::Type::LINE)
+      if (el->type() == Element::Type::LINE);
 //            _separator.append((Line*)el);           // ignore! Internally managed
-            ;
+//            score()->setLyricsChanged(true);
       else
             qDebug("Lyrics::add: unknown element %s", el->name());
       }
@@ -207,6 +210,7 @@ void Lyrics::remove(Element* el)
                   separ->setParent(nullptr);
                   separ->removeUnmanaged();
                   delete separ;
+//                  score()->setLyricsChanged(true);//occurs on deletion on lyric or note
                   }
             }
       else
@@ -465,6 +469,7 @@ void Lyrics::paste(MuseScoreView* scoreview)
       layout();
       score()->setLayoutAll(true);
       score()->end();
+      //score()->setLyricsChanged(true);
       txt = sl.join(" ");
 
       QApplication::clipboard()->setText(txt, mode);
@@ -540,6 +545,7 @@ void Lyrics::endEdit()
       {
       Text::endEdit();
       score()->setLayoutAll(true);
+//      score()->setLyricsChanged(true);//called on lyrics text changed
       }
 
 //---------------------------------------------------------
@@ -552,6 +558,7 @@ void Lyrics::removeFromScore()
             _separator->removeUnmanaged();
             delete _separator;
             _separator = nullptr;
+            score()->setLyricsChanged(true);
             }
       }
 
@@ -622,12 +629,14 @@ LyricsLine::LyricsLine(Score* s)
       setLineWidth(Spatium(Lyrics::LYRICS_DASH_DEFAULT_LINE_THICKNESS));
       setAnchor(Spanner::Anchor::SEGMENT);
       _nextLyrics = nullptr;
+      score()->setLyricsChanged(true);//occurs on new lyric creation, paste or undo/redo of those
       }
 
 LyricsLine::LyricsLine(const LyricsLine& g)
    : SLine(g)
       {
       _nextLyrics = nullptr;
+//      score()->setLyricsChanged(true);//occurance unknown
       }
 
 //---------------------------------------------------------

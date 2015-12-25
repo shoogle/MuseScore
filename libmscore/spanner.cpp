@@ -275,6 +275,7 @@ void Spanner::remove(Element* e)
       if (ss->system())
             ss->system()->remove(ss);
       segments.removeOne(ss);
+//      score()->setLyricsChanged(true);//Occurance unknown
       }
 
 //---------------------------------------------------------
@@ -296,6 +297,7 @@ void Spanner::removeUnmanaged()
                   ss->setSystem(nullptr);
                   }
       score()->removeUnmanagedSpanner(this);
+//      score()->setLyricsChanged(true);//occurance unknown
       }
 
 //---------------------------------------------------------

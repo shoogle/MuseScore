@@ -18,32 +18,44 @@ class LyricsEditor : public QDockWidget {
       Element* _element;      // currently displayed element
       bool _lyricsEditorEdit; // set to true when an edit originates from
                               // within the lyrics editor itself
+      Ui::LyricsEditor le;
 
    public slots:
       void reset();
 
    public:
       LyricsEditor(QWidget* parent = 0);
-      void setElement(Element*);
+      void setLyrics(QString);
       void setElements(const QList<Element*>&);
       Element* element() const            { return _element;       }
       const QList<Element*>& el() const   { return _el;            }
       void setLyricsEditorEdit(bool val)     { _lyricsEditorEdit = val;  }
       };
 
+//---------------------------------------------------------
+//   LyricsEditorElement
+//---------------------------------------------------------
+
+class UiLyricsEditor: public Ui::LyricsEditor {
+   public:
+      void setupUi(QWidget *LyricsEditor);
+      };
+
+
+
 ////---------------------------------------------------------
 ////   LyricsEditor
 ////---------------------------------------------------------
 
-//class LyricsEditorEmpty : public QWidget {
-//      Q_OBJECT
+class LyricsEditorEmpty : public QWidget {
+      Q_OBJECT
 
-//      Ui::LyricsEditor e;
+      Ui::LyricsEditor e;
 
-//   public:
-//      LyricsEditorEmpty(QWidget* parent);
-//      virtual QSize sizeHint() const override;
-//      };
+   public:
+      LyricsEditorEmpty(QWidget* parent);
+      virtual QSize sizeHint() const override;
+      };
 
 } // namespace Ms
 #endif // LYRICSEDITOR_H

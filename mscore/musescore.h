@@ -697,6 +697,7 @@ class MuseScore : public QMainWindow, public MuseScoreCore {
       QHelpEngine*  helpEngine() const { return _helpEngine;   }
 
       void updateInspector();
+      void updateLyricsEditor();
       void showSynthControl(bool);
       void showMixer(bool);
 

@@ -298,6 +298,7 @@ void Score::init()
       _playChord              = false;
       _excerptsChanged        = false;
       _instrumentsChanged     = false;
+      _lyricsChanged          = false;
       _selectionChanged       = false;
 
       keyState                = 0;
@@ -1786,8 +1787,10 @@ void Score::removeElement(Element* element)
                   if (cr->beam())
                         cr->beam()->remove(cr);
                   for (Lyrics* lyr : cr->lyricsList())
-                        if (lyr)                // lyrics list may be sparse
+                        if (lyr) {              // lyrics list may be sparse
                               lyr->removeFromScore();
+                              _lyricsChanged = true;//Occurs on note deletion, not lyric deletion
+                              }
                   // TODO: check for tuplet?
                   }
                   break;
@@ -3424,7 +3427,10 @@ void Score::addLyrics(int tick, int staffIdx, const QString& txt)
                   break;
                   }
             }
-      if (!lyricsAdded) {
+      if (lyricsAdded)
+            qDebug("score.cpp:addLyrics");
+//            _lyricsChanged = true;//occurance unknown, probably when entering lyrics edit mode
+      else {
             qDebug("no chord/rest for lyrics<%s> at tick %d, staff %d",
                qPrintable(txt), tick, staffIdx);
             }
@@ -4125,7 +4131,9 @@ QString Score::extractLyrics()
                                     if (l->syllabic() == Lyrics::Syllabic::SINGLE || l->syllabic() == Lyrics::Syllabic::END)
                                           result += lyric + " ";
                                     else if (l->syllabic() == Lyrics::Syllabic::BEGIN || l->syllabic() == Lyrics:: Syllabic::MIDDLE)
-                                          result += lyric;
+                                          result += lyric;// + "-";
+//                                    else
+//                                          result += "_";
                                     }
                               }
                         }
