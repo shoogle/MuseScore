@@ -2536,7 +2536,7 @@ Shortcut Shortcut::_sc[] = {
          QT_TRANSLATE_NOOP("action","Re-Pitch Mode"),
          QT_TRANSLATE_NOOP("action","Replace pitches without changing rhythms"),
          0,
-         Icons::repitch_ICON,
+         Icons::noteEntryRepitch_ICON,
          Qt::ApplicationShortcut,
          ShortcutFlags::A_CMD | ShortcutFlags::A_CHECKABLE
          },
