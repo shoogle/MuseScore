@@ -763,6 +763,57 @@ MuseScore::MuseScore()
 
       populateNoteInputMenu();
 
+      QToolButton* noteEntryToolButton = new QToolButton(this);
+
+      Menu* noteEntryModes = new Menu(tr("Note Entry"));
+      //noteEntryModes->addAction(getAction("note-input"));
+      noteEntryModes->addAction(getAction("note-input-steptime"));
+      noteEntryModes->addAction(getAction("repitch"));
+      noteEntryModes->addAction(getAction("note-input-rhythm"));
+      noteEntryModes->addAction(getAction("note-input-realtime-auto"));
+      noteEntryModes->addAction(getAction("note-input-realtime-manual"));
+
+      getAction("note-input")->setIconVisibleInMenu(true);
+
+      noteEntryToolButton->setMenu(noteEntryModes);
+      noteEntryToolButton->setDefaultAction(getAction("note-input"));
+
+      entryTools->addWidget(noteEntryToolButton);
+
+      static const char* sl1[] = {
+            "note-input",
+            "repitch", "pad-note-128", "pad-note-64", "pad-note-32", "pad-note-16",
+            "pad-note-8",
+            "pad-note-4", "pad-note-2", "pad-note-1", "note-breve", "note-longa",
+            "pad-dot",
+            "pad-dotdot", "tie", "", "pad-rest", "",
+            "sharp2", "sharp", "nat", "flat", "flat2", "flip", ""
+            };
+
+      for (auto s : sl1) {
+            if (!*s)
+                  entryTools->addSeparator();
+            else
+                  entryTools->addAction(getAction(s));
+            }
+
+      static const char* vbsh { "QToolButton:checked, QToolButton:pressed { color: white;}" };
+
+      for (int i = 0; i < VOICES; ++i) {
+            QToolButton* tb = new QToolButton(this);
+            if (preferences.globalStyle == MuseScoreStyleType::LIGHT)
+                  tb->setStyleSheet(vbsh);
+            tb->setToolButtonStyle(Qt::ToolButtonTextOnly);
+            QPalette p(tb->palette());
+            p.setColor(QPalette::Base, MScore::selectColor[i]);
+            tb->setPalette(p);
+            QAction* a = getAction(voiceActions[i]);
+            a->setCheckable(true);
+            tb->setDefaultAction(a);
+            tb->setFocusPolicy(Qt::ClickFocus);
+            entryTools->addWidget(tb);
+            }
+
       //---------------------
       //    Menus
       //---------------------

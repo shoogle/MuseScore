@@ -37,6 +37,25 @@
 
 namespace Ms {
 
+class Menu : public QMenu
+{
+    Q_OBJECT
+public:
+    Menu(QString str) : QMenu(str) {}
+    bool event (QEvent * e)
+    {
+        const QHelpEvent *helpEvent = static_cast <QHelpEvent *>(e);
+         if (helpEvent->type() == QEvent::ToolTip && activeAction() != 0)
+         {
+              QToolTip::showText(helpEvent->globalPos(), activeAction()->toolTip());
+         } else
+         {
+              QToolTip::hideText();
+         }
+         return QMenu::event(e);
+    }
+};
+
 class Shortcut;
 class ScoreView;
 class Element;

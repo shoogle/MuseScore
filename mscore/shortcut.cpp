@@ -246,6 +246,61 @@ Shortcut Shortcut::_sc[] = {
       {
          MsWidget::MAIN_WINDOW,
          STATE_NORMAL | STATE_NOTE_ENTRY,
+         "note-input-steptime",
+         QT_TRANSLATE_NOOP("action","Steptime Mode (default)"),
+         QT_TRANSLATE_NOOP("action","Enter notes with a mouse or keyboard"),
+         0,
+         Icons::noteEntrySteptime_ICON,
+         Qt::WindowShortcut,
+         ShortcutFlags::A_CHECKABLE
+         },
+      {
+         MsWidget::MAIN_WINDOW,
+         STATE_NORMAL | STATE_NOTE_ENTRY,
+         "repitch",
+         QT_TRANSLATE_NOOP("action","Re-Pitch Mode"),
+         QT_TRANSLATE_NOOP("action","Replace pitches without changing rhythms"),
+         0,
+         Icons::noteEntryRepitch_ICON,
+         Qt::ApplicationShortcut,
+         ShortcutFlags::A_CMD | ShortcutFlags::A_CHECKABLE
+         },
+      {
+         MsWidget::MAIN_WINDOW,
+         STATE_NORMAL | STATE_NOTE_ENTRY,
+         "note-input-rhythm",
+         QT_TRANSLATE_NOOP("action","Rhythm Mode"),
+         QT_TRANSLATE_NOOP("action","Enter rhythms with a single click or keypress"),
+         0,
+         Icons::noteEntryRhythm_ICON,
+         Qt::WindowShortcut,
+         ShortcutFlags::A_CHECKABLE
+         },
+      {
+         MsWidget::MAIN_WINDOW,
+         STATE_NORMAL | STATE_NOTE_ENTRY,
+         "note-input-realtime-auto",
+         QT_TRANSLATE_NOOP("action","Realtime (automatic)"),
+         QT_TRANSLATE_NOOP("action","Perform the piece in time with a metronome beat"),
+         0,
+         Icons::noteEntryRealtimeAuto_ICON,
+         Qt::WindowShortcut,
+         ShortcutFlags::A_CHECKABLE
+         },
+      {
+         MsWidget::MAIN_WINDOW,
+         STATE_NORMAL | STATE_NOTE_ENTRY,
+         "note-input-realtime-manual",
+         QT_TRANSLATE_NOOP("action","Realtime (manual)"),
+         QT_TRANSLATE_NOOP("action","Perform the piece while tapping a key or pedal to set the pace"),
+         0,
+         Icons::noteEntryRealtimeManual_ICON,
+         Qt::WindowShortcut,
+         ShortcutFlags::A_CHECKABLE
+         },
+      {
+         MsWidget::MAIN_WINDOW,
+         STATE_NORMAL | STATE_NOTE_ENTRY,
          "pitch-spell",
          QT_TRANSLATE_NOOP("action","Respell Pitches"),
          QT_TRANSLATE_NOOP("action","Respell pitches"),
@@ -2528,17 +2583,6 @@ Shortcut Shortcut::_sc[] = {
          "config-raster",
          QT_TRANSLATE_NOOP("action","Configure Grid"),
          QT_TRANSLATE_NOOP("action","Configure grid")
-         },
-      {
-         MsWidget::MAIN_WINDOW,
-         STATE_NOTE_ENTRY,
-         "repitch",
-         QT_TRANSLATE_NOOP("action","Re-Pitch Mode"),
-         QT_TRANSLATE_NOOP("action","Replace pitches without changing rhythms"),
-         0,
-         Icons::noteEntryRepitch_ICON,
-         Qt::ApplicationShortcut,
-         ShortcutFlags::A_CMD | ShortcutFlags::A_CHECKABLE
          },
       {
          MsWidget::MAIN_WINDOW,
