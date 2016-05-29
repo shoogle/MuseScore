@@ -3037,16 +3037,26 @@ void MuseScore::changeState(ScoreState val)
                   if (cv && !cv->noteEntryMode())
                         cv->postCmd("note-input");
             case STATE_NOTE_ENTRY_STAFF_PITCHED:
-                  if (getAction("note-input-steptime")->isChecked())
+                  if (getAction("note-input-steptime")->isChecked()) {
+                        cs->setNoteEntryMethod(NoteEntryMethod::STEPTIME);
                         showModeText(tr("Steptime note input mode"));
-                  else if (getAction("repitch")->isChecked())
+                        }
+                  else if (getAction("repitch")->isChecked()) {
+                        cs->setNoteEntryMethod(NoteEntryMethod::REPITCH);
                         showModeText(tr("Repitch input mode"));
-                  else if (getAction("note-input-rhythm")->isChecked())
+                  }
+                  else if (getAction("note-input-rhythm")->isChecked()) {
+                        cs->setNoteEntryMethod(NoteEntryMethod::RHYTHM);
                         showModeText(tr("Rhythm input mode"));
-                  else if (getAction("note-input-realtime-auto")->isChecked())
+                        }
+                  else if (getAction("note-input-realtime-auto")->isChecked()) {
+                        cs->setNoteEntryMethod(NoteEntryMethod::REALTIME_AUTO);
                         showModeText(tr("Realtime (automatic) note input mode"));
-                  else if (getAction("note-input-realtime-manual")->isChecked())
+                        }
+                  else if (getAction("note-input-realtime-manual")->isChecked()) {
+                        cs->setNoteEntryMethod(NoteEntryMethod::REALTIME_MANUAL);
                         showModeText(tr("Realtime (manual) note input mode"));
+                        }
                   else
                         showModeText(tr("Note input mode"));
                   break;

@@ -27,6 +27,14 @@ class Segment;
 class Score;
 
 //---------------------------------------------------------
+//   NoteEntryMethod
+//---------------------------------------------------------
+
+enum NoteEntryMethod {
+      STEPTIME, REPITCH, RHYTHM, REALTIME_AUTO, REALTIME_MANUAL
+      };
+
+//---------------------------------------------------------
 //   InputState
 //---------------------------------------------------------
 
@@ -44,6 +52,7 @@ class InputState {
       NoteType _noteType       { NoteType::NORMAL };
       Beam::Mode _beamMode       { Beam::Mode::AUTO };
       bool _noteEntryMode      { false };
+      NoteEntryMethod _noteEntryMethod { NoteEntryMethod::STEPTIME };
       Slur* _slur              { 0     };
 
       Segment* nextInputPos() const;
@@ -79,8 +88,11 @@ class InputState {
       int string() const                  { return _string;             }
       void setString(int val)             { _string = val;              }
 
-      bool repitchMode() const            { return _repitchMode;    }
-      void setRepitchMode(bool val)       { _repitchMode = val;     }
+      bool repitchMode() const            { return _noteEntryMethod == NoteEntryMethod::REPITCH;    }
+      void setRepitchMode(bool val)       { if(val)
+                                                setNoteEntryMethod(NoteEntryMethod::REPITCH);
+                                            else
+                                                setNoteEntryMethod(NoteEntryMethod::STEPTIME);}
 
       StaffGroup staffGroup() const;
 
@@ -95,6 +107,9 @@ class InputState {
 
       bool noteEntryMode() const          { return _noteEntryMode; }
       void setNoteEntryMode(bool v)       { _noteEntryMode = v; }
+
+      NoteEntryMethod noteEntryMethod() const   { return _noteEntryMethod; }
+      void setNoteEntryMethod(NoteEntryMethod m)       { _noteEntryMethod = m; }
 
       Slur* slur() const                  { return _slur; }
       void setSlur(Slur* s)               { _slur = s; }
