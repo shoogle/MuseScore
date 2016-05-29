@@ -11,6 +11,7 @@
 //=============================================================================
 
 #include <fenv.h>
+#include <QActionGroup>
 
 #include "palettebox.h"
 #include "config.h"
@@ -765,15 +766,20 @@ MuseScore::MuseScore()
 
       QToolButton* noteEntryToolButton = new QToolButton(this);
 
-      Menu* noteEntryModes = new Menu(tr("Note Entry"));
+      QActionGroup* ag2 = new QActionGroup(this);
+      ag->setExclusive(true);
+      MenuWithToolTips* noteEntryModes = new MenuWithToolTips(tr("Note Entry"));
       //noteEntryModes->addAction(getAction("note-input"));
-      noteEntryModes->addAction(getAction("note-input-steptime"));
-      noteEntryModes->addAction(getAction("repitch"));
-      noteEntryModes->addAction(getAction("note-input-rhythm"));
-      noteEntryModes->addAction(getAction("note-input-realtime-auto"));
-      noteEntryModes->addAction(getAction("note-input-realtime-manual"));
+      ag2->addAction(getAction("note-input-steptime"));
+      ag2->addAction(getAction("repitch"));
+      ag2->addAction(getAction("note-input-rhythm"));
+      ag2->addAction(getAction("note-input-realtime-auto"));
+      ag2->addAction(getAction("note-input-realtime-manual"));
 
-      getAction("note-input")->setIconVisibleInMenu(true);
+      getAction("note-input-steptime")->setChecked(true);
+
+      connect(ag2, &QActionGroup::triggered, this, &MuseScore::setNoteEntryState);
+      noteEntryModes->addActions(ag2->actions());
 
       noteEntryToolButton->setMenu(noteEntryModes);
       noteEntryToolButton->setDefaultAction(getAction("note-input"));
@@ -781,8 +787,7 @@ MuseScore::MuseScore()
       entryTools->addWidget(noteEntryToolButton);
 
       static const char* sl1[] = {
-            "note-input",
-            "repitch", "pad-note-128", "pad-note-64", "pad-note-32", "pad-note-16",
+            "pad-note-128", "pad-note-64", "pad-note-32", "pad-note-16",
             "pad-note-8",
             "pad-note-4", "pad-note-2", "pad-note-1", "note-breve", "note-longa",
             "pad-dot",
@@ -2934,8 +2939,8 @@ void MuseScore::changeState(ScoreState val)
       static const char* tabNames[] = {
             "note-longa-TAB", "note-breve-TAB", "pad-note-1-TAB", "pad-note-2-TAB", "pad-note-4-TAB",
       "pad-note-8-TAB", "pad-note-16-TAB", "pad-note-32-TAB", "pad-note-64-TAB", "pad-note-128-TAB", "pad-rest-TAB", "rest-TAB"};
-      bool intoTAB = (_sstate != STATE_NOTE_ENTRY_TAB) && (val == STATE_NOTE_ENTRY_TAB);
-      bool fromTAB = (_sstate == STATE_NOTE_ENTRY_TAB) && (val != STATE_NOTE_ENTRY_TAB);
+      bool intoTAB = (_sstate != STATE_NOTE_ENTRY_STAFF_TAB) && (val == STATE_NOTE_ENTRY_STAFF_TAB);
+      bool fromTAB = (_sstate == STATE_NOTE_ENTRY_STAFF_TAB) && (val != STATE_NOTE_ENTRY_STAFF_TAB);
       // if activating TAB note entry, swap "pad-note-...-TAB" shorctuts into "pad-note-..." actions
       if (intoTAB) {
             for (unsigned i = 0; i < sizeof(stdNames)/sizeof(char*); ++i) {
@@ -3015,7 +3020,7 @@ void MuseScore::changeState(ScoreState val)
 
       if (_sstate == STATE_FOTO)
             updateInspector();
-      if (_sstate == STATE_NOTE_ENTRY_DRUM)
+      if (_sstate == STATE_NOTE_ENTRY_STAFF_DRUM)
             showDrumTools(0, 0);
 
       switch(val) {
@@ -3028,10 +3033,24 @@ void MuseScore::changeState(ScoreState val)
             case STATE_NORMAL:
                   _modeText->hide();
                   break;
-            case STATE_NOTE_ENTRY_PITCHED:
-                  showModeText(tr("Note input mode"));
+            case STATE_NOTE_ENTRY:
+                  if (cv && !cv->noteEntryMode())
+                        cv->postCmd("note-input");
+            case STATE_NOTE_ENTRY_STAFF_PITCHED:
+                  if (getAction("note-input-steptime")->isChecked())
+                        showModeText(tr("Steptime note input mode"));
+                  else if (getAction("repitch")->isChecked())
+                        showModeText(tr("Repitch input mode"));
+                  else if (getAction("note-input-rhythm")->isChecked())
+                        showModeText(tr("Rhythm input mode"));
+                  else if (getAction("note-input-realtime-auto")->isChecked())
+                        showModeText(tr("Realtime (automatic) note input mode"));
+                  else if (getAction("note-input-realtime-manual")->isChecked())
+                        showModeText(tr("Realtime (manual) note input mode"));
+                  else
+                        showModeText(tr("Note input mode"));
                   break;
-            case STATE_NOTE_ENTRY_DRUM:
+            case STATE_NOTE_ENTRY_STAFF_DRUM:
                   {
                   showModeText(tr("Drum input mode"));
                   InputState& is = cs->inputState();
@@ -3040,7 +3059,7 @@ void MuseScore::changeState(ScoreState val)
                         is.setDrumNote(_drumTools->selectedDrumNote());
                   }
                   break;
-            case STATE_NOTE_ENTRY_TAB:
+            case STATE_NOTE_ENTRY_STAFF_TAB:
                   showModeText(tr("TAB input mode"));
                   break;
             case STATE_EDIT:
@@ -3074,7 +3093,7 @@ void MuseScore::changeState(ScoreState val)
       if (selectionWindow)
             selectionWindow->setDisabled(val == STATE_PLAY || val == STATE_DISABLED);
       QAction* a = getAction("note-input");
-      bool noteEntry = val == STATE_NOTE_ENTRY_PITCHED || val == STATE_NOTE_ENTRY_TAB || val == STATE_NOTE_ENTRY_DRUM;
+      bool noteEntry = val & STATE_NOTE_ENTRY;
       a->setChecked(noteEntry);
       _sstate = val;
 
@@ -3922,10 +3941,15 @@ const char* stateName(ScoreState s)
       switch(s) {
             case STATE_DISABLED:           return "STATE_DISABLED";
             case STATE_NORMAL:             return "STATE_NORMAL";
-            case STATE_NOTE_ENTRY_PITCHED: return "STATE_NOTE_ENTRY_PITCHED";
-            case STATE_NOTE_ENTRY_DRUM:    return "STATE_NOTE_ENTRY_DRUM";
-            case STATE_NOTE_ENTRY_TAB:     return "STATE_NOTE_ENTRY_TAB";
+            case STATE_NOTE_ENTRY_STAFF_PITCHED: return "STATE_NOTE_ENTRY_PITCHED";
+            case STATE_NOTE_ENTRY_STAFF_DRUM:    return "STATE_NOTE_ENTRY_DRUM";
+            case STATE_NOTE_ENTRY_STAFF_TAB:     return "STATE_NOTE_ENTRY_TAB";
             case STATE_NOTE_ENTRY:         return "STATE_NOTE_ENTRY";
+            case STATE_NOTE_ENTRY_METHOD_STEPTIME:          return "STATE_NOTE_ENTRY_METHOD_STEPTIME";
+            case STATE_NOTE_ENTRY_METHOD_REPITCH:           return "STATE_NOTE_ENTRY_METHOD_REPITCH";
+            case STATE_NOTE_ENTRY_METHOD_RHYTHM:            return "STATE_NOTE_ENTRY_METHOD_RHYTHM";
+            case STATE_NOTE_ENTRY_METHOD_REALTIME_AUTO:     return "STATE_NOTE_ENTRY_METHOD_REALTIME_AUTO";
+            case STATE_NOTE_ENTRY_METHOD_REALTIME_MANUAL:   return "STATE_NOTE_ENTRY_METHOD_REALTIME_MANUAL";
             case STATE_EDIT:               return "STATE_EDIT";
             case STATE_TEXT_EDIT:          return "STATE_TEXT_EDIT";
             case STATE_LYRICS_EDIT:        return "STATE_LYRICS_EDIT";
