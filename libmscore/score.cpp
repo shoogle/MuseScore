@@ -2443,8 +2443,11 @@ void Score::padToggle(Pad n)
             // if in "note enter" mode, reset
             // rest flag
             //
-            if (noteEntryMode())
+            if (noteEntryMode()) {
                   _is.setRest(false);
+                  if (noteEntryMethod() == NoteEntryMethod::RHYTHM)
+                        cmdAddPitch(35, false);
+                  }
             }
 
       if (noteEntryMode() || !selection().isSingle())
