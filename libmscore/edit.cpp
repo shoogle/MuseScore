@@ -2719,7 +2719,8 @@ void Score::cmdEnterRest(const TDuration& d)
       NoteVal nval;
       setNoteRest(_is.segment(), track, nval, d.fraction(), Direction::AUTO);
       _is.moveToNextInputPos();
-      _is.setRest(false);  // continue with normal note entry
+      if (!noteEntryMode() || noteEntryMethod() != NoteEntryMethod::RHYTHM)
+            _is.setRest(false);  // continue with normal note entry unless in rhythm mode
       endCmd();
       }
 

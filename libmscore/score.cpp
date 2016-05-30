@@ -2369,6 +2369,7 @@ void Score::addAudioTrack()
 
 void Score::padToggle(Pad n)
       {
+      int oldDots = _is.duration().dots();
       switch (n) {
             case Pad::NOTE00:
                   _is.setDuration(TDuration::DurationType::V_LONG);
@@ -2444,9 +2445,22 @@ void Score::padToggle(Pad n)
             // rest flag
             //
             if (noteEntryMode()) {
-                  _is.setRest(false);
-                  if (noteEntryMethod() == NoteEntryMethod::RHYTHM)
-                        cmdAddPitch(35, false);
+                  if (noteEntryMethod() == NoteEntryMethod::RHYTHM) {
+                        switch (oldDots) {
+                              case 1:
+                                    padToggle(Pad::DOT);
+                                    break;
+                              case 2:
+                                    padToggle(Pad::DOTDOT);
+                                    break;
+                              }
+                        if (_is.rest())
+                              cmdEnterRest(_is.duration());
+                        else
+                              cmdAddPitch(35, false);
+                        }
+                  else
+                        _is.setRest(false);
                   }
             }
 

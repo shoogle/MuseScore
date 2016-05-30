@@ -4325,7 +4325,10 @@ void ScoreView::cmdEnterRest(const TDuration& d)
 qDebug("cmdEnterRest %s", qPrintable(d.name()));
       if (!noteEntryMode())
             sm->postEvent(new CommandEvent("note-input"));
-      _score->cmdEnterRest(d);
+      if (_score->noteEntryMethod() == NoteEntryMethod::RHYTHM)
+            _score->cmd(getAction("pad-rest"));
+      else
+            _score->cmdEnterRest(d);
 #if 0
       expandVoice();
       if (_is.cr() == 0) {
