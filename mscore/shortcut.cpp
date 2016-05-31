@@ -586,6 +586,15 @@ Shortcut Shortcut::_sc[] = {
          },
       {
          MsWidget::SCORE_TAB,
+         STATE_NOTE_ENTRY_METHOD_REALTIME_AUTO | STATE_NOTE_ENTRY_METHOD_REALTIME_MANUAL,
+         "realtime-advance",
+         QT_TRANSLATE_NOOP("action","Advance input"),
+         QT_TRANSLATE_NOOP("action","Move the cursor forward in realtime input mode"),
+         0,
+         Icons::quartrest_ICON
+         },
+      {
+         MsWidget::SCORE_TAB,
          STATE_NORMAL | STATE_NOTE_ENTRY,
          "add-staccato",
          QT_TRANSLATE_NOOP("action","Staccato"),

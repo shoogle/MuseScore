@@ -3259,6 +3259,12 @@ void ScoreView::cmd(const QAction* a)
             cmdCopyLyricsToClipboard();
             }
 
+      // STATE_NOTE_ENTRY_REALTIME actions (auto or manual)
+
+      else if (cmd == "realtime-advance") {
+            cmdRealtimeAdvance();
+            }
+
       // STATE_HARMONY_FIGBASS_EDIT actions
 
       else if (cmd == "advance-longa") {
@@ -6239,5 +6245,22 @@ void ScoreView::updateShadowNotes()
       setShadowNote(shadowNote->pos());
       }
 
-}
+//---------------------------------------------------------
+//   cmdRealtimeAdvance
+//   move forwards and extend note/rest in realtime mode
+//---------------------------------------------------------
 
+void ScoreView::cmdRealtimeAdvance()
+      {
+      const InputState& is = _score->inputState();
+      if (!is.noteEntryMode())
+            return;
+      if (is.rest())
+            cmdEnterRest(is.duration());
+      else {
+            _score->cmdAddTie();
+            moveCursor();
+            }
+      }
+
+}

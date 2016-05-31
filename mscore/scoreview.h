@@ -246,6 +246,7 @@ class ScoreView : public QWidget, public MuseScoreView {
       void cmdCreateTuplet(ChordRest* cr, Tuplet* tuplet);
       void cmdRepeatSelection();
       void cmdChangeEnharmonic(bool);
+      void cmdRealtimeAdvance();
 
       void setupFotoMode();
 
