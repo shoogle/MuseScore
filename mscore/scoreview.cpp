@@ -4257,10 +4257,7 @@ void ScoreView::adjustCanvasPosition(const Element* el, bool playBack)
                   showRect.setHeight(r.height());
                   }
             }
-      if (mscore->state() == ScoreState::STATE_NOTE_ENTRY
-                || mscore->state() == ScoreState::STATE_NOTE_ENTRY_DRUM
-                || mscore->state() == ScoreState::STATE_NOTE_ENTRY_PITCHED
-                || mscore->state() == ScoreState::STATE_NOTE_ENTRY_TAB) {
+      if (mscore->state() & ScoreState::STATE_NOTE_ENTRY) {
             setShadowNote(p);
             }
 
