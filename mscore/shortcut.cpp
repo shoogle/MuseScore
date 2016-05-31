@@ -1261,7 +1261,7 @@ Shortcut Shortcut::_sc[] = {
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_TAB,
+         STATE_NORMAL | STATE_NOTE_ENTRY,
          "note-longa",
          QT_TRANSLATE_NOOP("action","Longa"),
          QT_TRANSLATE_NOOP("action","Note duration: Longa"),
@@ -1272,7 +1272,7 @@ Shortcut Shortcut::_sc[] = {
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_TAB,
+         STATE_NORMAL | STATE_NOTE_ENTRY,
          "note-breve",
          QT_TRANSLATE_NOOP("action","Double Whole Note"),
          QT_TRANSLATE_NOOP("action","Note duration: Double whole"),
@@ -1283,7 +1283,7 @@ Shortcut Shortcut::_sc[] = {
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_TAB,
+         STATE_NORMAL | STATE_NOTE_ENTRY,
          "pad-note-1",
          QT_TRANSLATE_NOOP("action","Whole Note"),
          QT_TRANSLATE_NOOP("action","Note duration: Whole"),
@@ -1294,7 +1294,7 @@ Shortcut Shortcut::_sc[] = {
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_TAB,
+         STATE_NORMAL | STATE_NOTE_ENTRY,
          "pad-note-2",
          QT_TRANSLATE_NOOP("action","Half Note"),
          QT_TRANSLATE_NOOP("action","Note duration: Half"),
@@ -1305,7 +1305,7 @@ Shortcut Shortcut::_sc[] = {
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_TAB,
+         STATE_NORMAL | STATE_NOTE_ENTRY,
          "pad-note-4",
          QT_TRANSLATE_NOOP("action","Quarter Note"),
          QT_TRANSLATE_NOOP("action","Note duration: Quarter"),
@@ -1316,7 +1316,7 @@ Shortcut Shortcut::_sc[] = {
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_TAB,
+         STATE_NORMAL | STATE_NOTE_ENTRY,
          "pad-note-8",
          QT_TRANSLATE_NOOP("action","Eighth Note"),
          QT_TRANSLATE_NOOP("action","Note duration: Eighth"),
@@ -1327,7 +1327,7 @@ Shortcut Shortcut::_sc[] = {
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_TAB,
+         STATE_NORMAL | STATE_NOTE_ENTRY,
          "pad-note-16",
          QT_TRANSLATE_NOOP("action","16th Note"),
          QT_TRANSLATE_NOOP("action","Note duration: 16th"),
@@ -1338,7 +1338,7 @@ Shortcut Shortcut::_sc[] = {
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_TAB,
+         STATE_NORMAL | STATE_NOTE_ENTRY,
          "pad-note-32",
          QT_TRANSLATE_NOOP("action","32nd Note"),
          QT_TRANSLATE_NOOP("action","Note duration: 32nd"),
@@ -1349,7 +1349,7 @@ Shortcut Shortcut::_sc[] = {
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_TAB,
+         STATE_NORMAL | STATE_NOTE_ENTRY,
          "pad-note-64",
          QT_TRANSLATE_NOOP("action","64th Note"),
          QT_TRANSLATE_NOOP("action","Note duration: 64th"),
@@ -1360,7 +1360,7 @@ Shortcut Shortcut::_sc[] = {
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_TAB,
+         STATE_NORMAL | STATE_NOTE_ENTRY,
          "pad-note-128",
          QT_TRANSLATE_NOOP("action","128th Note"),
          QT_TRANSLATE_NOOP("action","Note duration: 128th"),
