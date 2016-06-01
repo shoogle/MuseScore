@@ -1040,6 +1040,25 @@ NoteVal Score::noteValForPosition(Position pos, bool &error)
       }
 
 //---------------------------------------------------------
+//  addMidiPitch
+//---------------------------------------------------------
+
+Note* Score::addMidiPitch(int pitch, bool addFlag)
+      {
+      NoteVal nval(pitch);
+      Staff* st = staff(inputState().track() / VOICES);
+
+      // if transposing, interpret MIDI pitch as representing desired written pitch
+      // set pitch based on corresponding sounding pitch
+      if (!styleB(StyleIdx::concertPitch))
+            nval.pitch += st->part()->instrument(inputState().tick())->transpose().chromatic;
+      // let addPitch calculate tpc values from pitch
+      //Key key   = st->key(inputState().tick());
+      //nval.tpc1 = pitch2tpc(nval.pitch, key, Prefer::NEAREST);
+      return addPitch(nval, addFlag);
+      }
+
+//---------------------------------------------------------
 //   addPitch
 //---------------------------------------------------------
 

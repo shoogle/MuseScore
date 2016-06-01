@@ -6255,24 +6255,30 @@ void ScoreView::cmdRealtimeAdvance()
       InputState& _is = _score->inputState();
       if (!_is.noteEntryMode())
             return;
-      //_score->startCmd();
+      _score->startCmd();
+      if (_is.cr()->duration() != _is.duration().fraction()) // TODO: replace with shadow rest when entering realtime mode
+            _score->setNoteRest(_is.segment(), _is.track(), NoteVal(), _is.duration().fraction(), Direction::AUTO);
+      _is.moveToNextInputPos();
       if (_score->activeMidiPitches()->empty())
-            //_score->setNoteRest(_is.segment(), _is.track(), NoteVal(), _is.duration().fraction(), Direction::AUTO);
-            cmdEnterRest(_is.duration());
+            _score->setNoteRest(_is.segment(), _is.track(), NoteVal(), _is.duration().fraction(), Direction::AUTO);
+            //cmdEnterRest(_is.duration());
       else {
             //_score->cmdAddTie();
             //moveCursor();
             QLinkedListIterator<MidiInputEvent> activeMidiEvents(*_score->activeMidiPitches());
+            MidiInputEvent ev = activeMidiEvents.next();
+            _score->addMidiPitch(ev.pitch, false);
             while (activeMidiEvents.hasNext()) {
-                 MidiInputEvent ev = activeMidiEvents.next();
+                 ev = activeMidiEvents.next();
                  //_score->setNoteRest(_is.segment(), _is.track(), NoteVal(ev.pitch), _is.duration().fraction(), Direction::AUTO);
-                 _score->masterScore()->enqueueMidiEvent(ev);
+                 _score->addMidiPitch(ev.pitch, true);
+                 //_score->masterScore()->enqueueMidiEvent(ev);
                  //activeMidiEvents.remove();
                  }
-            _is.moveToNextInputPos();
+            //_is.moveToNextInputPos();
             }
       //_is.moveToNextInputPos();
-      //_score->endCmd();
+      _score->endCmd();
       }
 
 }

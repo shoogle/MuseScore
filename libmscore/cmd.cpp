@@ -1779,18 +1779,13 @@ bool Score::processMidiInput()
                         startCmd();
                         cmdActive = true;
                         }
-                  NoteVal nval(ev.pitch);
-                  Staff* st = staff(inputState().track() / VOICES);
-
-                  // if transposing, interpret MIDI pitch as representing desired written pitch
-                  // set pitch based on corresponding sounding pitch
-                  if (!styleB(StyleIdx::concertPitch))
-                        nval.pitch += st->part()->instrument(inputState().tick())->transpose().chromatic;
-                  // let addPitch calculate tpc values from pitch
-                  //Key key   = st->key(inputState().tick());
-                  //nval.tpc1 = pitch2tpc(nval.pitch, key, Prefer::NEAREST);
-
-                  addPitch(nval, ev.chord);
+                  if (activeMidiPitches()->empty())
+                        ev.chord = false;
+                  else
+                        ev.chord = true;
+                  // TODO: add shadow note instead of real note in realtime modes
+                  // (note becomes real when realtime-advance triggered).
+                  addMidiPitch(ev.pitch, ev.chord);
                   activeMidiPitches()->append(ev);
                   }
             }

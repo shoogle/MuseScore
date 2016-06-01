@@ -639,6 +639,7 @@ class Score : public QObject, public ScoreElement {
 
       Note* addPitch(NoteVal&, bool addFlag);
       void addPitch(int pitch, bool addFlag);
+      Note* addMidiPitch(int pitch, bool addFlag);
       Note* addNote(Chord*, NoteVal& noteVal);
 
       NoteVal noteValForPosition(Position pos, bool &error);
