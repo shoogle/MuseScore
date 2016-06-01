@@ -360,8 +360,11 @@ Note* Score::addNote(Chord* chord, NoteVal& noteVal)
       setPlayNote(true);
       setPlayChord(true);
       select(note, SelectType::SINGLE, 0);
-      if (!chord->staff()->isTabStaff())
-            _is.moveToNextInputPos();
+      if (!chord->staff()->isTabStaff()) {
+            NoteEntryMethod nem = _is.noteEntryMethod();
+            if (nem != REALTIME_AUTO && nem != REALTIME_MANUAL)
+                  _is.moveToNextInputPos();
+            }
       return note;
       }
 
