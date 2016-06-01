@@ -2141,6 +2141,10 @@ void MuseScore::midiCtrlReceived(int controller, int value)
             return;
             }
       // when value is 0 (usually when a key is released ) nothing happens
+      if (controller == 64 && value) {
+            qDebug("Sustain Pedal ON!");
+            getAction("realtime-advance")->trigger();
+            }
       if (value && processMidiRemote(MIDI_REMOTE_TYPE_CTRL, controller))
             return;
       }
