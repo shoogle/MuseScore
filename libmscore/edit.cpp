@@ -1050,8 +1050,11 @@ Note* Score::addPitch(NoteVal& nval, bool addFlag)
                   return 0;
                   }
             Note* note = addNote(c, nval);
-            if (_is.lastSegment() == _is.segment())
-                  _is.moveToNextInputPos();
+            if (_is.lastSegment() == _is.segment()) {
+                  NoteEntryMethod nem = _is.noteEntryMethod();
+                  if (nem != REALTIME_AUTO && nem != REALTIME_MANUAL)
+                        _is.moveToNextInputPos();
+                  }
             return note;
             }
       expandVoice();
@@ -1178,8 +1181,11 @@ Note* Score::addPitch(NoteVal& nval, bool addFlag)
             if (next)
                   _is.moveInputPos(next->segment());
             }
-      else
-            _is.moveToNextInputPos();
+      else {
+            NoteEntryMethod nem = _is.noteEntryMethod();
+            if (nem != REALTIME_AUTO && nem != REALTIME_MANUAL)
+                  _is.moveToNextInputPos();
+            }
       return note;
       }
 

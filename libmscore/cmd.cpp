@@ -1728,6 +1728,12 @@ bool Score::processMidiInput()
       bool cmdActive = false;
       while (!midiInputQueue()->empty()) {
             MidiInputEvent ev = midiInputQueue()->dequeue();
+            QMutableLinkedListIterator<MidiInputEvent> activePitches(*activeMidiPitches());
+             while (activePitches.hasNext()) {
+                 MidiInputEvent prev = activePitches.next();
+                 if (prev.pitch == ev.pitch)
+                        activePitches.remove();
+                 }
             if (MScore::debugMode)
                   qDebug("<-- !noteentry dequeue %i", ev.pitch);
             if (!noteEntryMode()) {
@@ -1749,8 +1755,26 @@ bool Score::processMidiInput()
                         }
                   }
             else  {
-                  if (ev.velocity == 0)
+                  if (ev.velocity == 0) {
+                        // delete note in realtime mode
+                        //Chord* chord = static_cast<Chord*>(_is.cr());
+                        //std::vector<Note*> notes = chord->notes();
+                        NoteEntryMethod nem = _is.noteEntryMethod();
+                        if (nem == REALTIME_AUTO || nem == REALTIME_MANUAL) {
+                              if (_is.cr()->isChord()) {
+                                    Note* n = static_cast<Chord*>(_is.cr())->findNote(ev.pitch);
+                                    if (n) {
+                                          qDebug("Pitches match! Note %i, Pitch %i", n->pitch(), ev.pitch);
+                                          if (!cmdActive) {
+                                                startCmd();
+                                                cmdActive = true;
+                                                }
+                                          deleteItem(n);
+                                          }
+                                    }
+                              }
                         continue;
+                        }
                   if (!cmdActive) {
                         startCmd();
                         cmdActive = true;
@@ -1767,6 +1791,7 @@ bool Score::processMidiInput()
                   //nval.tpc1 = pitch2tpc(nval.pitch, key, Prefer::NEAREST);
 
                   addPitch(nval, ev.chord);
+                  activeMidiPitches()->append(ev);
                   }
             }
       if (cmdActive) {
