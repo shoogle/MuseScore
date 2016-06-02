@@ -1769,6 +1769,7 @@ bool Score::processMidiInput()
                                                 startCmd();
                                                 cmdActive = true;
                                                 }
+                                          deleteItem(n->tieBack());
                                           deleteItem(n);
                                           }
                                     }

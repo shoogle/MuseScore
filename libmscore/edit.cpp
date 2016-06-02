@@ -1040,6 +1040,28 @@ NoteVal Score::noteValForPosition(Position pos, bool &error)
       }
 
 //---------------------------------------------------------
+//  addTiedMidiPitch
+//---------------------------------------------------------
+
+Note* Score::addTiedMidiPitch(int pitch, bool addFlag, Chord* prevChord)
+      {
+      if (prevChord->isChord()) {
+            Note* n = addMidiPitch(pitch, addFlag);
+            Note* nn = prevChord->findNote(n->pitch());
+            if (nn) {
+                  Tie* tie = new Tie(this);
+                  tie->setStartNote(nn);
+                  tie->setEndNote(n);
+                  tie->setTrack(n->track());
+                  undoAddElement(tie);
+                  return n;
+                  }
+            undoRemoveElement(n);
+            }
+      return 0;
+      }
+
+//---------------------------------------------------------
 //  addMidiPitch
 //---------------------------------------------------------
 
@@ -1437,6 +1459,42 @@ void Score::repitchNote(const Position& p, bool replace)
             next = nextChordRest(next);
       if (next)
             _is.moveInputPos(next->segment());
+      }
+
+//---------------------------------------------------------
+//   cmdRealtimeAdvance
+//   move forwards and extend note/rest in realtime mode
+//---------------------------------------------------------
+
+void Score::cmdRealtimeAdvance()
+      {
+      if (!_is.noteEntryMode())
+            return;
+      startCmd();
+      if (_is.cr()->duration() != _is.duration().fraction()) // TODO: replace with shadow rest when entering realtime mode
+            setNoteRest(_is.segment(), _is.track(), NoteVal(), _is.duration().fraction(), Direction::AUTO);
+      Chord* prevChord = static_cast<Chord*>(_is.cr());
+      _is.moveToNextInputPos();
+      if (activeMidiPitches()->empty())
+            setNoteRest(_is.segment(), _is.track(), NoteVal(), _is.duration().fraction(), Direction::AUTO);
+            //cmdEnterRest(_is.duration());
+      else {
+            //cmdAddTie();
+            //moveCursor();
+            QLinkedListIterator<MidiInputEvent> activeMidiEvents(*activeMidiPitches());
+            MidiInputEvent ev = activeMidiEvents.next();
+            addTiedMidiPitch(ev.pitch, false, prevChord);
+            while (activeMidiEvents.hasNext()) {
+                 ev = activeMidiEvents.next();
+                 //setNoteRest(_is.segment(), _is.track(), NoteVal(ev.pitch), _is.duration().fraction(), Direction::AUTO);
+                 addTiedMidiPitch(ev.pitch, true, prevChord);
+                 //masterScore()->enqueueMidiEvent(ev);
+                 //activeMidiEvents.remove();
+                 }
+            //_is.moveToNextInputPos();
+            }
+      //_is.moveToNextInputPos();
+      endCmd();
       }
 
 //---------------------------------------------------------

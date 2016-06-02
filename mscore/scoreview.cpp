@@ -3262,7 +3262,7 @@ void ScoreView::cmd(const QAction* a)
       // STATE_NOTE_ENTRY_REALTIME actions (auto or manual)
 
       else if (cmd == "realtime-advance") {
-            cmdRealtimeAdvance();
+            _score->cmdRealtimeAdvance();
             }
 
       // STATE_HARMONY_FIGBASS_EDIT actions
@@ -6243,42 +6243,6 @@ void ScoreView::updateContinuousPanel()
 void ScoreView::updateShadowNotes()
       {
       setShadowNote(shadowNote->pos());
-      }
-
-//---------------------------------------------------------
-//   cmdRealtimeAdvance
-//   move forwards and extend note/rest in realtime mode
-//---------------------------------------------------------
-
-void ScoreView::cmdRealtimeAdvance()
-      {
-      InputState& _is = _score->inputState();
-      if (!_is.noteEntryMode())
-            return;
-      _score->startCmd();
-      if (_is.cr()->duration() != _is.duration().fraction()) // TODO: replace with shadow rest when entering realtime mode
-            _score->setNoteRest(_is.segment(), _is.track(), NoteVal(), _is.duration().fraction(), Direction::AUTO);
-      _is.moveToNextInputPos();
-      if (_score->activeMidiPitches()->empty())
-            _score->setNoteRest(_is.segment(), _is.track(), NoteVal(), _is.duration().fraction(), Direction::AUTO);
-            //cmdEnterRest(_is.duration());
-      else {
-            //_score->cmdAddTie();
-            //moveCursor();
-            QLinkedListIterator<MidiInputEvent> activeMidiEvents(*_score->activeMidiPitches());
-            MidiInputEvent ev = activeMidiEvents.next();
-            _score->addMidiPitch(ev.pitch, false);
-            while (activeMidiEvents.hasNext()) {
-                 ev = activeMidiEvents.next();
-                 //_score->setNoteRest(_is.segment(), _is.track(), NoteVal(ev.pitch), _is.duration().fraction(), Direction::AUTO);
-                 _score->addMidiPitch(ev.pitch, true);
-                 //_score->masterScore()->enqueueMidiEvent(ev);
-                 //activeMidiEvents.remove();
-                 }
-            //_is.moveToNextInputPos();
-            }
-      //_is.moveToNextInputPos();
-      _score->endCmd();
       }
 
 }

@@ -639,6 +639,7 @@ class Score : public QObject, public ScoreElement {
 
       Note* addPitch(NoteVal&, bool addFlag);
       void addPitch(int pitch, bool addFlag);
+      Note* addTiedMidiPitch(int pitch, bool addFlag, Chord* prevChord);
       Note* addMidiPitch(int pitch, bool addFlag);
       Note* addNote(Chord*, NoteVal& noteVal);
 
@@ -652,6 +653,7 @@ class Score : public QObject, public ScoreElement {
       void putNote(const QPointF& pos, bool replace);
       void putNote(const Position& pos, bool replace);
       void repitchNote(const Position& pos, bool replace);
+      void cmdRealtimeAdvance();
       void cmdAddPitch(int pitch, bool addFlag);
 
       void startCmd();                          // start undoable command
