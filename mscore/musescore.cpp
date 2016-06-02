@@ -165,8 +165,6 @@ QErrorMessage* errorMessage;
 const char* voiceActions[] = { "voice-1", "voice-2", "voice-3", "voice-4" };
 
 const std::list<const char*> MuseScore::_allNoteInputMenuEntries {
-            "note-input",
-            "repitch",
             "pad-note-128",
             "pad-note-64",
             "pad-note-32",
@@ -199,8 +197,6 @@ const std::list<const char*> MuseScore::_allNoteInputMenuEntries {
             };
 
 const std::list<const char*> MuseScore::_advancedNoteInputMenuEntries {
-            "note-input",
-            "repitch",
             "pad-note-128",
             "pad-note-64",
             "pad-note-32",
@@ -233,7 +229,6 @@ const std::list<const char*> MuseScore::_advancedNoteInputMenuEntries {
             };
 
 const std::list<const char*> MuseScore::_basicNoteInputMenuEntries {
-            "note-input",
             "pad-note-32",
             "pad-note-16",
             "pad-note-8",
@@ -458,6 +453,38 @@ void MuseScore::populateNoteInputMenu()
       {
       entryTools->clear();
       static const char* vbsh { "QToolButton:checked, QToolButton:pressed { color: white;}" };
+
+      //-----------------------------------------------------------------
+      // Note Entry Modes menu
+      // toolbutton menu to swap between Note Entry Methods)
+      //-----------------------------------------------------------------
+
+      QToolButton* noteEntryToolButton = new QToolButton(this);
+
+      QActionGroup* ag2 = new QActionGroup(this);
+      ag2->setExclusive(true);
+      MenuWithToolTips* noteEntryModes = new MenuWithToolTips(tr("Note Entry"));
+      //noteEntryModes->addAction(getAction("note-input"));
+      ag2->addAction(getAction("note-input-steptime"));
+      ag2->addAction(getAction("repitch"));
+      ag2->addAction(getAction("note-input-rhythm"));
+      ag2->addAction(getAction("note-input-realtime-auto"));
+      ag2->addAction(getAction("note-input-realtime-manual"));
+
+      getAction("note-input-steptime")->setChecked(true);
+
+      connect(ag2, &QActionGroup::triggered, this, &MuseScore::setNoteEntryState);
+      noteEntryModes->addActions(ag2->actions());
+
+      noteEntryToolButton->setMenu(noteEntryModes);
+      noteEntryToolButton->setDefaultAction(getAction("note-input"));
+
+      entryTools->addWidget(noteEntryToolButton);
+
+      //-----------------------------------------------------------------
+      // Note Input toolbar
+      // user-configurable toolbar
+      //-----------------------------------------------------------------
 
       for (const auto s : _noteInputMenuEntries) {
             if (!*s)
@@ -763,61 +790,6 @@ MuseScore::MuseScore()
       entryTools->setObjectName("entry-tools");
 
       populateNoteInputMenu();
-
-      QToolButton* noteEntryToolButton = new QToolButton(this);
-
-      QActionGroup* ag2 = new QActionGroup(this);
-      ag->setExclusive(true);
-      MenuWithToolTips* noteEntryModes = new MenuWithToolTips(tr("Note Entry"));
-      //noteEntryModes->addAction(getAction("note-input"));
-      ag2->addAction(getAction("note-input-steptime"));
-      ag2->addAction(getAction("repitch"));
-      ag2->addAction(getAction("note-input-rhythm"));
-      ag2->addAction(getAction("note-input-realtime-auto"));
-      ag2->addAction(getAction("note-input-realtime-manual"));
-
-      getAction("note-input-steptime")->setChecked(true);
-
-      connect(ag2, &QActionGroup::triggered, this, &MuseScore::setNoteEntryState);
-      noteEntryModes->addActions(ag2->actions());
-
-      noteEntryToolButton->setMenu(noteEntryModes);
-      noteEntryToolButton->setDefaultAction(getAction("note-input"));
-
-      entryTools->addWidget(noteEntryToolButton);
-
-      static const char* sl1[] = {
-            "pad-note-128", "pad-note-64", "pad-note-32", "pad-note-16",
-            "pad-note-8",
-            "pad-note-4", "pad-note-2", "pad-note-1", "note-breve", "note-longa",
-            "pad-dot",
-            "pad-dotdot", "tie", "", "pad-rest", "",
-            "sharp2", "sharp", "nat", "flat", "flat2", "flip", ""
-            };
-
-      for (auto s : sl1) {
-            if (!*s)
-                  entryTools->addSeparator();
-            else
-                  entryTools->addAction(getAction(s));
-            }
-
-      static const char* vbsh { "QToolButton:checked, QToolButton:pressed { color: white;}" };
-
-      for (int i = 0; i < VOICES; ++i) {
-            QToolButton* tb = new QToolButton(this);
-            if (preferences.globalStyle == MuseScoreStyleType::LIGHT)
-                  tb->setStyleSheet(vbsh);
-            tb->setToolButtonStyle(Qt::ToolButtonTextOnly);
-            QPalette p(tb->palette());
-            p.setColor(QPalette::Base, MScore::selectColor[i]);
-            tb->setPalette(p);
-            QAction* a = getAction(voiceActions[i]);
-            a->setCheckable(true);
-            tb->setDefaultAction(a);
-            tb->setFocusPolicy(Qt::ClickFocus);
-            entryTools->addWidget(tb);
-            }
 
       //---------------------
       //    Menus
