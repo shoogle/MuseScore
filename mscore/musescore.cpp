@@ -2102,6 +2102,8 @@ void MuseScore::midiNoteReceived(int channel, int pitch, int velo)
 
 void MuseScore::midiCtrlReceived(int controller, int value)
       {
+      static bool pedalOn;
+
       if (!midiinEnabled())
             return;
       if (_midiRecordId != -1) {
@@ -2113,9 +2115,31 @@ void MuseScore::midiCtrlReceived(int controller, int value)
             return;
             }
       // when value is 0 (usually when a key is released ) nothing happens
-      if (controller == 64 && value) {
-            qDebug("Sustain Pedal ON!");
-            getAction("realtime-advance")->trigger();
+      if (controller == 64) {// && value) {
+            pedalOn = value > 0;
+            if (pedalOn)
+                  qDebug("Sustain Pedal ON!");
+            else
+                  qDebug("Sustain Pedal OFF!");
+            if (cs->noteEntryMode()) {
+                  if (cs->noteEntryMethod() == NoteEntryMethod::REALTIME_MANUAL)
+                        getAction("realtime-advance")->trigger();
+                  else if (cs->noteEntryMethod() == NoteEntryMethod::REALTIME_AUTO)
+                        if (pedalOn) {
+                              QTime t;
+                              int iterations = 1;
+                              t.start();
+                              while (pedalOn) {
+                                    //QTime delayTime = QTime::currentTime().addMSecs(500);
+                                    //delayTime.addMSecs(2000);
+                                    while(t.elapsed() < 500 * iterations) {
+                                          QCoreApplication::processEvents( QEventLoop::AllEvents, 100 );
+                                          }
+                                    iterations++;
+                                    getAction("realtime-advance")->trigger();
+                                    }
+                              }
+                  }
             }
       if (value && processMidiRemote(MIDI_REMOTE_TYPE_CTRL, controller))
             return;
