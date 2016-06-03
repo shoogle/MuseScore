@@ -1470,6 +1470,12 @@ void Score::cmdRealtimeAdvance()
       {
       if (!_is.noteEntryMode())
             return;
+      // small delay in case midi note received at same time
+      QTime dieTime = QTime::currentTime().addMSecs(100);
+      while( QTime::currentTime() < dieTime )
+      {
+        QCoreApplication::processEvents( QEventLoop::AllEvents, 100 );
+      }
       startCmd();
       if (_is.cr()->duration() != _is.duration().fraction()) // TODO: replace with shadow rest when entering realtime mode
             setNoteRest(_is.segment(), _is.track(), NoteVal(), _is.duration().fraction(), Direction::AUTO);
