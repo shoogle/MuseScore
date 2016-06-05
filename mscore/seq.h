@@ -145,8 +145,8 @@ class Seq : public QObject, public Sequencer {
       EventMap::const_iterator guiPos;    // moved in gui thread
       QList<const Note*> markedNotes;     // notes marked as sounding
 
-      uint tackRest;                      // metronome state
-      uint tickRest;
+      uint tackRemain;                      // metronome state
+      uint tickRemain;
       qreal metronomeVolume;
 
       QTimer* heartBeatTimer;
@@ -237,6 +237,7 @@ class Seq : public QObject, public Sequencer {
       void putEvent(const NPlayEvent&, unsigned framePos = 0);
       void startNoteTimer(int duration);
       virtual void startNote(int channel, int, int, double nt) override;
+      virtual void playMetronomeTick(bool primaryTick) override;
       virtual void startNote(int channel, int, int, int, double nt) override;
       void eventToGui(NPlayEvent);
       void stopNoteTimer();

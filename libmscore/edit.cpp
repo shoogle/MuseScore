@@ -56,6 +56,7 @@
 #include "ottava.h"
 #include "textframe.h"
 #include "accidental.h"
+#include "sequencer.h"
 
 namespace Ms {
 
@@ -1470,11 +1471,14 @@ void Score::cmdRealtimeAdvance()
       {
       if (!_is.noteEntryMode())
             return;
-      // small delay in case midi note received at same time
+      // give audible feedback immediately, but dont advance just yet.
+      bool isStartOfMeasure = _is.cr()->rtick() == 0;
+      MScore::seq->playMetronomeTick(isStartOfMeasure);
+      // user is likely to press notes "on the beat" and not before, so add a
+      // small delay before actually advancing in case a MIDI note is recieved.
       QTime dieTime = QTime::currentTime().addMSecs(100);
-      while( QTime::currentTime() < dieTime )
-      {
-        QCoreApplication::processEvents( QEventLoop::AllEvents, 100 );
+      while( QTime::currentTime() < dieTime ) {
+            QCoreApplication::processEvents( QEventLoop::AllEvents, 100 );
       }
       startCmd();
       if (_is.cr()->duration() != _is.duration().fraction()) // TODO: replace with shadow rest when entering realtime mode

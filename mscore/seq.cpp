@@ -139,8 +139,8 @@ Seq::Seq()
       playlistChanged = false;
       cs              = 0;
       cv              = 0;
-      tackRest        = 0;
-      tickRest        = 0;
+      tackRemain        = 0;
+      tickRemain        = 0;
       maxMidiOutPort  = 0;
 
       endTick  = 0;
@@ -582,32 +582,32 @@ void Seq::processMessages()
 void Seq::metronome(unsigned n, float* p, bool force)
       {
       if (!mscore->metronome() && !force) {
-            tickRest = 0;
-            tackRest = 0;
+            tickRemain = 0;
+            tackRemain = 0;
             return;
             }
-      if (tickRest) {
-            tackRest = 0;
-            int idx = tickLength - tickRest;
-            int nn = n < tickRest ? n : tickRest;
+      if (tickRemain) {
+            tackRemain = 0;
+            int idx = tickLength - tickRemain;
+            int nn = n < tickRemain ? n : tickRemain;
             for (int i = 0; i < nn; ++i) {
                   qreal v = tick[idx] * metronomeVolume;
                   *p++ += v;
                   *p++ += v;
                   ++idx;
                   }
-            tickRest -= nn;
+            tickRemain -= nn;
             }
-      if (tackRest) {
-            int idx = tackLength - tackRest;
-            int nn = n < tackRest ? n : tackRest;
+      if (tackRemain) {
+            int idx = tackLength - tackRemain;
+            int nn = n < tackRemain ? n : tackRemain;
             for (int i = 0; i < nn; ++i) {
                   qreal v = tack[idx] * metronomeVolume;
                   *p++ += v;
                   *p++ += v;
                   ++idx;
                   }
-            tackRest -= nn;
+            tackRemain -= nn;
             }
       }
 
@@ -816,9 +816,9 @@ void Seq::process(unsigned n, float* buffer)
                   const NPlayEvent& event = (*pPlayPos)->second;
                   playEvent(event, framePos);
                   if (event.type() == ME_TICK1)
-                        tickRest = tickLength;
+                        tickRemain = tickLength;
                   else if (event.type() == ME_TICK2)
-                        tackRest = tackLength;
+                        tackRemain = tackLength;
                   mutex.lock();
                   ++(*pPlayPos);
                   mutex.unlock();
@@ -865,6 +865,19 @@ void Seq::process(unsigned n, float* buffer)
                   }
             }
       else {
+            // Outside of playback mode
+            for ( ; playPos != events.end(); ) {
+            const NPlayEvent& event = (*playPos).second;
+                  if (event.type() == ME_TICK1)
+                        tickRemain = tickLength;
+                  else if (event.type() == ME_TICK2)
+                        tackRemain = tackLength;
+                  mutex.lock();
+                  ++playPos;
+                  mutex.unlock();
+                  }
+            if (frames)
+                  metronome(frames, p, true);
             _synti->process(frames, p);
             }
       //
@@ -1097,6 +1110,26 @@ void Seq::startNote(int channel, int pitch, int velo, int duration, double nt)
       stopNotes();
       startNote(channel, pitch, velo, nt);
       startNoteTimer(duration);
+      }
+
+//---------------------------------------------------------
+//   playMetronomeTick
+//---------------------------------------------------------
+
+void Seq::playMetronomeTick(bool primaryTick)
+      {
+      if (state != Transport::STOP)
+            return;
+      NPlayEvent ev;
+      if (primaryTick)
+            ev.setType(ME_TICK1); // play tick
+      else
+            ev.setType(ME_TICK2); // play tock
+      mutex.lock();
+      events.clear();
+      events.insert(std::pair<int,NPlayEvent>(0, ev));
+      playPos  = events.cbegin();
+      mutex.unlock();
       }
 
 //---------------------------------------------------------
