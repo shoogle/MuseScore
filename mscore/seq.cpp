@@ -591,7 +591,7 @@ void Seq::metronome(unsigned n, float* p, bool force)
             int idx = tickLength - tickRemain;
             int nn = n < tickRemain ? n : tickRemain;
             for (int i = 0; i < nn; ++i) {
-                  qreal v = tick[idx] * metronomeVolume;
+                  qreal v = tick[idx] * tickVelocity * metronomeVolume;
                   *p++ += v;
                   *p++ += v;
                   ++idx;
@@ -602,7 +602,7 @@ void Seq::metronome(unsigned n, float* p, bool force)
             int idx = tackLength - tackRemain;
             int nn = n < tackRemain ? n : tackRemain;
             for (int i = 0; i < nn; ++i) {
-                  qreal v = tack[idx] * metronomeVolume;
+                  qreal v = tack[idx] * tackVelocity * metronomeVolume;
                   *p++ += v;
                   *p++ += v;
                   ++idx;
@@ -815,10 +815,14 @@ void Seq::process(unsigned n, float* buffer)
                         }
                   const NPlayEvent& event = (*pPlayPos)->second;
                   playEvent(event, framePos);
-                  if (event.type() == ME_TICK1)
+                  if (event.type() == ME_TICK1) {
                         tickRemain = tickLength;
-                  else if (event.type() == ME_TICK2)
+                        tickVelocity = event.velo() ? qreal(event.value()) / 127.0 : 1.0;
+                        }
+                  else if (event.type() == ME_TICK2) {
                         tackRemain = tackLength;
+                        tackVelocity = event.velo() ? qreal(event.value()) / 127.0 : 1.0;
+                        }
                   mutex.lock();
                   ++(*pPlayPos);
                   mutex.unlock();
@@ -867,11 +871,15 @@ void Seq::process(unsigned n, float* buffer)
       else {
             // Outside of playback mode
             for ( ; playPos != events.end(); ) {
-            const NPlayEvent& event = (*playPos).second;
-                  if (event.type() == ME_TICK1)
+                  const NPlayEvent& event = (*playPos).second;
+                  if (event.type() == ME_TICK1) {
                         tickRemain = tickLength;
-                  else if (event.type() == ME_TICK2)
+                        tickVelocity = event.velo() ? qreal(event.value()) / 127.0 : 1.0;
+                        }
+                  else if (event.type() == ME_TICK2) {
                         tackRemain = tackLength;
+                        tackVelocity = event.velo() ? qreal(event.value()) / 127.0 : 1.0;
+                        }
                   mutex.lock();
                   ++playPos;
                   mutex.unlock();
@@ -1116,7 +1124,7 @@ void Seq::startNote(int channel, int pitch, int velo, int duration, double nt)
 //   playMetronomeTick
 //---------------------------------------------------------
 
-void Seq::playMetronomeTick(bool primaryTick)
+void Seq::playMetronomeTick(bool primaryTick, int velocity)
       {
       if (state != Transport::STOP)
             return;
@@ -1125,6 +1133,7 @@ void Seq::playMetronomeTick(bool primaryTick)
             ev.setType(ME_TICK1); // play tick
       else
             ev.setType(ME_TICK2); // play tock
+      ev.setVelo(velocity);
       mutex.lock();
       events.clear();
       events.insert(std::pair<int,NPlayEvent>(0, ev));

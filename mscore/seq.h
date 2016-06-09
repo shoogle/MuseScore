@@ -147,6 +147,8 @@ class Seq : public QObject, public Sequencer {
 
       uint tackRemain;                      // metronome state
       uint tickRemain;
+      qreal tackVelocity = 1.0;
+      qreal tickVelocity = 1.0;
       qreal metronomeVolume;
 
       QTimer* heartBeatTimer;
@@ -237,7 +239,7 @@ class Seq : public QObject, public Sequencer {
       void putEvent(const NPlayEvent&, unsigned framePos = 0);
       void startNoteTimer(int duration);
       virtual void startNote(int channel, int, int, double nt) override;
-      virtual void playMetronomeTick(bool primaryTick) override;
+      virtual void playMetronomeTick(bool primaryTick, int velocity) override;
       virtual void startNote(int channel, int, int, int, double nt) override;
       void eventToGui(NPlayEvent);
       void stopNoteTimer();

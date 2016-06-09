@@ -1472,8 +1472,59 @@ void Score::cmdRealtimeAdvance()
       if (!_is.noteEntryMode())
             return;
       // give audible feedback immediately, but dont advance just yet.
+      int velocity = 127;
       bool isStartOfMeasure = _is.cr()->rtick() == 0;
-      MScore::seq->playMetronomeTick(isStartOfMeasure);
+      if (!isStartOfMeasure) {
+            int msrTick = _is.segment()->measure()->tick();
+            qreal tempo       = tempomap()->tempo(msrTick);
+            Fraction timeSig     = sigmap()->timesig(msrTick).nominal();
+            int numerator   = timeSig.numerator();
+            int denominator = timeSig.denominator();
+            int clickTicks  = MScore::division * 4 / denominator;
+            bool triplets = false;
+            // COMPOUND METER: if time sig is 3*n/d, convert to 3d units
+            // note: 3/8, 3/16, ... are NOT considered compound
+            if (numerator > 3 && numerator % 3 == 0) {
+                  // if denominator longer than 1/8 OR tempo for compound unit slower than 60MM
+                  // (i.e. each denom. unit slower than 180MM = tempo 3.0)
+                  // then do not count as compound, but beat click-clack-clack triplets
+                  if (denominator < 8 || tempo * denominator / 4 < 3.0)
+                        triplets = true;
+                  // otherwise, count as compound meter (one beat every 3 denominator units)
+                  else {
+                        numerator   /= 3;
+                        clickTicks  *= 3;
+                        }
+                  }
+
+            // NUMBER OF TICKS
+            int numOfClicks = numerator;                          // default to a full measure of 'clicks'
+            int lastPause   = clickTicks;                         // the number of ticks to wait after the last 'click'
+            // if not at the beginning of a measure, add clicks for the initial measure part
+            if (msrTick < _is.tick()) {
+                  int delta    = _is.tick() - msrTick;
+                  int addClick = (delta + clickTicks - 1) / clickTicks;     // round num. of clicks up
+                  numOfClicks += addClick;
+                  lastPause    = delta - (addClick - 1) * clickTicks;       // anything after last click time is final pause
+                  }
+            // or if measure not complete (anacrusis), add clicks for the missing measure part
+            else if (_is.segment()->measure()->ticks() < clickTicks * numerator) {
+                  int delta    = clickTicks * numerator - _is.segment()->measure()->ticks();
+                  int addClick = (delta + clickTicks - 1) / clickTicks;
+                  numOfClicks += addClick;
+                  lastPause    = delta - (addClick - 1) * clickTicks;
+                  }
+      /*
+            // MIN_CLICKS: be sure to have at least MIN_CLICKS clicks: if less, add full measures
+            while (numOfClicks < MIN_CLICKS)
+                  numOfClicks += numerator;
+      */
+            // click-clack-clack triplets
+            if (triplets)
+                  numerator = 3;
+            velocity = _is.segment()->rtick() % clickTicks == 0 ? 127 : 16;
+            }
+      MScore::seq->playMetronomeTick(isStartOfMeasure, velocity);
       // user is likely to press notes "on the beat" and not before, so add a
       // small delay before actually advancing in case a MIDI note is recieved.
       QTime dieTime = QTime::currentTime().addMSecs(100);

@@ -1736,7 +1736,7 @@ bool Score::processMidiInput()
                  }
             if (MScore::debugMode)
                   qDebug("<-- !noteentry dequeue %i", ev.pitch);
-            if (!noteEntryMode()) {
+            if (!noteEntryMode() || (noteEntryMethod() & (REALTIME_AUTO | REALTIME_MANUAL))) {
                   int staffIdx = selection().staffStart();
                   Part* p;
                   if (staffIdx < 0 || staffIdx >= nstaves())
@@ -1754,7 +1754,7 @@ bool Score::processMidiInput()
                                           0.0);
                         }
                   }
-            else  {
+            if (noteEntryMode()) /*else*/  {
                   if (ev.velocity == 0) {
                         // delete note in realtime mode
                         //Chord* chord = static_cast<Chord*>(_is.cr());

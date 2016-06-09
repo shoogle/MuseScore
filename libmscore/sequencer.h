@@ -29,7 +29,7 @@ class Sequencer {
       virtual void sendEvent(const NPlayEvent&) = 0;
       virtual void startNote(int channel, int, int, double nt) = 0;
       virtual void startNote(int channel, int, int, int, double nt) = 0;
-      virtual void playMetronomeTick(bool primaryTick) = 0;
+      virtual void playMetronomeTick(bool primaryTick, int velocity) = 0;
       };
 
 }     // namespace Ms

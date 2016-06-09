@@ -2130,13 +2130,13 @@ void MuseScore::midiCtrlReceived(int controller, int value)
                               int iterations = 1;
                               t.start();
                               while (pedalOn) {
+                                    getAction("realtime-advance")->trigger();
                                     //QTime delayTime = QTime::currentTime().addMSecs(500);
                                     //delayTime.addMSecs(2000);
                                     while(t.elapsed() < 500 * iterations) {
                                           QCoreApplication::processEvents( QEventLoop::AllEvents, 100 );
                                           }
                                     iterations++;
-                                    getAction("realtime-advance")->trigger();
                                     }
                               }
                   }
@@ -3300,7 +3300,7 @@ void MuseScore::readSettings()
 
 void MuseScore::play(Element* e) const
       {
-      if (noSeq || !(seq && seq->isRunning()) || !preferences.playNotes)
+      if (noSeq || !(seq && seq->isRunning()) || !preferences.playNotes || (cs->noteEntryMode() && (cs->noteEntryMethod() & (REALTIME_AUTO | REALTIME_MANUAL))))
             return;
 
       if (e->type() == Element::Type::NOTE) {
@@ -3324,7 +3324,7 @@ void MuseScore::play(Element* e) const
 
 void MuseScore::play(Element* e, int pitch) const
       {
-      if (noSeq || !(seq && seq->isRunning()))
+      if (noSeq || !(seq && seq->isRunning()) || (cs->noteEntryMode() && (cs->noteEntryMethod() & (REALTIME_AUTO | REALTIME_MANUAL))))
             return;
       if (preferences.playNotes && e->type() == Element::Type::NOTE) {
             Note* note = static_cast<Note*>(e);
