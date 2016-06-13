@@ -233,7 +233,7 @@ class Segment : public Element {
 
       // some helper function
       ChordRest* cr(int track) const                    {
-            Q_ASSERT(_segmentType == Type::ChordRest);
+            //Q_ASSERT(_segmentType == Type::ChordRest);
             return (ChordRest*)(_elist[track]);
             };
       bool isType(const Segment::Type t) const { return static_cast<int>(_segmentType) & static_cast<int>(t); }
