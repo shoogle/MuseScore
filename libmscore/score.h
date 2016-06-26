@@ -178,6 +178,146 @@ struct MidiInputEvent {
       };
 
 //---------------------------------------------------------
+//   RawNote
+//---------------------------------------------------------
+
+class RawNote {
+      int _pitch;
+      Note* _tiedNoteFor;
+      Note* _tiedNoteBack;
+
+   public:
+      RawNote(int pitch) : RawNote(pitch, 0, 0) {}
+      RawNote(int pitch, Note* tiedNoteFor, Note* tiedNoteBack) :
+                  _pitch(pitch),
+                  _tiedNoteFor(tiedNoteFor),
+                  _tiedNoteBack(tiedNoteBack) {
+            qDebug("RawNote: %u, tnf: %s, tnb: %s", _pitch, _tiedNoteFor ? "T" : "F", _tiedNoteBack ? "T" : "F");
+            }
+
+      int pitch() { return _pitch; }
+      Note* tiedNoteFor()  { return _tiedNoteFor;  }
+      Note* tiedNoteBack() { return _tiedNoteBack; }
+
+      void print() {
+            qDebug("~~~~RawNote: pitch = %i, tnf = %p, tnb = %p", pitch(), tiedNoteFor(), tiedNoteBack());
+            }
+      };
+
+//---------------------------------------------------------
+//   RawChord
+//---------------------------------------------------------
+
+class RawChord {
+      int _tick;
+      int _ticks;
+      QLinkedList<RawNote*> _notes;
+
+   public:
+      RawChord(int tick, int ticks, RawNote* note) : _tick(tick), _ticks(ticks) {
+            Q_ASSERT(tick >= 0 && ticks > 0);
+            notes()->append(note);
+            qDebug("RawChord: tick=%i ticks=%i pitch=%i", tick, ticks, note->pitch());
+            }
+      //RawChord(int tick, int ticks, RawNote note) { RawChord(tick, tick + ticks, note); }
+      int tick() { return _tick; }
+      int ticks()     { return _ticks; }
+      int endTick()   { return tick() + ticks(); }
+
+      bool noOverlap(RawChord* c) { return c->tick() >= endTick() || c->endTick() < tick(); }
+      bool coincides(RawChord* c) { return c->tick() == tick() && c->endTick() == endTick(); }
+
+      QLinkedList<RawNote*>* notes() { return &_notes; }
+      void addNote(RawNote* note) { notes()->append(note); }
+
+      bool addNotesFromChord(RawChord* chord) {
+            if (!coincides(chord))
+                  return false;
+            QLinkedListIterator<RawNote*> i(*chord->notes());
+            while (i.hasNext())
+                  notes()->append(i.next());
+            return true;
+            }
+
+      void print() {
+            qDebug("~~~RawChord: tick = %i, ticks = %i (endTick = %i)", tick(), ticks(), endTick());
+            QLinkedListIterator<RawNote*> it(*notes());
+            while (it.hasNext()) {
+                  it.next()->print();
+                  }
+            }
+      };
+
+//---------------------------------------------------------
+//   VirtualVoice
+//---------------------------------------------------------
+
+class VirtualVoice {
+      QLinkedList<RawChord*> _chords;
+
+public:
+      VirtualVoice(RawChord* c) {
+            addChord(c);
+            }
+
+      QLinkedList<RawChord*>* chords() { return &_chords; }
+
+      bool addChord(RawChord* chord) {
+            QMutableLinkedListIterator<RawChord*> it(*chords());
+            while (it.hasNext()) {
+                  RawChord* rc = it.next();
+                  if (rc->addNotesFromChord(chord))
+                        return true; // chords coincide so notes were added
+                  if (!rc->noOverlap(chord))
+                        return false; // chords overlap so can't go in this voice
+                  }
+            // there is room for this chord in the voice
+            chords()->append(chord);
+            return true;
+            }
+
+      void print() {
+            QLinkedListIterator<RawChord*> it(*chords());
+            int i = 0;
+            while (it.hasNext()) {
+                  qDebug("~~VirtualVoiceChord %i", i);
+                  it.next()->print();
+                  i++;
+                  }
+            }
+      };
+
+//---------------------------------------------------------
+//   VirtualVoiceManager
+//---------------------------------------------------------
+
+class VirtualVoiceManager {
+      QLinkedList<VirtualVoice*> _voices;
+
+   public:
+      QLinkedList<VirtualVoice*>* voices() { return &_voices; }
+
+      void addChord(RawChord* chord) {
+            QMutableLinkedListIterator<VirtualVoice*> it(*voices());
+            while (it.hasNext()) {
+                  if (it.next()->addChord(chord))
+                        return;
+                  }
+            voices()->append(new VirtualVoice(chord));
+            }
+
+      void print () {
+            QLinkedListIterator<VirtualVoice*> it(*voices());
+            int i = 0;
+            while (it.hasNext()) {
+                  qDebug("~VirtualVoice %i", i);
+                  it.next()->print();
+                  i++;
+                  }
+            }
+      };
+
+//---------------------------------------------------------
 //   Position
 //---------------------------------------------------------
 
@@ -654,6 +794,8 @@ class Score : public QObject, public ScoreElement {
       void putNote(const Position& pos, bool replace);
       void repitchNote(const Position& pos, bool replace);
       void cmdRealtimeAdvance();
+      void separateVoices(int max_voices);
+      void simplifyDurations();
       void cmdAddPitch(int pitch, bool addFlag);
 
       void startCmd();                          // start undoable command

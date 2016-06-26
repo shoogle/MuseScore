@@ -1558,129 +1558,259 @@ void Score::cmdRealtimeAdvance()
             }
       if (!isStartOfMeasure && _is.cr()->rtick() == 0) {
             // just advanced across barline. Now separate voices and simplify durations
+            separateVoices(VOICES);
+            }
+      endCmd();
+      }
+
+//---------------------------------------------------------
+//   separateVoices
+//---------------------------------------------------------
+
+void Score::separateVoices(int max_voices)
+      {
+      Q_ASSERT(max_voices <= VOICES);
+      // Voice separation is a 4 step process for each measure:
+      //   1) Look for overlapping notes and send them to higher "virtual voices".
+      //   2) Simplify the durations of notes in all virtual voices. This
+      //      replaces tied notes with long notes, but some ties might remain.
+      //   3) Remaining ties might allow some virtual voices to be combined, so do it.
+      //   4) Re-render as real voices, dropping voices greater than max_voices.
+      // Some steps use MIDI-style note on/off timings instead of the usual representation.
+      RawNote rn = RawNote(0);
+      RawChord rc = RawChord(0, 100, &rn);
+      RawChord rc2 = RawChord(0, 100, new RawNote(54));
+      RawChord rc3 = RawChord(0, 110, new RawNote(654));
+      qDebug("RN u=%u i=%i tnf=%p tnb=%p", rn.pitch(), rn.pitch(), rn.tiedNoteFor(), rn.tiedNoteBack());
+      rc2.addNote(new RawNote(21));
+      rc.addNote(new RawNote(87));
+      rc.addNotesFromChord(&rc2);
+      rc.print();
+      rc2.print();
+      VirtualVoiceManager vvm_test;
+      vvm_test.addChord(&rc);
+      vvm_test.addChord(&rc2);
+      vvm_test.addChord(&rc3);
+      vvm_test.print();
+
+      VirtualVoiceManager vvm;
+      Segment* inputSegment = _is.segment();
+      int inputTrack = _is.track();
+      for (Segment* seg = _is.cr()->measure()->prevMeasure()->first(Segment::Type::ChordRest); seg; seg = seg->next(Segment::Type::ChordRest)) {
+            ChordRest* curr = seg->cr(_is.track());
+            if (curr->isChord())
+                  qDebug("Chord!");
+                  if (curr->isChord()) {
+                        // combine tied chords
+                        Chord* chord = static_cast<Chord*>(curr); // chord at segment
+                        foreach (Note* n, chord->notes()) {
+                              Tie* t = n->tieBack();
+                              Note* tnb = t ? t->startNote() : 0;
+                              if (tnb && tnb->chord()->measure() == chord->measure())
+                                    continue; // already accounted for this note
+                              int ticks = chord->duration().ticks();
+                              Note* tnf = 0;
+                              Note* nn = n;
+                              for (t = n->tieFor(); t; t = nn->tieFor()) {
+                                    nn = t->endNote();
+                                    if (nn->chord()->measure() == chord->measure()) {
+                                          ticks += nn->chord()->duration().ticks();
+                                          }
+                                    else {
+                                          tnf = nn;
+                                          break;
+                                          }
+                                    }
+                              vvm.addChord(new RawChord(n->tick(), ticks, new RawNote(n->pitch(), tnf, tnb)));
+                              }
+                        }
+            }
+      qDebug("##SIMPLIFY!##");
+      vvm.print();
+      int voice = 0;
+      QLinkedListIterator<VirtualVoice*> vvit(*vvm.voices());
+      while (vvit.hasNext()) {
+            VirtualVoice* vvoice = vvit.next();
+            int track = inputTrack + voice;
+            Segment* seg = inputSegment->measure()->prevMeasure()->first(Segment::Type::ChordRest);
+            QLinkedListIterator<RawChord*> rcit(*vvoice->chords());
+            while (rcit.hasNext()) {
+                  RawChord* rchord = rcit.next();
+                        while (seg->tick() < rchord->tick()) {
+                              if (seg->rtick() == 0 || seg->cr(track))
+                                    seg = setNoteRest(seg, track, NoteVal(), Fraction::fromTicks(rchord->tick() - seg->tick()), Direction::AUTO);
+                              seg = seg->next(Segment::Type::ChordRest);
+                              }
+                  seg = setNoteRest(seg, track, NoteVal(0), Fraction::fromTicks(rchord->ticks()), Direction::AUTO);
+                  Chord* newChord = static_cast<Chord*>(seg->cr(track));
+                  Note* n = newChord->notes().front();
+                  undoRemoveElement(n);
+                  QLinkedListIterator<RawNote*> rnit(*rchord->notes());
+                  while (rnit.hasNext()) {
+                        RawNote* rnote = rnit.next();
+                        NoteVal nval = NoteVal(rnote->pitch());
+                        n = addNote(newChord, nval);
+                        Note* nn = rnote->tiedNoteFor();
+                        if (nn) {
+                              Tie* t = new Tie(this);
+                              n->setTieFor(t);
+                              t->setStartNote(n);
+                              t->setEndNote(nn);
+                              nn->setTieBack(t);
+                              t->setTrack(track);
+                              undoAddElement(t);
+                              }
+                        nn = rnote->tiedNoteBack();
+                        if (nn) {
+                              Tie* t = new Tie(this);
+                              n->setTieBack(t);
+                              t->setEndNote(n);
+                              t->setStartNote(nn);
+                              nn->setTieFor(t);
+                              t->setTrack(nn->track());
+                              undoAddElement(t);
+                              }
+                        }
+                  while (seg && seg->tick() < rchord->endTick())
+                        seg = seg->next(Segment::Type::ChordRest);
+                  }
+            if (seg)
+                  seg = setNoteRest(seg, track, NoteVal(), Fraction::fromTicks(inputSegment->tick() - seg->tick()), Direction::AUTO);
+            voice++;
+            if (voice >= VOICES)
+                  break;
+            }
+      _is.setTrack(inputTrack);
+      _is.setSegment(inputSegment);
+      }
+
+//---------------------------------------------------------
+//   simplifyDurations
+//---------------------------------------------------------
+
+void Score::simplifyDurations()
+      {
 //            EventMap events;
 //            score->renderMidi(&events);
 //            if(events.size() == 0)
 //                  return false;
-            //auto segs = _is.cr()->measure()->prevMeasure()->segments();
-            Segment* inputSegment = _is.segment();
-            for (Segment* seg = _is.cr()->measure()->prevMeasure()->first(Segment::Type::ChordRest); seg; seg = seg->next(Segment::Type::ChordRest)) {
+      //auto segs = _is.cr()->measure()->prevMeasure()->segments();
+      Segment* inputSegment = _is.segment();
+      for (Segment* seg = _is.cr()->measure()->prevMeasure()->first(Segment::Type::ChordRest); seg; seg = seg->next(Segment::Type::ChordRest)) {
 //                  if (seg->segmentType() != Segment::Type::ChordRest)
 //                        continue;
-                  ChordRest* curr = seg->cr(_is.track());
-                  if (curr->isChord())
-                        qDebug("Chord!");
-                  //setNoteRest(curr->segment(), curr->track(), NoteVal(), curr->duration(), Direction::AUTO);
-                        //setNoteRest(prev->segment(), prev->track(), NoteVal(), prev->duration(), Direction::AUTO);
-                        if (curr->isChord()) {
-                              // combine tied chords
-                              Chord* chord = static_cast<Chord*>(curr);
-                              int minEndTick = std::numeric_limits<int>::max();
-                              uint numNotes = chord->notes().size();
-                              std::vector<int> pitches(numNotes);
-                              std::vector<Note*> tiedNoteBack(numNotes);
-                              std::vector<Note*> tiedNoteFor(numNotes);
-                              for (uint i = 0; i < numNotes; i++) {
-                                          Note* n = chord->notes()[i];
-                                          pitches[i] = n->pitch();
-                                          tiedNoteFor[i] = n->tieFor() ? n->tieFor()->endNote() : 0;
-                                          tiedNoteBack[i] = n->tieBack() ? n->tieBack()->startNote() : 0;
+            ChordRest* curr = seg->cr(_is.track());
+            if (curr->isChord())
+                  qDebug("Chord!");
+            //setNoteRest(curr->segment(), curr->track(), NoteVal(), curr->duration(), Direction::AUTO);
+                  //setNoteRest(prev->segment(), prev->track(), NoteVal(), prev->duration(), Direction::AUTO);
+                  if (curr->isChord()) {
+                        // combine tied chords
+                        Chord* chord = static_cast<Chord*>(curr);
+                        int minEndTick = std::numeric_limits<int>::max();
+                        uint numNotes = chord->notes().size();
+                        std::vector<int> pitches(numNotes);
+                        std::vector<Note*> tiedNoteBack(numNotes);
+                        std::vector<Note*> tiedNoteFor(numNotes);
+                        for (uint i = 0; i < numNotes; i++) {
+                                    Note* n = chord->notes()[i];
+                                    pitches[i] = n->pitch();
+                                    tiedNoteFor[i] = n->tieFor() ? n->tieFor()->endNote() : 0;
+                                    tiedNoteBack[i] = n->tieBack() ? n->tieBack()->startNote() : 0;
 #if 0
-                                          pitch = n->pitch();
-                                          Note* nn = n->lastTiedNote();
-                                          int endTick = nn->tick() + nn->chord()->duration().ticks();
-                                          if (endTick < minEndTick)
-                                                minEndTick = endTick;
+                                    pitch = n->pitch();
+                                    Note* nn = n->lastTiedNote();
+                                    int endTick = nn->tick() + nn->chord()->duration().ticks();
+                                    if (endTick < minEndTick)
+                                          minEndTick = endTick;
 #endif
-                                    }
-                              std::vector<Note*> tmpTiedNotesFor(tiedNoteFor);
-                              bool more = true;
-                              bool anyTiesFor = false;
-                              while (more) {
-                                    for (uint i = 0; i < numNotes; i++) {
-                                          tiedNoteFor[i] = tmpTiedNotesFor[i];
-                                          Note* n = tmpTiedNotesFor[i];
-                                          if (n && n->chord()->measure() == curr->measure() && n->chord()->notes().size() == numNotes) { // TODO: are notes actually the same?
-                                                anyTiesFor = true;
-                                                Tie* t = n->tieFor();
-                                                if (t) {
-                                                      tmpTiedNotesFor[i] = t->endNote();
-                                                      }
-                                                else {
-                                                      tmpTiedNotesFor[i] = 0;
-                                                      int endTick = n->tick() + n->chord()->duration().ticks();
-                                                      if (endTick < minEndTick)
-                                                            minEndTick = endTick;
-                                                      }
+                              }
+                        std::vector<Note*> tmpTiedNotesFor(tiedNoteFor);
+                        bool more = true;
+                        bool anyTiesFor = false;
+                        while (more) {
+                              for (uint i = 0; i < numNotes; i++) {
+                                    tiedNoteFor[i] = tmpTiedNotesFor[i];
+                                    Note* n = tmpTiedNotesFor[i];
+                                    if (n && n->chord()->measure() == curr->measure() && n->chord()->notes().size() == numNotes) { // TODO: are notes actually the same?
+                                          anyTiesFor = true;
+                                          Tie* t = n->tieFor();
+                                          if (t) {
+                                                tmpTiedNotesFor[i] = t->endNote();
                                                 }
                                           else {
-                                                more = false;
-                                                if (n) {
-                                                      int endTick = n->tick();
-                                                      if (endTick < minEndTick)
-                                                            minEndTick = endTick;
-                                                      }
+                                                tmpTiedNotesFor[i] = 0;
+                                                int endTick = n->tick() + n->chord()->duration().ticks();
+                                                if (endTick < minEndTick)
+                                                      minEndTick = endTick;
+                                                }
+                                          }
+                                    else {
+                                          more = false;
+                                          if (n) {
+                                                int endTick = n->tick();
+                                                if (endTick < minEndTick)
+                                                      minEndTick = endTick;
                                                 }
                                           }
                                     }
-                              if (!anyTiesFor)
-                                    continue;
+                              }
+                        if (!anyTiesFor)
+                              continue;
 //                              if (minEndTick > inputSegment->tick())
 //                                    minEndTick = inputSegment->tick();
-                              int noteTicks = minEndTick - curr->tick();
-                              if (noteTicks != curr->duration().ticks()) {
-                                    seg = setNoteRest(seg, curr->track(), NoteVal(pitches[0]), Fraction::fromTicks(noteTicks), Direction::AUTO);
-                                    Chord* newChord = static_cast<Chord*>(seg->cr(_is.track()));
-                                    Note* n = newChord->notes().front();
-                                    undoRemoveElement(n);
-                                    for (uint i = 0; i < numNotes; i++) {
-                                          NoteVal nval = NoteVal(pitches[i]);
-                                          n = addNote(newChord, nval);
-                                          Note* nn = tiedNoteFor[i];
-                                          if (nn) {
-                                                Tie* t = new Tie(this);
-                                                n->setTieFor(t);
-                                                t->setStartNote(n);
-                                                t->setEndNote(nn);
-                                                nn->setTieBack(t);
-                                                t->setTrack(n->track());
-                                                undoAddElement(t);
-                                                }
-                                          nn = tiedNoteBack[i];
-                                          if (nn) {
-                                                Tie* t = new Tie(this);
-                                                n->setTieBack(t);
-                                                t->setEndNote(n);
-                                                t->setStartNote(nn);
-                                                nn->setTieFor(t);
-                                                t->setTrack(n->track());
-                                                undoAddElement(t);
-                                                }
-                                          //newChord->add(n);
-                                          //n->setNval(NoteVal(pitches[i]), newChord->tick());
+                        int noteTicks = minEndTick - curr->tick();
+                        if (noteTicks != curr->duration().ticks()) {
+                              seg = setNoteRest(seg, curr->track(), NoteVal(pitches[0]), Fraction::fromTicks(noteTicks), Direction::AUTO);
+                              Chord* newChord = static_cast<Chord*>(seg->cr(_is.track()));
+                              Note* n = newChord->notes().front();
+                              undoRemoveElement(n);
+                              for (uint i = 0; i < numNotes; i++) {
+                                    NoteVal nval = NoteVal(pitches[i]);
+                                    n = addNote(newChord, nval);
+                                    Note* nn = tiedNoteFor[i];
+                                    if (nn) {
+                                          Tie* t = new Tie(this);
+                                          n->setTieFor(t);
+                                          t->setStartNote(n);
+                                          t->setEndNote(nn);
+                                          nn->setTieBack(t);
+                                          t->setTrack(n->track());
+                                          undoAddElement(t);
                                           }
+                                    nn = tiedNoteBack[i];
+                                    if (nn) {
+                                          Tie* t = new Tie(this);
+                                          n->setTieBack(t);
+                                          t->setEndNote(n);
+                                          t->setStartNote(nn);
+                                          nn->setTieFor(t);
+                                          t->setTrack(n->track());
+                                          undoAddElement(t);
+                                          }
+                                    //newChord->add(n);
+                                    //n->setNval(NoteVal(pitches[i]), newChord->tick());
                                     }
-                        }
-                  else {
-                        // combine consecutive rests
-                        ChordRest* laterRest = 0;
-                        for (Segment* s = seg->next(Segment::Type::ChordRest); s; s = s->next(Segment::Type::ChordRest)) {
-                              ChordRest* cr = s->cr(_is.track());
-                              if (!cr->isRest())
-                                    break;
-                              laterRest = cr;
                               }
-                        if (laterRest) {
-                              int restTicks = laterRest->tick() + laterRest->duration().ticks() - curr->tick();
-                              seg = setNoteRest(seg, curr->track(), NoteVal(), Fraction::fromTicks(restTicks), Direction::AUTO);
-                              }
-                        }
-                  //TDuration dur = prev->durationType().shift(1);
-                  //changeCRlen(prev, dur);
                   }
-            _is.setSegment(inputSegment);
+            else {
+                  // combine consecutive rests
+                  ChordRest* laterRest = 0;
+                  for (Segment* s = seg->next(Segment::Type::ChordRest); s; s = s->next(Segment::Type::ChordRest)) {
+                        ChordRest* cr = s->cr(_is.track());
+                        if (!cr->isRest())
+                              break;
+                        laterRest = cr;
+                        }
+                  if (laterRest) {
+                        int restTicks = laterRest->tick() + laterRest->duration().ticks() - curr->tick();
+                        seg = setNoteRest(seg, curr->track(), NoteVal(), Fraction::fromTicks(restTicks), Direction::AUTO);
+                        }
+                  }
+            //TDuration dur = prev->durationType().shift(1);
+            //changeCRlen(prev, dur);
             }
-      endCmd();
+      _is.setSegment(inputSegment);
       }
 
 //---------------------------------------------------------
