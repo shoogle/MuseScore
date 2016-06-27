@@ -1577,21 +1577,6 @@ void Score::separateVoices(int max_voices)
       //   3) Remaining ties might allow some virtual voices to be combined, so do it.
       //   4) Re-render as real voices, dropping voices greater than max_voices.
       // Some steps use MIDI-style note on/off timings instead of the usual representation.
-      RawNote rn = RawNote(0);
-      RawChord rc = RawChord(0, 100, &rn);
-      RawChord rc2 = RawChord(0, 100, new RawNote(54));
-      RawChord rc3 = RawChord(0, 110, new RawNote(654));
-      qDebug("RN u=%u i=%i tnf=%p tnb=%p", rn.pitch(), rn.pitch(), rn.tiedNoteFor(), rn.tiedNoteBack());
-      rc2.addNote(new RawNote(21));
-      rc.addNote(new RawNote(87));
-      rc.addNotesFromChord(&rc2);
-      rc.print();
-      rc2.print();
-      VirtualVoiceManager vvm_test;
-      vvm_test.addChord(&rc);
-      vvm_test.addChord(&rc2);
-      vvm_test.addChord(&rc3);
-      vvm_test.print();
 
       VirtualVoiceManager vvm;
       Segment* inputSegment = _is.segment();
@@ -1625,8 +1610,9 @@ void Score::separateVoices(int max_voices)
                               }
                         }
             }
-      qDebug("##SIMPLIFY!##");
-      vvm.print();
+      //qDebug("##SIMPLIFY!##");
+      //vvm.print();
+      vvm.sortVoices(inputTrack % 2 == 0);
       int voice = 0;
       QLinkedListIterator<VirtualVoice*> vvit(*vvm.voices());
       while (vvit.hasNext()) {

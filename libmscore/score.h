@@ -228,6 +228,16 @@ class RawChord {
       bool coincides(RawChord* c) { return c->tick() == tick() && c->endTick() == endTick(); }
 
       QLinkedList<RawNote*>* notes() { return &_notes; }
+      int numNotes() { return notes()->size(); };
+
+      int sumPitches() {
+            int sum = 0;
+            QLinkedListIterator<RawNote*> i(*notes());
+            while (i.hasNext())
+                  sum += i.next()->pitch();
+            return sum;
+            }
+
       void addNote(RawNote* note) { notes()->append(note); }
 
       bool addNotesFromChord(RawChord* chord) {
@@ -261,6 +271,27 @@ public:
             }
 
       QLinkedList<RawChord*>* chords() { return &_chords; }
+      int numChords() { return chords()->size(); }
+
+      int numNotes() {
+            int sum = 0;
+            QLinkedListIterator<RawChord*> i(*chords());
+            while (i.hasNext())
+                  sum += i.next()->numNotes();
+            return sum;
+            }
+
+      int sumPitches() {
+            int sum = 0;
+            QLinkedListIterator<RawChord*> i(*chords());
+            while (i.hasNext())
+                  sum += i.next()->sumPitches();
+            return sum;
+            }
+
+      float averagePitch() {
+            return sumPitches() * 1.0 / numNotes();
+            }
 
       bool addChord(RawChord* chord) {
             QMutableLinkedListIterator<RawChord*> it(*chords());
@@ -296,6 +327,7 @@ class VirtualVoiceManager {
 
    public:
       QLinkedList<VirtualVoice*>* voices() { return &_voices; }
+      int numVoices() { return voices()->size(); }
 
       void addChord(RawChord* chord) {
             QMutableLinkedListIterator<VirtualVoice*> it(*voices());
@@ -304,6 +336,47 @@ class VirtualVoiceManager {
                         return;
                   }
             voices()->append(new VirtualVoice(chord));
+            }
+
+      void sortVoices(bool highestFirst) {
+            qDebug("Sort Voices");
+            // sort voices by pitch in alternating directions. Either:
+            //     highest, lowest, 2nd highest, 2nd lowest... etc.
+            // OR: lowest, highest, 2nd lowest, 2nd highest... etc.
+            QList<VirtualVoice*> sorted;
+            int n = numVoices();
+
+            while (!_voices.isEmpty()) {
+                  VirtualVoice* v = _voices.takeFirst();
+                  bool added = false;
+                  int ns = sorted.size();
+                  for (int i=0; i < ns; i++) {
+                        if (v->averagePitch() > sorted.at(i)->averagePitch()) {
+                              sorted.insert(i, v);
+                              added = true;
+                              break;
+                              }
+                        }
+                  if (!added)
+                        sorted.append(v);
+                  }
+
+            for (int i=1; i < n; i+=2) {
+                  sorted.move(n-1, i);
+                  }
+
+            if (highestFirst) {
+                  while (!sorted.isEmpty()) {
+                        VirtualVoice* v = sorted.takeFirst();
+                        _voices.append(v);
+                        }
+                  }
+            else {
+                  while (!sorted.isEmpty()) {
+                        VirtualVoice* v = sorted.takeFirst();
+                        _voices.prepend(v);
+                        }
+                  }
             }
 
       void print () {
