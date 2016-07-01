@@ -204,6 +204,45 @@ class StartDialog : public QDialog, public Ui::StartDialog {
       };
 
 //---------------------------------------------------------
+//   MenuWithTooltips
+//---------------------------------------------------------
+
+class MenuWithTooltips : public QMenu {
+      Q_OBJECT
+
+   public:
+      MenuWithTooltips(QString str) : QMenu(str) {}
+
+      bool event (QEvent * e) {
+            const QHelpEvent *helpEvent = static_cast <QHelpEvent *>(e);
+
+            if (helpEvent->type() == QEvent::ToolTip && activeAction() != 0)
+                  QToolTip::showText(helpEvent->globalPos(), activeAction()->toolTip());
+            else
+                  QToolTip::hideText();
+
+            return QMenu::event(e);
+            }
+      };
+
+//---------------------------------------------------------
+//   ToolButtonMenu
+//---------------------------------------------------------
+
+class ToolButtonMenu : public QToolButton {
+      Q_OBJECT
+
+   public:
+      ToolButtonMenu(QString str, QAction* a, QWidget* w) : QToolButton(w) {
+            QToolButton::setMenu(new MenuWithTooltips(str));
+            QToolButton::setDefaultAction(a);
+            }
+
+      void addAction(QAction* a) { QToolButton::menu()->addAction(a); }
+
+      };
+
+//---------------------------------------------------------
 //   MuseScoreApplication (mac only)
 //---------------------------------------------------------
 

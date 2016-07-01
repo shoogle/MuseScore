@@ -164,8 +164,6 @@ QErrorMessage* errorMessage;
 const char* voiceActions[] = { "voice-1", "voice-2", "voice-3", "voice-4" };
 
 const std::list<const char*> MuseScore::_allNoteInputMenuEntries {
-            "note-input",
-            "repitch",
             "pad-note-128",
             "pad-note-64",
             "pad-note-32",
@@ -198,8 +196,6 @@ const std::list<const char*> MuseScore::_allNoteInputMenuEntries {
             };
 
 const std::list<const char*> MuseScore::_advancedNoteInputMenuEntries {
-            "note-input",
-            "repitch",
             "pad-note-128",
             "pad-note-64",
             "pad-note-32",
@@ -232,7 +228,6 @@ const std::list<const char*> MuseScore::_advancedNoteInputMenuEntries {
             };
 
 const std::list<const char*> MuseScore::_basicNoteInputMenuEntries {
-            "note-input",
             "pad-note-32",
             "pad-note-16",
             "pad-note-8",
@@ -457,6 +452,36 @@ void MuseScore::populateNoteInputMenu()
       {
       entryTools->clear();
       static const char* vbsh { "QToolButton:checked, QToolButton:pressed { color: white;}" };
+
+      //-----------------------------------------------------------------
+      // Note Entry Modes menu
+      // toolbutton menu to swap between Note Entry Methods)
+      //-----------------------------------------------------------------
+
+      //QToolButton* noteEntryToolButton = new QToolButton(this);
+
+      //MenuWithTooltips* noteEntryModes = new MenuWithTooltips();
+
+      ToolButtonMenu* noteInputModes = new ToolButtonMenu(tr("Note Entry"), getAction("note-input"), this);
+
+      //noteEntryModes->addAction(getAction("note-input"));
+      noteInputModes->addAction(getAction("note-input-steptime"));
+      noteInputModes->addAction(getAction("note-input-repitch"));
+      noteInputModes->addAction(getAction("note-input-rhythm"));
+      noteInputModes->addAction(getAction("note-input-realtime-auto"));
+      noteInputModes->addAction(getAction("note-input-realtime-manual"));
+
+      //getAction("note-input")->setIconVisibleInMenu(true);
+
+      //noteEntryToolButton->setMenu(noteEntryModes);
+      //noteInputModes->setDefaultAction(getAction("note-input"));
+
+      entryTools->addWidget(noteInputModes);
+
+      //-----------------------------------------------------------------
+      // Note Input toolbar
+      // user-configurable toolbar
+      //-----------------------------------------------------------------
 
       for (const auto s : _noteInputMenuEntries) {
             if (!*s)
