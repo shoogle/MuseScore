@@ -284,7 +284,7 @@ add_executable ( ${ExecutableName}
       startcenter.cpp scoreBrowser.cpp scorePreview.cpp scoreInfo.cpp
       logindialog.cpp loginmanager.cpp uploadscoredialog.cpp breaksdialog.cpp searchComboBox.cpp
       help.cpp help.h
-      toolbarEditor.cpp toolbarEditor.h
+      toolbarEditor.cpp toolbuttonmenu.cpp
 
 
       ${OMR_FILES}
