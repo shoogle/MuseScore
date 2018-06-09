@@ -980,3 +980,17 @@ if (NOT MSVC)
    ADD_DEPENDENCIES(${ExecutableName} mops1)
    ADD_DEPENDENCIES(${ExecutableName} mops2)
 endif (NOT MSVC)
+
+# Add the appropriate splash screen for the build
+if (MSCORE_UNSTABLE)
+    if ("$ENV{BINTRAY_REPO_OWNER}" STREQUAL "musescore")
+        # This is a nightly build
+        configure_file(../assets/splash-nightly.png ${PROJECT_SOURCE_DIR}/mscore/data/splash.png COPYONLY)
+    else ("$ENV{BINTRAY_REPO_OWNER}" STREQUAL "musescore")
+        # This is someone building on their own
+        configure_file(../assets/splash-dev.png ${PROJECT_SOURCE_DIR}/mscore/data/splash.png COPYONLY)
+    endif ("$ENV{BINTRAY_REPO_OWNER}" STREQUAL "musescore")
+else (MSCORE_UNSTABLE)
+    # Standard splash on stable releases
+    configure_file(../assets/splash-stable.png ${PROJECT_SOURCE_DIR}/mscore/data/splash.png COPYONLY)
+endif (MSCORE_UNSTABLE)

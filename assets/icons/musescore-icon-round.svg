@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 1000 1000" style="enable-background:new 0 0 1000 1000;" xml:space="preserve">
+<g id="musescore-icon-square">
+</g>
+<g id="musescore-icon-round">
+	
+		<linearGradient id="Circle_1_" gradientUnits="userSpaceOnUse" x1="13.3529" y1="503.002" x2="971.5354" y2="503.002" gradientTransform="matrix(0.711 0.7032 -0.7032 0.711 496.192 -200.4404)">
+		<stop  offset="0" style="stop-color:#1F8FBD"/>
+		<stop  offset="0.255" style="stop-color:#1F86BD"/>
+		<stop  offset="0.5276" style="stop-color:#1F77BD"/>
+		<stop  offset="1" style="stop-color:#1C69B5"/>
+	</linearGradient>
+	<path id="Circle" style="fill:url(#Circle_1_);" d="M829.5,162.8c188.1,186.1,189.8,489.4,3.8,677.5s-489.4,189.8-677.5,3.8
+		S-34.1,354.7,152,166.6S641.4-23.2,829.5,162.8z"/>
+	<path id="mu_1_" style="fill:#FFFFFF;" d="M686.4,225c-76.9,0-139.8,62.9-139.8,139.8h46.6c0-51.7,41.5-93.2,93.2-93.2
+		s93.2,41.5,93.2,93.2h46.6C826.1,287.8,763.3,225,686.4,225z M686.4,341.4c-12.9,0-23.3,10.4-23.3,23.3c0,12.9,10.4,23.3,23.3,23.3
+		s23.3-10.4,23.3-23.3C709.7,351.9,699.2,341.4,686.4,341.4z M290.3,388c-64.1,0-116.5,52.4-116.5,116.5v233h46.6v-233
+		c0-38.9,31-69.9,69.9-69.9s69.9,31,69.9,69.9v233h46.6v-233c0-38.9,31-69.9,69.9-69.9s69.9,31,69.9,69.9v69.9v23.3
+		c0,76.9,62.9,147.4,139.8,147.4s139.8-70.4,139.8-147.4V411.3h-46.6v186.4c0,51.7-41.5,105.3-93.2,105.3s-93.2-53.6-93.2-105.3
+		v-69.9v-23.3c0-64.1-52.4-116.5-116.5-116.5c-38.2,0-71.9,18.9-93.2,47.5C362.2,406.9,328.5,388,290.3,388z"/>
+</g>
+<g id="Guides" style="display:none;">
+</g>
+</svg>
