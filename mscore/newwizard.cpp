@@ -378,8 +378,14 @@ NewWizardPage5::NewWizardPage5(QWidget* parent)
       sp->setShowContextMenu(false);
       sp->setSelectable(true);
       sp->setDisableDoubleClick(true);
-      sp->setSelected(14);
+      int keysigCMajorIdx = 14;
+      sp->setSelected(keysigCMajorIdx);
       PaletteScrollArea* sa = new PaletteScrollArea(sp);
+      // set widget name to include name of selected key signature
+      // we could set the description, but some screen readers ignore it
+      sa->setAccessibleName(tr("Key Signature: %1").arg(qApp->translate("Palette", sp->cellAt(keysigCMajorIdx)->name.toUtf8())));
+      QAccessibleEvent event(sa, QAccessible::NameChanged);
+      QAccessible::updateAccessibility(&event);
       QVBoxLayout* l1 = new QVBoxLayout;
       l1->addWidget(sa);
       b1->setLayout(l1);
