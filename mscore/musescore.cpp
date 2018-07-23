@@ -4734,10 +4734,10 @@ void MuseScore::cmd(QAction* a)
             if (a->isChecked()) {
                   lastFocusWidget = QApplication::focusWidget();
                   sb->setFocus();
-                  if (pb->noSelection())
-                        pb->setKeyboardNavigation(false);
-                  else
+                  if (pb->selectedPalette())
                         pb->setKeyboardNavigation(true);
+                  else
+                        pb->setKeyboardNavigation(false);
                   }
             else {
                   if (lastFocusWidget)
@@ -4749,10 +4749,10 @@ void MuseScore::cmd(QAction* a)
             PaletteBox* pb = getPaletteBox();
             QLineEdit* sb = pb->searchBox();
             sb->setFocus();
-            if (pb->noSelection())
-                  pb->setKeyboardNavigation(false);
-            else
+            if (pb->selectedPalette())
                   pb->setKeyboardNavigation(true);
+            else
+                  pb->setKeyboardNavigation(false);
             return;
             }
       if (cmdn == "apply-current-palette-element") {

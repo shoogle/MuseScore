@@ -64,7 +64,7 @@ PaletteBox::PaletteBox(QWidget* parent)
       hlSearch->addWidget(_searchBox);
 
       PaletteBoxScrollArea* sa = new PaletteBoxScrollArea;
-      sa->setFocusPolicy(Qt::NoFocus);
+      sa->setFocusPolicy(Qt::StrongFocus);
       sa->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
       sa->setContextMenuPolicy(Qt::CustomContextMenu);
       sa->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -372,6 +372,18 @@ QList<Palette*> PaletteBox::palettes()const
       }
 
 //---------------------------------------------------------
+//   paletteBoxButtons
+//---------------------------------------------------------
+
+QList<PaletteBoxButton*> PaletteBox::paletteBoxButtons() const
+      {
+      QList<PaletteBoxButton*> pbbl;
+      for (int i = 0; i < (vbox->count() - 1); i += 2)
+            pbbl.append(static_cast<PaletteBoxButton*>(vbox->itemAt(i)->widget()));
+      return pbbl;
+      }
+
+//---------------------------------------------------------
 //   read
 //    return false on error
 //---------------------------------------------------------
@@ -395,12 +407,63 @@ bool PaletteBox::read(XmlReader& e)
       }
 
 //---------------------------------------------------------
-//   sizeHint
+//   PaletteBoxScrollArea::sizeHint
 //---------------------------------------------------------
 
 QSize PaletteBoxScrollArea::sizeHint() const
       {
       return QSize(170 * guiScaling, 170 * guiScaling);
+      }
+
+//---------------------------------------------------------
+//   PaletteBoxScrollArea::sizeHint
+//---------------------------------------------------------
+
+void PaletteBoxScrollArea::keyPressEvent(QKeyEvent* event)
+      {
+      QWidget* w = this->parentWidget()->parentWidget();
+      PaletteBox* pb = static_cast<PaletteBox*>(w);
+      Palette* p = pb->selectedPalette();
+      if (p) {
+            int pressedKey = event->key();
+            switch (pressedKey) {
+                  case Qt::Key_Right:
+                  case Qt::Key_Left:
+                  case Qt::Key_Up:
+                  case Qt::Key_Down:
+                        {
+                        int idx = p->getCurrentIdx();
+                        if (pressedKey == Qt::Key_Left || pressedKey == Qt::Key_Up)
+                              idx--;
+                        else
+                              idx++;
+                        if (idx < 0)
+                              idx = p->size() - 1;
+                        else if (idx >= p->size())
+                              idx = 0;
+                        p->setCurrentIdx(idx);
+                        // Set widget name to name of selected key signature. We could
+                        // set the description, but some screen readers ignore it.
+                        setAccessibleName(qApp->translate("Palette", p->cellAt(idx)->name.toUtf8()));
+                        QAccessibleEvent event(this, QAccessible::NameChanged);
+                        QAccessible::updateAccessibility(&event);
+                        p->update();
+                        break;
+                        }
+                  case Qt::Key_Enter:
+                  case Qt::Key_Return:
+                        p->applyPaletteElement();
+                  default:
+                        break;
+                  }
+            }
+      else {
+            QList<PaletteBoxButton*> pbbl = pb->paletteBoxButtons();
+            if (!pbbl.isEmpty()) {
+                  pbbl.first()->setFocus();
+                  }
+            }
+      QScrollArea::keyPressEvent(event);
       }
 
 //---------------------------------------------------------
@@ -424,16 +487,29 @@ void PaletteBox::changeEvent(QEvent *event)
       }
 
 //---------------------------------------------------------
-//   noSelection
+//   selectedPalette
 //---------------------------------------------------------
 
-bool PaletteBox::noSelection()
+Palette* PaletteBox::selectedPalette()
       {
       for (Palette* p : palettes()) {
             if (p->getCurrentIdx() != -1)
-                  return false;
+                  return p;
             }
-      return true;
+      return nullptr;
+      }
+
+//---------------------------------------------------------
+//   currentPaletteBoxButton
+//---------------------------------------------------------
+
+PaletteBoxButton* PaletteBox::currentPaletteBoxButton()
+      {
+      for (PaletteBoxButton* pbb : paletteBoxButtons()) {
+            if (pbb->hasFocus())
+                  return pbb;
+            }
+      return nullptr;
       }
 
 //---------------------------------------------------------

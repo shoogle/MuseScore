@@ -60,9 +60,11 @@ class PaletteBox : public QDockWidget {
       bool read(XmlReader&);
       void clear();
       QList<Palette*> palettes() const;
+      QList<PaletteBoxButton*> paletteBoxButtons() const;
       void updateWorkspaces();
       QLineEdit* searchBox() { return _searchBox; }
-      bool noSelection();
+      Palette* selectedPalette();
+      PaletteBoxButton* currentPaletteBoxButton();
       void mousePressEvent(QMouseEvent* ev, Palette* p1);
       void navigation(QKeyEvent *event);
       bool eventFilter(QObject* obj, QEvent *event);
@@ -77,7 +79,10 @@ class PaletteBox : public QDockWidget {
 class PaletteBoxScrollArea : public QScrollArea {
        Q_OBJECT
 
-    public:
+   protected:
+      virtual void keyPressEvent(QKeyEvent* event) override;
+
+   public:
       virtual QSize sizeHint() const;
       };
 
