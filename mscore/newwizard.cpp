@@ -379,9 +379,9 @@ NewWizardPage5::NewWizardPage5(QWidget* parent)
       sp->setSelectable(true);
       sp->setDisableDoubleClick(true);
       sp->setSelected(14);
-      PaletteScrollArea* sa = new PaletteScrollArea(sp);
+//      PaletteScrollArea* sa = new PaletteScrollArea(sp);
       QVBoxLayout* l1 = new QVBoxLayout;
-      l1->addWidget(sa);
+      l1->addWidget(sp);
       b1->setLayout(l1);
 
       tempoGroup = new QGroupBox;
