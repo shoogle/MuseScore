@@ -101,10 +101,35 @@ class PaletteScrollArea : public QScrollArea {
       };
 
 //---------------------------------------------------------
+//   PaletteModel
+//---------------------------------------------------------
+
+class PaletteModel : public QAbstractItemModel {
+      Q_OBJECT
+
+      QList<PaletteCell*> cells;
+      qreal extraMag;
+      QPalette qpalette;
+
+   public:
+      PaletteModel(const QPalette& qp, QObject* parent);
+      PaletteCell* cellAt(int idx) const;
+      QSize sizeHint(int idx) const;
+      QPixmap pixmap(int idx) const;
+
+      // QAbstractItemModel
+      virtual QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
+      virtual QModelIndex parent(const QModelIndex &child) const override;
+      virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+      virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+      virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+      };
+
+//---------------------------------------------------------
 //   Palette
 //---------------------------------------------------------
 
-class Palette : public QWidget {
+class Palette : public QAbstractItemView {
       Q_OBJECT
 
       QString _name;
@@ -150,6 +175,17 @@ class Palette : public QWidget {
       const QList<PaletteCell*>* ccp() const { return filterActive ? &dragCells : &cells; }
       QPixmap pixmap(int cellIdx) const;
 
+   protected:
+      // QAbstractItemView
+      virtual QRect visualRect(const QModelIndex &index) const override;
+      virtual void scrollTo(const QModelIndex &index, QAbstractItemView::ScrollHint hint = EnsureVisible) override;
+      virtual QModelIndex indexAt(const QPoint &p) const override;
+      virtual QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers) override;
+      virtual int horizontalOffset() const override;
+      virtual int verticalOffset() const override;
+      virtual bool isIndexHidden(const QModelIndex &index) const override;
+      virtual void setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags command);
+      virtual QRegion visualRegionForSelection(const QItemSelection &selection) const override;
 
    private slots:
       void actionToggled(bool val);

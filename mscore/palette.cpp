@@ -83,7 +83,7 @@ static bool needsStaff(Element* e)
 //---------------------------------------------------------
 
 Palette::Palette(QWidget* parent)
-   : QWidget(parent)
+   : QAbstractItemView(parent)
       {
       extraMag      = 1.0;
       currentIdx    = -1;
@@ -1875,5 +1875,281 @@ void Palette::dropEvent(QDropEvent* event)
       emit changed();
       }
 
-}
+//---------------------------------------------------------
+//   PaletteModel
+//---------------------------------------------------------
 
+PaletteModel::PaletteModel(const QPalette& qp, QObject* parent) : QAbstractItemModel(parent)
+      {
+      qpalette = qp;
+      extraMag = 1.0;
+      }
+
+//---------------------------------------------------------
+//   PaletteModel::cellAt
+//---------------------------------------------------------
+
+PaletteCell* PaletteModel::cellAt(int idx) const
+      {
+      return cells.at(idx);
+      }
+
+//---------------------------------------------------------
+//   PaletteModel::sizeHint
+//---------------------------------------------------------
+
+QSize PaletteModel::sizeHint(int idx) const
+      {
+      qreal _spatium = gscore->spatium();
+      qreal mag      = PALETTE_SPATIUM * extraMag / _spatium;
+      PaletteCell* c = cellAt(idx);
+      if (!c || !c->element)
+            return QSize();
+      qreal cellMag = c->mag * mag;
+      Element* e = c->element;
+      e->layout();
+      QRectF r = e->bbox();
+      int w    = lrint(r.width()  * cellMag);
+      int h    = lrint(r.height() * cellMag);
+      return QSize(w, h);
+      }
+
+//---------------------------------------------------------
+//   PaletteModel::pixmap
+//---------------------------------------------------------
+
+QPixmap PaletteModel::pixmap(int idx) const
+      {
+      qreal _spatium = gscore->spatium();
+      qreal mag      = PALETTE_SPATIUM * extraMag / _spatium;
+      PaletteCell* c = cellAt(idx);
+      if (!c || !c->element)
+            return QPixmap();
+      qreal cellMag = c->mag * mag;
+      Element* e = c->element;
+      e->layout();
+      QRectF r = e->bbox();
+      int w    = lrint(r.width()  * cellMag);
+      int h    = lrint(r.height() * cellMag);
+
+      if (w * h == 0) {
+            qDebug("zero pixmap %d %d %s", w, h, e->name());
+            return QPixmap();
+            }
+
+      QPixmap pm(w, h);
+      pm.fill(Qt::transparent);
+      QPainter p(&pm);
+      p.setRenderHint(QPainter::Antialiasing, true);
+
+      if (e->isIcon())
+            toIcon(e)->setExtent(w < h ? w : h);
+      p.scale(cellMag, cellMag);
+
+      QPointF pos = e->ipos();
+      e->setPos(-r.topLeft());
+
+      QColor color;
+       // show voice colors for notes
+      if (e->isChord()) {
+             Chord* chord = toChord(e);
+             for (Note* n : chord->notes())
+                   n->setSelected(true);
+             color = e->curColor();
+             }
+       else
+             color = qpalette.color(QPalette::Normal, QPalette::Text);
+
+      p.setPen(QPen(color));
+      e->scanElements(&p, paintPaletteElement);
+
+      e->setPos(pos);
+      return pm;
+      }
+
+//---------------------------------------------------------
+//   PaletteModel::index
+//---------------------------------------------------------
+
+QModelIndex PaletteModel::index(int row, int column, const QModelIndex &parent) const
+      {
+      if (row < 0 || column != 0 || parent.isValid() || row >= cells.size()) {
+            Q_ASSERT(false); // shouldn't get here
+            return QModelIndex(); // invalid
+            }
+      return createIndex(row, column);
+      }
+
+//---------------------------------------------------------
+//   PaletteModel::parent
+//---------------------------------------------------------
+
+QModelIndex PaletteModel::parent(const QModelIndex &child) const
+      {
+      Q_ASSERT(child.isValid() && child.column() == 0 && child.row() >= 0 && child.row() < cells.size());
+      return QModelIndex();
+      }
+
+//---------------------------------------------------------
+//   PaletteModel::rowCount
+//---------------------------------------------------------
+
+int PaletteModel::rowCount(const QModelIndex &parent) const
+      {
+      Q_ASSERT(!parent.isValid()); // no parents
+      return cells.size();
+      }
+
+//---------------------------------------------------------
+//   PaletteModel::columnCount
+//---------------------------------------------------------
+
+int PaletteModel::columnCount(const QModelIndex &parent) const
+      {
+      Q_ASSERT(!parent.isValid()); // no parents
+      return 1;
+      }
+
+//---------------------------------------------------------
+//   PaletteModel::data
+//---------------------------------------------------------
+
+QVariant PaletteModel::data(const QModelIndex &index, int role) const
+      {
+      Q_ASSERT(index.isValid() && index.column() == 0 && index.row() >= 0 && index.row() < cells.size());
+      PaletteCell* cell = cells.at(index.row());
+      switch (role) {
+            case Qt::DisplayRole:
+                  return QVariant(cell->name);
+                  break;
+            case Qt::DecorationRole:
+                  return QVariant(pixmap(index.row()));
+                  break;
+            case Qt::ToolTipRole:
+                  return QVariant(cell->name);
+                  break;
+            case Qt::SizeHintRole:
+                  return QSize(10, 10);
+                  break;
+            default:
+                  break;
+            }
+      return QVariant();
+      }
+
+//---------------------------------------------------------
+//   visualRect
+//---------------------------------------------------------
+
+QRect Palette::visualRect(const QModelIndex &index) const
+      {
+      return idxRect(index.row());
+      }
+
+//---------------------------------------------------------
+//   scrollTo
+//---------------------------------------------------------
+
+void Palette::scrollTo(const QModelIndex &index, QAbstractItemView::ScrollHint hint)
+      {
+      const QRect itemRect = visualRect(index);
+      const QRect viewRect = viewport()->rect();
+
+      if (hint == QAbstractItemView::EnsureVisible) {
+            if (itemRect.top() < viewRect.top()) {
+                  // scroll UP minimum amount to see item
+                  hint = QAbstractItemView::PositionAtTop;
+                  }
+            else if (itemRect.bottom() > viewRect.bottom()) {
+                  // scroll DOWN minimum amount to see item
+                  hint = QAbstractItemView::PositionAtBottom;
+                  }
+            else {
+                  // item is already visible
+                  viewport()->update(itemRect);
+                  return;
+                  }
+            }
+
+      int scrollValue;
+
+      switch (hint) {
+            case QAbstractItemView::PositionAtTop:
+                  scrollValue = itemRect.top();
+                  break;
+            case QAbstractItemView::PositionAtBottom:
+                  scrollValue = itemRect.bottom() - viewRect.height();
+                  break;
+            case QAbstractItemView::PositionAtCenter:
+                  scrollValue = itemRect.top() + (itemRect.bottom() - viewRect.height())/2;
+                  break;
+            default:
+                  Q_ASSERT(false); // shouldn't get here
+                  break;
+            }
+
+      verticalScrollBar()->setValue(scrollValue);
+      }
+
+//---------------------------------------------------------
+//   indexAt
+//---------------------------------------------------------
+
+QModelIndex Palette::indexAt(const QPoint &p) const
+      {
+      return QModelIndex();
+      }
+
+//---------------------------------------------------------
+//   moveCursor
+//---------------------------------------------------------
+
+QModelIndex Palette::moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers)
+      {
+      return QModelIndex();
+      }
+
+//---------------------------------------------------------
+//   horizontalOffset
+//---------------------------------------------------------
+
+int Palette::horizontalOffset() const
+      {
+      return 0;
+      }
+
+//---------------------------------------------------------
+//   verticalOffset
+//---------------------------------------------------------
+
+int Palette::verticalOffset() const
+      {
+      return 0;
+      }
+
+//---------------------------------------------------------
+//   isIndexHidden
+//---------------------------------------------------------
+bool Palette::isIndexHidden(const QModelIndex &index) const
+      {
+      return false;
+      }
+
+//---------------------------------------------------------
+//   setSelection
+//---------------------------------------------------------
+
+void Palette::setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags command)
+      {
+      return;
+      }
+
+//---------------------------------------------------------
+//   visualRegionForSelection
+//---------------------------------------------------------
+
+QRegion Palette::visualRegionForSelection(const QItemSelection &selection) const
+      {
+      return QRegion();
+      }
+}
