@@ -4,9 +4,12 @@
 #include <QStatusBar>
 #include <QAccessible>
 #include <QAccessibleWidget>
-#include "scoreview.h"
 
 namespace  Ms {
+
+class MuseScore;
+class ScoreView;
+class Element;
 
 //---------------------------------------------------------
 //   AccessibleScoreView
@@ -36,16 +39,16 @@ class ScoreAccessibility : public QObject {
       Q_OBJECT
 
       static ScoreAccessibility* inst;
-      QMainWindow* mainWindow;
+      MuseScore* mainWindow;
       QLabel* statusBarLabel;
-      ScoreAccessibility(QMainWindow* statusBar);
+      ScoreAccessibility(MuseScore* window);
       std::pair<int, float>barbeat(Element* e);
 
    public:
       ~ScoreAccessibility();
       void updateAccessibilityInfo();
       void clearAccessibilityInfo();
-      static void createInstance(QMainWindow* statusBar);
+      static void createInstance(MuseScore* window);
       static ScoreAccessibility* instance();
       void currentInfoChanged();
       };

@@ -2,6 +2,7 @@
 #include <QWidget>
 #include "scoreaccessibility.h"
 #include "musescore.h"
+#include "scoreview.h"
 #include "libmscore/segment.h"
 #include "libmscore/timesig.h"
 #include "libmscore/score.h"
@@ -84,16 +85,16 @@ QAccessibleInterface* AccessibleScoreView::ScoreViewFactory(const QString &class
 
 ScoreAccessibility* ScoreAccessibility::inst = 0;
 
-ScoreAccessibility::ScoreAccessibility(QMainWindow* mainWindow) : QObject(mainWindow)
+ScoreAccessibility::ScoreAccessibility(MuseScore* window) : QObject(window)
       {
-      this->mainWindow = mainWindow;
+      this->mainWindow = window;
       statusBarLabel = 0;
       }
 
-void ScoreAccessibility::createInstance(QMainWindow* mainWindow)
+void ScoreAccessibility::createInstance(MuseScore* window)
       {
       if (!inst) {
-            inst = new ScoreAccessibility(mainWindow);
+            inst = new ScoreAccessibility(window);
             }
       }
 
@@ -107,7 +108,7 @@ void ScoreAccessibility::clearAccessibilityInfo()
             mainWindow->statusBar()->removeWidget(statusBarLabel);
             delete statusBarLabel;
             statusBarLabel = 0;
-            static_cast<MuseScore*>(mainWindow)->currentScoreView()->score()->setAccessibleInfo(tr("No selection"));
+            mainWindow->currentScoreView()->score()->setAccessibleInfo(tr("No selection"));
             }
       }
 
@@ -115,8 +116,10 @@ void ScoreAccessibility::currentInfoChanged()
       {
       clearAccessibilityInfo();
       statusBarLabel  = new QLabel(mainWindow->statusBar());
-      ScoreView* scoreView =  static_cast<MuseScore*>(mainWindow)->currentScoreView();
+      ScoreView* scoreView =  mainWindow->currentScoreView();
       Score* score = scoreView->score();
+      QString statusMessage;
+      QString screenReaderMessage;
       if (score->selection().isSingle()) {
             Element* e = score->selection().element();
             if (!e) {
@@ -160,9 +163,8 @@ void ScoreAccessibility::currentInfoChanged()
                   rez = QString("%1; %2").arg(rez).arg(staff);
                   }
 
-            statusBarLabel->setText(rez);
-            QString screenReaderRez = QString("%1%2 %3 %4").arg(e->screenReaderInfo()).arg(barsAndBeats).arg(staff).arg(e->accessibleExtraInfo());
-            score->setAccessibleInfo(screenReaderRez);
+            statusMessage = rez;
+            screenReaderMessage = QString("%1%2 %3 %4").arg(e->screenReaderInfo()).arg(barsAndBeats).arg(staff).arg(e->accessibleExtraInfo());
             }
       else if (score->selection().isRange()) {
             QString barsAndBeats = "";
@@ -179,13 +181,15 @@ void ScoreAccessibility::currentInfoChanged()
 
             bar_beat = barbeat(endSegment);
             barsAndBeats += " " + tr("End Measure: %1; End Beat: %2").arg(QString::number(bar_beat.first)).arg(QString::number(bar_beat.second));
-            statusBarLabel->setText(tr("Range Selection") + barsAndBeats);
-            score->setAccessibleInfo(tr("Range Selection") + barsAndBeats);
+            statusMessage = tr("Range Selection") + barsAndBeats;
+            screenReaderMessage = statusMessage;
             }
       else if (score->selection().isList()) {
-            statusBarLabel->setText(tr("List Selection"));
-            score->setAccessibleInfo(tr("List Selection"));
+            statusMessage = tr("List Selection");
+            screenReaderMessage = statusMessage;
             }
+      statusBarLabel->setText(statusMessage);
+      score->setAccessibleInfo(screenReaderMessage);
       mainWindow->statusBar()->addWidget(statusBarLabel);
       }
 
@@ -196,7 +200,7 @@ ScoreAccessibility* ScoreAccessibility::instance()
 
 void ScoreAccessibility::updateAccessibilityInfo()
       {
-      ScoreView* w = static_cast<MuseScore*>(mainWindow)->currentScoreView();
+      ScoreView* w = mainWindow->currentScoreView();
       if (!w) return;
 
       currentInfoChanged();
@@ -217,8 +221,11 @@ void ScoreAccessibility::updateAccessibilityInfo()
             mscore->activateWindow();
             w->setFocus();
             }
-      QObject* obj = static_cast<QObject*>(w);
-      QAccessibleValueChangeEvent ev(obj, w->score()->accessibleInfo());
+      // QObject* obj = static_cast<QObject*>(w);
+      // QAccessibleValueChangeEvent ev(obj, w->score()->accessibleInfo()); // Only worked in NVDA
+      mainWindow->setAccessibleName(w->score()->accessibleInfo()); // Hack, name contains info
+      // QAccessibleEvent ev(mainWindow, QAccessible::NameChanged); // Read name, doesn't work in NVDA
+      QAccessibleEvent ev(mainWindow, QAccessible::Focus); // Read name, works in all screen readers
       QAccessible::updateAccessibility(&ev);
       }
 
