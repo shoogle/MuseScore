@@ -2,13 +2,22 @@
 
 This is where all assets are stored as SVGs
 
+## Structure
+
+- Icons: App icons
+- Files: Document icons
+- Splash: Boot splash screens
+- Glyphs: UI Glyphs (Longer Term Goal)
+- Resources: Assets that are only embedded in other assets
+
+
 ## Workflow
 
 1. Start with a Master SVG, which contains:
     - Any text in the file stored as editable text, with attributes to describe how it should be rendered
     - Font, font size, font style (bold/italics), colour, etc.
     - Any images included in the file stored as "xlinks" to external files
-2. Produce a standalone/optimized SVG, which contains:
+2. Produce a standalone SVG, which contains:
     - Any text converted to paths to ensure correctness regardless of whether the user has the right font installed
     - Any raster images embedded into the SVG in base64 to make the file more portable since there is only one file to move around
     - For full instructions see [here](#Exporting-SVGs-From-Master-SVG)
