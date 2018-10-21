@@ -37,8 +37,8 @@
     </g>
     <g>
         <path fill="none" d="M79.5 371.3h341V431h-341z"/>
-        <text x="155.223" y="428.299" font-size="76" font-family="Roboto-Bold" fill="#989898">
-            TYPE
+        <text x="155.223" y="428.299" font-size="76" font-family="Roboto-Bold" text-anchor="middle" fill="#989898">
+            @TYPE@
         </text>
         <image xlink:href="../icons/musescore-icon-round.svg" width="240" height="240" preserveAspectRatio="none" x="132.5" y="105" image-rendering="optimizeSpeed"/>
     </g>
