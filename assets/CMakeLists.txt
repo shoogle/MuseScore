@@ -4,6 +4,7 @@ function(optimize_svg SVG_FILE_IN SVG_FILE_OUT)
   get_filename_component(BASENAME "${SVG_FILE_OUT}" NAME)
   add_custom_command(
     OUTPUT "${SVG_FILE_OUT}"
+    DEPENDS "${SVG_FILE_IN}"
     COMMAND scour "${SVG_FILE_IN}" "${SVG_FILE_OUT}"
     VERBATIM
     )
