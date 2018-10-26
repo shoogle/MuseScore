@@ -1,47 +1,45 @@
-subdirs(files icons resources splash)
+project("MuseScore assets"
+  DESCRIPTION "Build MuseScore's icons and resources from SVG source files"
+  LANGUAGES NONE
+  )
 
-function(optimize_svg SVG_FILE_IN SVG_FILE_OUT)
-  get_filename_component(BASENAME "${SVG_FILE_OUT}" NAME)
-  add_custom_command(
-    OUTPUT "${SVG_FILE_OUT}"
-    DEPENDS "${SVG_FILE_IN}"
-    COMMAND scour "${SVG_FILE_IN}" "${SVG_FILE_OUT}"
-    VERBATIM
-    )
-  add_custom_target(
-    "${BASENAME} (optimized)"
-    ALL
-    DEPENDS "${SVG_FILE_OUT}"
-    )
-endfunction(optimize_svg)
+cmake_minimum_required(VERSION 3.0.0)
 
-function(vectorize_svg SVG_FILE_IN SVG_FILE_OUT)
-  get_filename_component(BASENAME "${SVG_FILE_OUT}" NAME)
-  add_custom_command(
-    OUTPUT "${SVG_FILE_OUT}"
-    COMMAND inkscape -z "${SVG_FILE_IN}" --vacuum-defs --export-text-to-path --export-plain-svg "${SVG_FILE_OUT}"
-    VERBATIM
-    )
-  add_custom_target(
-    "${BASENAME} (vectorized)"
-    ALL
-    DEPENDS "${SVG_FILE_OUT}"
-    VERBATIM
-    )
-endfunction(vectorize_svg)
+include("svg-functions.cmake")
 
-function(rasterize_svg SVG_FILE_IN PNG_FILE_OUT)
-  # any additional arguments will be passed to inkscape (see ${ARGN})
-  get_filename_component(BASENAME "${PNG_FILE_OUT}" NAME)
+add_custom_target("assets")
+add_custom_target("assets_zip" DEPENDS MuseScore_assets.zip)
+
+function(zip_archive ARCHIVE)
+  # any additional arguments will be passed to the zip utility (see ${ARGN})
   add_custom_command(
-    OUTPUT "${PNG_FILE_OUT}"
-    COMMAND inkscape -z "${SVG_FILE_IN}" ${ARGN} --export-png "${PNG_FILE_OUT}"
+    OUTPUT "${ARCHIVE}"
+    DEPENDS assets # is a target, not a file, so no issue with relative paths
+    COMMAND "${CMAKE_COMMAND}" -E tar "cfv" "${ARCHIVE}" --format=zip ${ARGN}
     VERBATIM
-    )
-  add_custom_target(
-    "${BASENAME} (rasterized)"
-    ALL
-    DEPENDS "${PNG_FILE_OUT}"
-    VERBATIM
-    )
-endfunction(vectorize_svg)
+  )
+endfunction(zip_archive)
+
+# Mark a file for inclusion in the assets ZIP archive
+macro(add_to_assets_archive FILE)
+  if(IS_ABSOLUTE "${FILE}")
+    list(APPEND _ASSETS_LIST "${FILE}")
+  else(IS_ABSOLUTE "${FILE}")
+    list(APPEND _ASSETS_LIST "${CMAKE_CURRENT_BINARY_DIR}/${FILE}")
+  endif(IS_ABSOLUTE "${FILE_PATH}")
+  set(_ASSETS_LIST "${_ASSETS_LIST}" PARENT_SCOPE)
+endmacro(add_to_assets_archive)
+
+# Make changes to the assets list visible in the parent directory. Must be the
+# last thing called in any subdirectory where assets are added to the archive.
+macro(propagate_assets_list)
+  set(_ASSETS_LIST "${_ASSETS_LIST}" PARENT_SCOPE)
+endmacro(propagate_assets_list)
+
+add_subdirectory(icons)
+add_subdirectory(files)
+add_subdirectory(splash)
+add_subdirectory(resources)
+
+message("Assets: ${_ASSETS_LIST}")
+zip_archive(MuseScore_assets.zip ${_ASSETS_LIST})

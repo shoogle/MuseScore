@@ -22,7 +22,7 @@
 <path d="M221.6 386.6c-14.7 0-29.4-5.6-40.6-16.8-10.9-10.9-16.8-25.3-16.8-40.6s6-29.8 16.8-40.6l36.6-36.6c1.1-1.1 2.5-1.7 4.1-1.7s3 .6 4.1 1.7l36.6 36.6c22.4 22.4 22.4 58.9 0 81.3-11.3 11.1-26 16.7-40.8 16.7zm0-122.5l-32.5 32.5c-8.7 8.7-13.5 20.2-13.5 32.5s4.8 23.8 13.5 32.5c17.9 17.9 47.1 17.9 65.1 0s17.9-47.1 0-65.1l-32.6-32.4z" fill="#4d4d4d"/>
         <!-- END ../resources/cymbal.svg -->
     </g>
-    <text x="309" y="260" fill="#fff" font-family="Raleway-SemiBold" font-size="36" text-anchor="middle">MuseScore</text>
+    <text x="309" y="260" fill="#fff" font-family="Raleway-SemiBold" font-size="36" text-anchor="middle">@MUSESCORE_NAME@</text>
     <text x="607" y="362" fill="#fff" font-family="Roboto-Bold" font-size="24" text-anchor="end">@MUSESCORE_VERSION_FULL@</text>
     <text x="326" y="360" fill="#fff" font-family="Roboto-Bold" font-size="18" text-anchor="middle">@BUILD@ BUILD - FOR TESTING ONLY</text>
 </svg>

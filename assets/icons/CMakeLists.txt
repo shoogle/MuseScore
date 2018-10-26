@@ -1,5 +1,5 @@
 # These SVGs already optimized, so just copy to build folder
-file(COPY musescore-icon-round.svg DESTINATION .)
-file(COPY musescore-icon-square.svg DESTINATION .)
-
-# rasterize(musescore-icon-round.svg)
+foreach(FILE musescore-icon-round.svg musescore-icon-square.svg)
+  file(COPY "${FILE}" DESTINATION .)
+  add_to_assets_archive("${FILE}")
+endforeach(FILE)
