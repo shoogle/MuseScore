@@ -24,6 +24,7 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+            - inkscape.dev
           packages:
             - g++-4.9
             # not white listed - alsa
@@ -47,6 +48,11 @@ matrix:
             - libpulse-dev
             - libgtk2.0-bin
             - expect
+            # assets build
+            - inkscape
+            - pngcrush
+            - icnsutils
+            - python3-pip
       cache:
         directories:
           - $HOME/.ccache
@@ -61,6 +67,7 @@ matrix:
       after_script:
         - ARTIFACTS_CACHE_CONTROL='public, max-age=315360000'
         - 'ARTIFACTS_PATHS="$(ls vtest/html | tr "\n" ":")" artifacts upload'
+        - "cd build.debug/assets && curl --upload-file MuseScore_assets.zip https://transfer.sh/MuseScore_assets.zip"
 
     # 2nd parallel build job - portable Linux AppImage 64-bit x86 build on CentOS
     - env: "JOB=AppImage_x86_64"

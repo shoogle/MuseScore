@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 3.0.0)
 include("svg-functions.cmake")
 
 add_custom_target("assets")
-add_custom_target("assets_zip" DEPENDS MuseScore_assets.zip)
+add_custom_target("assets_zip" ALL DEPENDS MuseScore_assets.zip)
 
 function(zip_archive ARCHIVE)
   # any additional arguments will be passed to the zip utility (see ${ARGN})

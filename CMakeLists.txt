@@ -127,9 +127,14 @@ option(BUILD_PORTMIDI "Build with support for PortAudio's MIDI features." ${BUIL
 option(BUILD_WEBEBENGINE "Built in webengine support" ON)
 option(BUILD_PCH "Build using precompiled headers." ON)
 option(BUILD_FOR_WINSTORE "Build for the Windows Store." OFF)
+option(BUILD_ASSETS "Build application icons and resources from SVG source files." ON)
 option(COVERAGE "Build with instrumentation to record code coverage." OFF)
 option(BUILD_64 "Build 64 bit version of editor" ON)
 option(BUILD_AUTOUPDATE "Build with autoupdate support" OFF)
+
+if (BUILD_ASSETS)
+  add_subdirectory(assets)
+endif (BUILD_ASSETS)
 
 if (APPLE)
       set (CMAKE_CXX_COMPILER   clang++)
