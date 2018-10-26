@@ -41,6 +41,12 @@ export ARTIFACTS_KEY=$ARTIFACTS_AWS_ACCESS_KEY_ID
 export ARTIFACTS_SECRET=$ARTIFACTS_AWS_SECRET_ACCESS_KEY
 artifacts -v || curl -sL https://raw.githubusercontent.com/travis-ci/artifacts/master/install | bash
 
+# Install dependencies for assets build
+sudo add-apt-repository -y ppa:inkscape.dev/stable
+sudo apt-get update
+sudo apt-get install -y inkscape
+sudo pip3 install scour
+
 # IMPORTANT: Must now return shell to it's initial state:
 set +x
 set +e

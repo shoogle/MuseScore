@@ -5,6 +5,8 @@ project("MuseScore assets"
 
 cmake_minimum_required(VERSION 3.0.0)
 
+option(BUILD_ASSETS "Build application icons and resources from SVG source files." ON)
+
 include("svg-functions.cmake")
 
 add_custom_target("assets")
@@ -20,13 +22,22 @@ function(zip_archive ARCHIVE)
   )
 endfunction(zip_archive)
 
+function(unzip_archive ARCHIVE)
+  # any additional arguments will be passed to the zip utility (see ${ARGN})
+  add_custom_target("assets_unzip"
+    DEPENDS assets_zip
+    COMMAND "${CMAKE_COMMAND}" -E tar "xfv" "${ARCHIVE}" --format=zip ${ARGN}
+    VERBATIM
+  )
+endfunction(unzip_archive)
+
 # Mark a file for inclusion in the assets ZIP archive
 macro(add_to_assets_archive FILE)
   if(IS_ABSOLUTE "${FILE}")
     list(APPEND _ASSETS_LIST "${FILE}")
   else(IS_ABSOLUTE "${FILE}")
     list(APPEND _ASSETS_LIST "${CMAKE_CURRENT_BINARY_DIR}/${FILE}")
-  endif(IS_ABSOLUTE "${FILE_PATH}")
+  endif(IS_ABSOLUTE "${FILE}")
   set(_ASSETS_LIST "${_ASSETS_LIST}" PARENT_SCOPE)
 endmacro(add_to_assets_archive)
 
@@ -43,3 +54,4 @@ add_subdirectory(resources)
 
 message("Assets: ${_ASSETS_LIST}")
 zip_archive(MuseScore_assets.zip ${_ASSETS_LIST})
+unzip_archive(MuseScore_assets.zip ${_ASSETS_LIST})

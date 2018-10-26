@@ -24,7 +24,6 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - inkscape.dev
           packages:
             - g++-4.9
             # not white listed - alsa
@@ -49,17 +48,17 @@ matrix:
             - libgtk2.0-bin
             - expect
             # assets build
-            - inkscape
             - pngcrush
             - icnsutils
             - python3-pip
+            - fonts-roboto
       cache:
         directories:
           - $HOME/.ccache
       before_install:
         - "source build/travis/job1_Tests/environment.sh"
       install:
-        - "./build/travis/job1_Tests/install.sh"
+        - "./build/travis/job1_Tests/install.sh && cd build.debug/assets && curl --upload-file MuseScore_assets.zip https://transfer.sh/MuseScore_assets.zip"
       before_script:
         - "./build/travis/job1_Tests/before_script.sh"
       script:
@@ -67,7 +66,6 @@ matrix:
       after_script:
         - ARTIFACTS_CACHE_CONTROL='public, max-age=315360000'
         - 'ARTIFACTS_PATHS="$(ls vtest/html | tr "\n" ":")" artifacts upload'
-        - "cd build.debug/assets && curl --upload-file MuseScore_assets.zip https://transfer.sh/MuseScore_assets.zip"
 
     # 2nd parallel build job - portable Linux AppImage 64-bit x86 build on CentOS
     - env: "JOB=AppImage_x86_64"
