@@ -1849,7 +1849,7 @@ MuseScore::MuseScore()
       if (enableExperimental) {
             cornerLabel = new QLabel(this);
             cornerLabel->setScaledContents(true);
-            cornerLabel->setPixmap(QPixmap(":/data/mscore.png"));
+            cornerLabel->setPixmap(QPixmap(":/data/mscore.svg"));
             cornerLabel->setGeometry(width() - 48, 0, 48, 48);
             }
       }

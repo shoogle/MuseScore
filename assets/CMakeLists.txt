@@ -47,6 +47,7 @@ macro(propagate_assets_list)
   set(_ASSETS_LIST "${_ASSETS_LIST}" PARENT_SCOPE)
 endmacro(propagate_assets_list)
 
+add_subdirectory(brand)
 add_subdirectory(icons)
 add_subdirectory(files)
 add_subdirectory(splash)

@@ -447,7 +447,7 @@ NewWizard::NewWizard(QWidget* parent)
       setObjectName("NewWizard");
       setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
       setWizardStyle(QWizard::ClassicStyle);
-      setPixmap(QWizard::LogoPixmap, QPixmap(":/data/mscore.png"));
+      setPixmap(QWizard::LogoPixmap, QPixmap(":/data/mscore.svg"));
       setPixmap(QWizard::WatermarkPixmap, QPixmap());
       setWindowTitle(tr("New Score Wizard"));
 
