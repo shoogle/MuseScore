@@ -1,3 +1,4 @@
-# Only copy resources into build directory that are linked to from other SVGs.
-# Usually this is only raster images, as vector images would be embedded.
-file(COPY splash-background.jpg DESTINATION .)
+# copy resources into build directory that are linked to from other SVGs.
+foreach(FILE cymbals.svg folded-page.svg mu.svg musicxml-logo.svg splash-background.jpg)
+  file(COPY "${FILE}" DESTINATION .)
+endforeach(FILE)

@@ -1,9 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
-  <linearGradient id="g" x2="1" gradientTransform="rotate(45 .5 .5)">
-    <stop offset="0" stop-color="#148dbd"/>
-    <stop offset=".5" stop-color="#1f74bd"/>
-    <stop offset="1" stop-color="#1c5fb5"/>
-  </linearGradient>
-  <circle cx="500" cy="500" r="480" fill="url(#g)"/>
-  <path fill="#fff" d="M686.4 225c-76.9 0-139.8 62.9-139.8 139.8h46.6c0-51.7 41.5-93.2 93.2-93.2s93.2 41.5 93.2 93.2h46.6c-.1-77-62.9-139.8-139.8-139.8zm0 116.4c-12.9 0-23.3 10.4-23.3 23.3s10.4 23.3 23.3 23.3 23.3-10.4 23.3-23.3c0-12.8-10.5-23.3-23.3-23.3zM290.3 388c-64.1 0-116.5 52.4-116.5 116.5v233h46.6v-233c0-38.9 31-69.9 69.9-69.9s69.9 31 69.9 69.9v233h46.6v-233c0-38.9 31-69.9 69.9-69.9s69.9 31 69.9 69.9v93.2c0 76.9 62.9 147.4 139.8 147.4s139.8-70.4 139.8-147.4V411.3h-46.6v186.4c0 51.7-41.5 105.3-93.2 105.3s-93.2-53.6-93.2-105.3v-93.2c0-64.1-52.4-116.5-116.5-116.5-38.2 0-71.9 18.9-93.2 47.5-21.3-28.6-55-47.5-93.2-47.5z"/>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x2="1" gradientTransform="rotate(45 .5 .5)">
+      <stop offset="0" stop-color="#148dbd"/>
+      <stop offset=".5" stop-color="#1f74bd"/>
+      <stop offset="1" stop-color="#1c5fb5"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50%" cy="50%" r="50%" fill="url(#g)"/>
+  <use stroke="#fff" xlink:href="../resources/mu.svg#mu-logo" transform="translate(88 114)"/>
 </svg>
