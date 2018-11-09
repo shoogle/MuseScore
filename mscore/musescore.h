@@ -418,8 +418,6 @@ class MuseScore : public QMainWindow, public MuseScoreCore {
       QStringList _recentScores;
       QToolButton* _playButton;
 
-      qreal _physicalDotsPerInch;
-
       QMessageBox* infoMsgBox;
       TourHandler* _tourHandler { 0 };
 
@@ -793,7 +791,7 @@ class MuseScore : public QMainWindow, public MuseScoreCore {
       void showSynthControl(bool);
       void showMixer(bool);
 
-      qreal physicalDotsPerInch() const                              { return _physicalDotsPerInch; }
+      qreal physicalDotsPerInch() const;
       static const std::list<const char*>& allNoteInputMenuEntries() { return _allNoteInputMenuEntries; }
       std::list<const char*>* noteInputMenuEntries()                 { return &_noteInputMenuEntries; }
       void setNoteInputMenuEntries(std::list<const char*> l)         { _noteInputMenuEntries = l; }

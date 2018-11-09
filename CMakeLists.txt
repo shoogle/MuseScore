@@ -253,17 +253,17 @@ endfunction(copy_during_build)
 if (MSCORE_UNSTABLE)
     if ("$ENV{BINTRAY_REPO_OWNER}" STREQUAL "musescore")
         # This is a nightly build
-        set(SPLASH splash-nightly.png)
+        set(SPLASH splash-nightly.svg)
     else ("$ENV{BINTRAY_REPO_OWNER}" STREQUAL "musescore")
         # This is someone building on their own
-        set(SPLASH splash-development.png)
+        set(SPLASH splash-development.svg)
     endif ("$ENV{BINTRAY_REPO_OWNER}" STREQUAL "musescore")
 else (MSCORE_UNSTABLE)
     # Standard splash on stable releases
-    set(SPLASH splash-stable.png)
+    set(SPLASH splash-stable.svg)
 endif (MSCORE_UNSTABLE)
 
-copy_during_build(${PROJECT_BINARY_DIR}/assets/splash/${SPLASH} ${PROJECT_SOURCE_DIR}/mscore/data/splash.png)
+copy_during_build(${PROJECT_BINARY_DIR}/assets/splash/${SPLASH} ${PROJECT_SOURCE_DIR}/mscore/data/splash.svg)
 copy_during_build(${PROJECT_BINARY_DIR}/assets/brand/musescore-logo-alpha.svg ${PROJECT_SOURCE_DIR}/mscore/data/icons/mscore.svg)
 
 if (BUILD_WEBEBENGINE)

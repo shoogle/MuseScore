@@ -162,6 +162,7 @@ bool processJob = false;
 bool externalIcons = false;
 bool pluginMode = false;
 static bool startWithNewScore = false;
+double _physicalDotsPerInch = 0.0;
 double guiScaling = 0.0;
 static double userDPI = 0.0;
 int trimMargin = -1;
@@ -252,6 +253,11 @@ extern TextPalette* textPalette;
 static constexpr double SCALE_MAX  = 16.0;
 static constexpr double SCALE_MIN  = 0.05;
 static constexpr double SCALE_STEP = 1.7;
+
+qreal MuseScore::physicalDotsPerInch() const
+      {
+      return _physicalDotsPerInch;
+      }
 
 //---------------------------------------------------------
 // cmdInsertMeasure
@@ -968,31 +974,6 @@ MuseScore::MuseScore()
       _tourHandler = new TourHandler(this);
       qApp->installEventFilter(_tourHandler);
       _tourHandler->loadTours();
-
-      QScreen* screen = QGuiApplication::primaryScreen();
-      if (userDPI == 0.0) {
-#if defined(Q_OS_WIN)
-      if (QSysInfo::WindowsVersion <= QSysInfo::WV_WINDOWS7)
-            _physicalDotsPerInch = screen->logicalDotsPerInch() * screen->devicePixelRatio();
-      else
-            _physicalDotsPerInch = screen->physicalDotsPerInch();  // physical resolution
-#else
-      _physicalDotsPerInch = screen->physicalDotsPerInch();        // physical resolution
-#endif
-            }
-      else {
-            _physicalDotsPerInch = userDPI;
-            }
-      if (guiScaling == 0.0) {
-            // set scale for icons, palette elements, window sizes, etc
-            // the default values are hard coded in pixel sizes and assume ~96 DPI
-            if (qAbs(_physicalDotsPerInch - DPI_DISPLAY) > 6.0)
-                  guiScaling = _physicalDotsPerInch / DPI_DISPLAY;
-            else
-                  guiScaling = 1.0;
-            }
-
-      MScore::pixelRatio = DPI / screen->logicalDotsPerInch();
 
       setObjectName("MuseScore");
       _sstate = STATE_INIT;
@@ -7028,13 +7009,67 @@ int main(int argc, char* av[])
       if (!MScore::testMode)
             MScore::readDefaultStyle(preferences.getString(PREF_SCORE_STYLE_DEFAULTSTYLEFILE));
 
-      QSplashScreen* sc = 0;
+      if (!MScore::noGui) {
+            QScreen* screen = QGuiApplication::primaryScreen();
+            if (userDPI == 0.0) {
+#if defined(Q_OS_WIN)
+            if (QSysInfo::WindowsVersion <= QSysInfo::WV_WINDOWS7)
+                  _physicalDotsPerInch = screen->logicalDotsPerInch() * screen->devicePixelRatio();
+            else
+                  _physicalDotsPerInch = screen->physicalDotsPerInch();  // physical resolution
+#else
+            _physicalDotsPerInch = screen->physicalDotsPerInch();        // physical resolution
+#endif
+                  }
+            else {
+                  _physicalDotsPerInch = userDPI;
+                  }
+            if (guiScaling == 0.0) {
+                  // set scale for icons, palette elements, window sizes, etc
+                  // the default values are hard coded in pixel sizes and assume ~96 DPI
+                  if (qAbs(_physicalDotsPerInch - DPI_DISPLAY) > 6.0)
+                        guiScaling = _physicalDotsPerInch / DPI_DISPLAY;
+                  else
+                        guiScaling = 1.0;
+                  }
+
+            MScore::pixelRatio = DPI / screen->logicalDotsPerInch();
+            }
+
+      QSplashScreen* sc = nullptr;
       if (!MScore::noGui && preferences.getBool(PREF_UI_APP_STARTUP_SHOWSPLASHSCREEN)) {
-            QPixmap pm(":/data/splash.png");
+            QSvgRenderer renderer(QString(":/data/splash.svg"));
+            QPixmap pm(renderer.defaultSize() * guiScaling * qApp->devicePixelRatio());
+            QPainter painter(&pm);
+            renderer.render(&painter);
+            pm.setDevicePixelRatio(qApp->devicePixelRatio());
             sc = new QSplashScreen(pm);
             sc->setWindowTitle(QString("MuseScore Startup"));
 #ifdef Q_OS_MAC // to have session dialog on top of splashscreen on mac
-            sc->setWindowFlags(Qt::FramelessWindowHint);
+            sc->setWindowFlag(Qt::FramelessWindowHint);
+#endif
+#ifdef QT_DEBUG
+            QString mscore_msg = QString(
+"MuseScore: GUI Scaling: %1, devicePixelRatio: %2"
+                  )
+                  .arg(guiScaling)
+                  .arg(qApp->devicePixelRatio()); // reports largest from all monitors, not necessarily primary monitor;
+            const qreal MM_PER_INCH = 25.4;
+            auto wxh = [](QSizeF s) { return QString("%1x%2").arg(s.width()).arg(s.height()); };
+            QScreen* screen = qApp->primaryScreen();
+            QString screen_msg = QString(
+"Primary Display:\n"
+"  size (mm): %1, size (inches): %2\n"
+"  size (pixels) %3, devicePixelRatio: %4\n"
+"  logical DPI: %5, phyical DPI: %6"
+                  )
+                  .arg(wxh(screen->physicalSize()))
+                  .arg(wxh(screen->physicalSize()/MM_PER_INCH))
+                  .arg(wxh(screen->size())) // multiply this by monitor's devicePixelRatio to get actual number of pixels
+                  .arg(screen->devicePixelRatio()) // =1 for standard displays, >1 for HDPI / retina displays
+                  .arg(screen->logicalDotsPerInch()) // many monitors pretend to be (a multiple of) 96 DPI for historical reasons
+                  .arg(screen->physicalDotsPerInch()); // multiply this by devicePixelRatio to get the monitor's actual DPI
+            sc->showMessage(QString("%1\n\n%2").arg(mscore_msg, screen_msg), Qt::AlignLeft, Qt::white);
 #endif
             sc->show();
             qApp->processEvents();
