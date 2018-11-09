@@ -27,7 +27,7 @@ void MuseScore::showStartcenter(bool val)
       {
       QAction* a = getAction("startcenter");
       if (val && startcenter == nullptr) {
-            startcenter = new Startcenter;
+            startcenter = new Startcenter(this);
             startcenter->addAction(a);
             startcenter->readSettings();
             connect(startcenter, SIGNAL(closed(bool)), a, SLOT(setChecked(bool)));
@@ -41,8 +41,8 @@ void MuseScore::showStartcenter(bool val)
 //   Startcenter
 //---------------------------------------------------------
 
-Startcenter::Startcenter()
- : AbstractDialog(0)
+Startcenter::Startcenter(QWidget* parent)
+ : AbstractDialog(parent)
       {
       setObjectName("Startcenter");
       setupUi(this);
