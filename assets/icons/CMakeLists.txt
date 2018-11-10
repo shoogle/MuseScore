@@ -1,17 +1,17 @@
-# These SVGs already optimized, so just copy to build folder
-# foreach(FILE musescore-icon-round.svg musescore-icon-square.svg)
-#   file(COPY "${FILE}" DESTINATION .)
-#   add_to_assets_archive("${FILE}")
-# endforeach(FILE)
-
-set(TARGET "assets_icons")
+set(TARGET "${TARGET}_icons")
 add_custom_target("${TARGET}")
-add_dependencies(assets "${TARGET}")
 
-foreach(FILE musescore-icon-round musescore-icon-square)
-  add_custom_target("${FILE}" DEPENDS "${FILE}.svg")
-  add_dependencies("${TARGET}" "${FILE}")
-  standalone_svg("${CMAKE_CURRENT_SOURCE_DIR}/${FILE}.svg" "${FILE}-standalone.svg")
-  optimize_svg("${FILE}-standalone.svg" "${FILE}.svg")
-  add_to_assets_archive("${FILE}.svg")
-endforeach(FILE)
+set(WINDOWS_ICO_SIZES 16 24 32 48 64 256) # https://docs.microsoft.com/en-gb/windows/desktop/uxguide/vis-icons
+set(MACOS_ICNS_SIZES 16 32 48 128 256 512 1024) # https://en.wikipedia.org/wiki/Apple_Icon_Image_format
+set(FREEDESKTOP_COMMON_SIZES 16 22 24 32 48 128 256 512)
+
+set(ALL_ICON_SIZES ${WINDOWS_ICO_SIZES} ${MACOS_ICNS_SIZES} ${FREEDESKTOP_COMMON_SIZES})
+
+list(REMOVE_DUPLICATES ALL_ICON_SIZES)
+
+include("icon-functions.cmake")
+
+add_directory_target(app)
+add_directory_target(file)
+
+propagate_assets_list()

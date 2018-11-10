@@ -7,29 +7,19 @@ cmake_minimum_required(VERSION 3.0.0)
 
 option(BUILD_ASSETS "Build application icons and resources from SVG source files." ON)
 
+if(NOT DEFINED MUSESCORE_NAME)
+  set(MUSESCORE_NAME "MuseScore")
+endif(NOT DEFINED MUSESCORE_NAME)
+
+if(NOT DEFINED MUSESCORE_VERSION)
+  set(MUSESCORE_VERSION "X.Y")
+  set(MUSESCORE_VERSION_FULL "X.Y.Z")
+endif(NOT DEFINED MUSESCORE_VERSION)
+
+set(ASSETS_ARCHIVE_NAME "${MUSESCORE_NAME}-assets-${MUSESCORE_VERSION_FULL}.zip")
+
 include("svg-functions.cmake")
-
-add_custom_target("assets")
-add_custom_target("assets_zip" ALL DEPENDS MuseScore_assets.zip)
-
-function(zip_archive ARCHIVE)
-  # any additional arguments will be passed to the zip utility (see ${ARGN})
-  add_custom_command(
-    OUTPUT "${ARCHIVE}"
-    DEPENDS assets # is a target, not a file, so no issue with relative paths
-    COMMAND "${CMAKE_COMMAND}" -E tar "cfv" "${ARCHIVE}" --format=zip ${ARGN}
-    VERBATIM
-  )
-endfunction(zip_archive)
-
-function(unzip_archive ARCHIVE)
-  # any additional arguments will be passed to the zip utility (see ${ARGN})
-  add_custom_target("assets_unzip"
-    DEPENDS assets_zip
-    COMMAND "${CMAKE_COMMAND}" -E tar "xfv" "${ARCHIVE}" --format=zip ${ARGN}
-    VERBATIM
-  )
-endfunction(unzip_archive)
+include("archive-functions.cmake")
 
 # Mark a file for inclusion in the assets ZIP archive
 macro(add_to_assets_archive FILE)
@@ -47,12 +37,25 @@ macro(propagate_assets_list)
   set(_ASSETS_LIST "${_ASSETS_LIST}" PARENT_SCOPE)
 endmacro(propagate_assets_list)
 
-add_subdirectory(brand)
-add_subdirectory(icons)
-add_subdirectory(files)
-add_subdirectory(splash)
+function(add_directory_target DIRECTORY)
+  add_subdirectory("${DIRECTORY}")
+  add_dependencies("${TARGET}" "${TARGET}_${DIRECTORY}")
+  propagate_assets_list() # propagate outside function scope
+endfunction(add_directory_target)
+
+set(TARGET "assets")
+
+add_custom_target("${TARGET}")
+
 add_subdirectory(resources)
 
+add_directory_target(brand)
+add_directory_target(icons)
+add_directory_target(splash)
+
 message("Assets: ${_ASSETS_LIST}")
-zip_archive(MuseScore_assets.zip ${_ASSETS_LIST})
-unzip_archive(MuseScore_assets.zip ${_ASSETS_LIST})
+
+add_custom_target("assets_zip" ALL DEPENDS "${ASSETS_ARCHIVE_NAME}")
+
+zip_archive("${ASSETS_ARCHIVE_NAME}" ${_ASSETS_LIST})
+unzip_archive("${ASSETS_ARCHIVE_NAME}" ${_ASSETS_LIST})

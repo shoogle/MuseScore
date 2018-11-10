@@ -1,15 +1,5 @@
-set(TARGET "assets_splash")
+set(TARGET "${TARGET}_splash")
 add_custom_target("${TARGET}")
-add_dependencies(assets "${TARGET}")
-
-if(NOT DEFINED MUSESCORE_NAME)
-  set(MUSESCORE_NAME "MuseScore")
-endif(NOT DEFINED MUSESCORE_NAME)
-
-if(NOT DEFINED MUSESCORE_VERSION)
-  set(MUSESCORE_VERSION "X.Y")
-  set(MUSESCORE_VERSION_FULL "X.Y.Z")
-endif(NOT DEFINED MUSESCORE_VERSION)
 
 function(splash SVG_FILE_IN BUILD)
   string(TOLOWER "${BUILD}" BUILD_LOWER)
@@ -17,14 +7,14 @@ function(splash SVG_FILE_IN BUILD)
   configure_file("${SVG_FILE_IN}" "${FILE_OUT}-raw.svg") # substitute @BUILD@
   standalone_svg("${FILE_OUT}-raw.svg" "${FILE_OUT}-standalone.svg")
   optimize_svg("${FILE_OUT}-standalone.svg" "${FILE_OUT}.svg")
-  rasterize_svg("${FILE_OUT}.svg" "${FILE_OUT}.png")
-  add_custom_target("${TARGET}_${FILE_OUT}" DEPENDS "${FILE_OUT}.png")
-  add_dependencies("${TARGET}_${FILE_OUT}" assets_icons)
-  add_dependencies("${TARGET}" "${TARGET}_${FILE_OUT}")
+  add_custom_target("${TARGET}_${FILE_OUT}.svg" DEPENDS "${FILE_OUT}.svg")
+  add_dependencies("${TARGET}_${FILE_OUT}.svg" "assets_icons_app_musescore-icon-round.svg")
+  add_dependencies("${TARGET}" "${TARGET}_${FILE_OUT}.svg")
   add_to_assets_archive("${FILE_OUT}.svg")
-  add_to_assets_archive("${FILE_OUT}.png")
 endfunction(splash)
 
 splash(splash-stable.svg STABLE)
 splash(splash-unstable.svg NIGHTLY)
 splash(splash-unstable.svg DEVELOPMENT)
+
+propagate_assets_list()

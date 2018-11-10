@@ -12,6 +12,18 @@ function(make_path_absolute VAR_NAME)
   endif(NOT IS_ABSOLUTE "${FILE_PATH}")
 endfunction(make_path_absolute)
 
+function(required_program VARIABLE COMMAND DESCRIPTION)
+  set(DESCRIPTION "${DESCRIPTION} (required)")
+  find_program("${VARIABLE}" "${COMMAND}" DOC "${DESCRIPTION}")
+  if(NOT ${VARIABLE} OR NOT EXISTS "${${VARIABLE}}")
+    message(FATAL_ERROR "Not found: ${COMMAND} - ${DESCRIPTION}")
+  endif(NOT ${VARIABLE} OR NOT EXISTS "${${VARIABLE}}")
+endfunction(required_program)
+
+required_program(INKSCAPE "inkscape" "SVG vector graphics editing program")
+required_program(XMLLINT "xmllint" "Tool for parsing XML files")
+required_program(SVGO "svgo" "Tool for optimizing SVG vector graphics files")
+
 function(standalone_svg SVG_FILE_IN SVG_FILE_OUT)
   make_path_absolute(SVG_FILE_IN) # absolute path needed for add_custom_command
   add_custom_command(

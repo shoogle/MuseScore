@@ -1,21 +1,22 @@
-set(TARGET "assets_files")
+set(TARGET "${TARGET}_file")
 add_custom_target("${TARGET}")
-add_dependencies(assets "${TARGET}")
 
 function(filetype_icon SVG_FILE_IN)
   foreach(TYPE ${ARGN})
     string(TOLOWER "${TYPE}" TYPE_LOWER)
-    add_custom_target("${TYPE_LOWER}" DEPENDS "${TYPE_LOWER}.svg")
-    add_dependencies("${TARGET}" "${TYPE_LOWER}")
+    add_custom_target("${TARGET}_${TYPE_LOWER}.svg" DEPENDS "${TYPE_LOWER}.svg")
+    add_dependencies("${TARGET}" "${TARGET}_${TYPE_LOWER}.svg")
     configure_file("${SVG_FILE_IN}" "${SVG_FILE_IN}") # substitute @TYPE@ in file
     file(READ "${CMAKE_CURRENT_BINARY_DIR}/${SVG_FILE_IN}" YOUR_CONTENT_HERE)
     string(REGEX REPLACE "^[^>]+>(.*)</[^<]+$" "\\1" YOUR_CONTENT_HERE "${YOUR_CONTENT_HERE}")
     set(YOUR_CONTENT_HERE "BEGIN ${SVG_FILE_IN} -->\n${YOUR_CONTENT_HERE}\n<!-- END ${SVG_FILE_IN}")
-    configure_file("../resources/folded-page.svg" "${TYPE_LOWER}-raw.svg") # substitute @YOUR_CONTENT_HERE@ in file
+    configure_file("../../resources/folded-page.svg" "${TYPE_LOWER}-raw.svg") # substitute @YOUR_CONTENT_HERE@ in file
     standalone_svg("${TYPE_LOWER}-raw.svg" "${TYPE_LOWER}-vector.svg")
     optimize_svg("${TYPE_LOWER}-vector.svg" "${TYPE_LOWER}.svg")
     add_to_assets_archive("${TYPE_LOWER}.svg")
+    rasterize_svg_sizes("${TYPE_LOWER}" ${ALL_ICON_SIZES})
   endforeach(TYPE)
+  propagate_assets_list()
 endfunction(filetype_icon)
 
 # icons for MuseScore files
@@ -23,3 +24,5 @@ filetype_icon(musescore-file.svg "MSCX" "MSCZ")
 
 # icons for MusicXML files
 filetype_icon(musicxml-file.svg "XML" "MXL")
+
+propagate_assets_list()

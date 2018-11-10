@@ -1,0 +1,12 @@
+function(rasterize_svg_sizes FILE_BASE)
+  # any additional arguments are assumed to be integer sizes for exported PNGs
+  foreach(SIZE ${ARGN})
+    set(SVG_FILE_IN "${FILE_BASE}.svg")
+    set(PNG_FILE_OUT "${FILE_BASE}-${SIZE}.png")
+    add_custom_target("${TARGET}_${PNG_FILE_OUT}" DEPENDS "${PNG_FILE_OUT}")
+    add_dependencies("${TARGET}" "${TARGET}_${PNG_FILE_OUT}")
+    rasterize_svg("${SVG_FILE_IN}" "${PNG_FILE_OUT}" "--export-width=${SIZE}" "--export-height=${SIZE}")
+    add_to_assets_archive("${PNG_FILE_OUT}")
+  endforeach(SIZE)
+  propagate_assets_list()
+endfunction(rasterize_svg_sizes)
