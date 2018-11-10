@@ -115,6 +115,7 @@
 #include "searchComboBox.h"
 #include "startcenter.h"
 #include "help.h"
+#include "svgrenderer.h"
 #include "awl/aslider.h"
 #include "extension.h"
 #include "thirdparty/qzip/qzipreader_p.h"
@@ -7036,11 +7037,7 @@ int main(int argc, char* av[])
 
       QSplashScreen* sc = nullptr;
       if (!MScore::noGui && preferences.getBool(PREF_UI_APP_STARTUP_SHOWSPLASHSCREEN)) {
-            QSvgRenderer renderer(QString(":/data/splash.svg"));
-            QPixmap pm(renderer.defaultSize() * guiScaling * qApp->devicePixelRatio());
-            QPainter painter(&pm);
-            renderer.render(&painter);
-            pm.setDevicePixelRatio(qApp->devicePixelRatio());
+            QPixmap pm = SvgRenderer(":/data/splash.svg").hdpiPixmap(QSize(), true);
             sc = new QSplashScreen(pm);
             sc->setWindowTitle(QString("MuseScore Startup"));
 #ifdef Q_OS_MAC // to have session dialog on top of splashscreen on mac

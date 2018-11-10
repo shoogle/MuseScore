@@ -5,5 +5,5 @@
     <stop offset="1" stop-color="#1c5fb5"/>
   </linearGradient>
   <circle cx="256" cy="256" r="256" fill="url(#g)"/>
-  <use stroke="#fff" xlink:href="../resources/mu.svg#mu-logo" transform="translate(88 114)"/>
+  <use x="88" y="120" stroke="#fff" xlink:href="../resources/mu.svg#mu-logo"/>
 </svg>

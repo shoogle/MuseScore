@@ -24,6 +24,7 @@
 #include "palette.h"
 #include "instrdialog.h"
 #include "scoreBrowser.h"
+#include "svgrenderer.h"
 #include "extension.h"
 
 #include "libmscore/instrtemplate.h"
@@ -447,7 +448,8 @@ NewWizard::NewWizard(QWidget* parent)
       setObjectName("NewWizard");
       setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
       setWizardStyle(QWizard::ClassicStyle);
-      setPixmap(QWizard::LogoPixmap, QPixmap(":/data/mscore.svg"));
+      QPixmap pm = SvgRenderer(":/data/mscore.svg").hdpiPixmap(QSize(64,64));
+      setPixmap(QWizard::LogoPixmap, pm);
       setPixmap(QWizard::WatermarkPixmap, QPixmap());
       setWindowTitle(tr("New Score Wizard"));
 

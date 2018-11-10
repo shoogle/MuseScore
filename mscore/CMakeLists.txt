@@ -297,7 +297,7 @@ add_executable ( ${ExecutableName}
       scoreBrowser.h scoreInfo.h scorePreview.h scoretab.h scoreview.h searchComboBox.h
       sectionbreakprop.h selectdialog.h selectionwindow.h selectnotedialog.h selinstrument.h
       seq.h shortcut.h shortcutcapturedialog.h simplebutton.h splitstaff.h stafftextproperties.h
-      startcenter.h startupWizard.h stringutils.h svggenerator.h symboldialog.h synthcontrol.h
+      startcenter.h startupWizard.h stringutils.h svggenerator.h svgrenderer.h symboldialog.h synthcontrol.h
       textcursor.h textpalette.h texttools.h timedialog.h timeline.h timesigproperties.h
       toolbarEditor.h toolbuttonmenu.h transposedialog.h tremolobarcanvas.h tremolobarprop.h
       tupletdialog.h updatechecker.h uploadscoredialog.h waveview.h webpage.h workspace.h
@@ -343,6 +343,7 @@ add_executable ( ${ExecutableName}
       layer.cpp selectdialog.cpp selectnotedialog.cpp propertymenu.cpp shortcut.cpp bb.cpp
       dragelement.cpp startupWizard.cpp
       svggenerator.cpp
+      svgrenderer.cpp
       masterpalette.cpp
       dragdrop.cpp
       waveview.cpp helpBrowser.cpp
