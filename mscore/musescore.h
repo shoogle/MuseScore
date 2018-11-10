@@ -414,7 +414,7 @@ class MuseScore : public QMainWindow, public MuseScoreCore {
       QAction* loopOutAction;
       QAction* panAction;
 
-      QLabel* cornerLabel;
+      QSvgWidget* cornerGraphic;
       QStringList _recentScores;
       QToolButton* _playButton;
 

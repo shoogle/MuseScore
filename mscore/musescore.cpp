@@ -1828,10 +1828,8 @@ MuseScore::MuseScore()
       connect(im, SIGNAL(localeChanged()), SLOT(inputMethodLocaleChanged()));
 
       if (enableExperimental) {
-            cornerLabel = new QLabel(this);
-            cornerLabel->setScaledContents(true);
-            cornerLabel->setPixmap(QPixmap(":/data/mscore.svg"));
-            cornerLabel->setGeometry(width() - 48, 0, 48, 48);
+            cornerGraphic = new QSvgWidget(":/data/mscore.svg", this);
+            cornerGraphic->setGeometry(width() - 48, 0, 48, 48);
             }
       }
 
@@ -1919,7 +1917,7 @@ void MuseScore::retranslate()
 void MuseScore::resizeEvent(QResizeEvent*)
       {
       if (enableExperimental) {
-            cornerLabel->setGeometry(width() - 48, 0, 48, 48);
+            cornerGraphic->setGeometry(width() - 48, 0, 48, 48);
             }
       }
 
