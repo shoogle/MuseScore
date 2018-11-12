@@ -36,12 +36,12 @@ if(WIN32)
   # Windows has a system tool called "convert" that conflicts with ImageMagick
   set(CONVERT "imconvert") # common solution is to rename ImageMagick's binary
 endif(WIN32)
-
 required_program(IMAGEMAGICK "magick" "ImageMagick image tool - https://www.imagemagick.org" "${CONVERT}")
 
 # NOTE: Very few programs support the ICNS icon format used on macOS. On Linux
-# we can use PNG2ICNS, but it doesn't support adding separate images for
-# retina displays https://sourceforge.net/p/icns/bugs/12/
+# we can use PNG2ICNS, but it doesn't support adding separate images for retina
+# displays https://sourceforge.net/p/icns/bugs/12/. This is not currently a
+# problem since we don't have separate images for retina displays anyway.
 required_program(PNG2ICNS "png2icns" "Tool to create macOS icons (libicns)- https://icns.sourceforge.io/" "${CONVERT}")
 required_program(ICNS2PNG "icns2png" "If this is missing then you have the wrong png2icns" "${CONVERT}")
 

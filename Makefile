@@ -36,6 +36,7 @@ BUILD_PORTAUDIO="ON"  # Override with "OFF" to disable.
 USE_SYSTEM_FREETYPE="OFF" # Override with "ON" to enable. Requires freetype >= 2.5.2.
 COVERAGE="OFF"        # Override with "ON" to enable.
 DOWNLOAD_SOUNDFONT="ON"   # Override with "OFF" to disable latest soundfont download.
+DOWNLOAD_ASSETS="ON"   # Override with "OFF" to ensure build fails if assets cannot be built from source.
 
 UPDATE_CACHE="TRUE"# Override if building a DEB or RPM, or when installing to a non-standard location.
 NO_RPATH="FALSE"# Package maintainers may want to override this (e.g. Debian)
@@ -61,6 +62,7 @@ release:
    	  -DBUILD_PORTAUDIO="${BUILD_PORTAUDIO}"   \
    	  -DUSE_SYSTEM_FREETYPE="${USE_SYSTEM_FREETYPE}" \
    	  -DDOWNLOAD_SOUNDFONT="${DOWNLOAD_SOUNDFONT}"   \
+			-DDOWNLOAD_ASSETS="${DOWNLOAD_ASSETS}"   \
   	  -DCMAKE_SKIP_RPATH="${NO_RPATH}"     ..; \
       make lrelease;                             \
       make -j ${CPUS};                           \
@@ -89,6 +91,7 @@ debug:
    	  -DUSE_SYSTEM_FREETYPE="${USE_SYSTEM_FREETYPE}"      \
       -DCOVERAGE="${COVERAGE}"                 \
    	  -DDOWNLOAD_SOUNDFONT="${DOWNLOAD_SOUNDFONT}"        \
+			-DDOWNLOAD_ASSETS="${DOWNLOAD_ASSETS}"              \
   	  -DCMAKE_SKIP_RPATH="${NO_RPATH}"     ..;            \
       make lrelease;                                        \
       make -j ${CPUS};                                      \

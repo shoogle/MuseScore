@@ -43,10 +43,8 @@ artifacts -v || curl -sL https://raw.githubusercontent.com/travis-ci/artifacts/m
 
 # Install dependencies for assets build
 sudo add-apt-repository -y ppa:inkscape.dev/stable
-sudo apt-get update
-sudo apt-get install -y inkscape
-sudo npm install -g npm || { echo "Trying manual NPM install" && curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash - ;}
-sudo apt-get install -y nodejs # update npm itself
+curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash - # node.js
+sudo apt-get install -y inkscape nodejs
 sudo npm install -g svgo
 
 # IMPORTANT: Must now return shell to it's initial state:
