@@ -9,7 +9,9 @@ option(BUILD_ASSETS "Build MuseScore's icons and resources from SVG source files
 option(DOWNLOAD_ASSETS "Download pre-built assets if they cannot be built due to missing dependencies, or if BUILD_ASSETS is disabled." OFF)
 option(OPTIMIZE_SVGS "Optimize SVG file size using SVGO." ON)
 option(OPTIMIZE_PNGS "Optimize PNG file size using PNGCRUSH." ON)
-option(OPTIMIZE_PNGS_BRUTE "Try all PNG compression methods to ensure smallest possible size (very time consuming)." OFF)
+option(OPTIMIZE_PNGS_BRUTE "Try all PNG compression methods to ensure smallest possible size (takes time)." OFF)
+option(BUILD_ICO "Build ICO icon files for use on Windows" ON)
+option(BUILD_ICNS "Build ICNS icon files for use on MacOS" ON)
 
 if(NOT BUILD_ASSETS AND NOT DOWNLOAD_ASSETS)
   message(FATAL_ERROR "Options BUILD_ASSETS and DOWNLOAD_ASSETS can't both be disabled.")
@@ -58,7 +60,7 @@ if(BUILD_ASSETS)
 else(BUILD_ASSETS)
   # Download pre-built assets archive during configure and extract during build
   # file(DOWNLOAD)
-  add_custom_command( # TODO don't extract already done so
+  add_custom_command( # TODO don't extract if already done so
     TARGET "assets" POST_BUILD
     COMMAND "${CMAKE_COMMAND}" -E tar "xfv" "${ASSETS_ARCHIVE_NAME}"
     VERBATIM

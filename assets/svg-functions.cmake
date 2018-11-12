@@ -13,13 +13,14 @@ function(make_path_absolute VAR_NAME)
 endfunction(make_path_absolute)
 
 function(required_program VARIABLE COMMAND DESCRIPTION)
+  # ARGN alternative names for the command
   if(BUILD_ASSETS)
-    find_program("${VARIABLE}" "${COMMAND}" DOC "${DESCRIPTION}")
+    find_program("${VARIABLE}" NAMES ${COMMAND} ${ARGN} DOC "${DESCRIPTION}")
     if(NOT ${VARIABLE} OR NOT EXISTS "${${VARIABLE}}")
       set(MSG_TYPE FATAL_ERROR) # fail build due to missing dependency
       if(DOWNLOAD_ASSETS)
         set(MSG_TYPE WARNING) # don't fail the build
-        set(BUILD_ASSETS OFF) # download assets instead of building them
+        set(BUILD_ASSETS OFF PARENT_SCOPE) # download assets instead of building them
       endif(DOWNLOAD_ASSETS)
       message("${MSG_TYPE}" "Not found: ${COMMAND} - ${DESCRIPTION}")
       message("A build dependency is missing so assets will be downloaded.")
@@ -27,8 +28,22 @@ function(required_program VARIABLE COMMAND DESCRIPTION)
   endif(BUILD_ASSETS)
 endfunction(required_program)
 
-required_program(INKSCAPE "inkscape" "SVG vector graphics editing program")
-required_program(XMLLINT "xmllint" "Tool for parsing XML files")
+required_program(INKSCAPE "inkscape" "SVG vector graphics editing program - https://inkscape.org/")
+required_program(XMLLINT "xmllint" "Tool for parsing XML files - http://xmlsoft.org/xmllint.html")
+
+set(CONVERT "convert") # old name of ImageMagick's command line tool
+if(WIN32)
+  # Windows has a system tool called "convert" that conflicts with ImageMagick
+  set(CONVERT "imconvert") # common solution is to rename ImageMagick's binary
+endif(WIN32)
+
+required_program(IMAGEMAGICK "magick" "ImageMagick image tool - https://www.imagemagick.org" "${CONVERT}")
+
+# NOTE: Very few programs support the ICNS icon format used on macOS. On Linux
+# we can use PNG2ICNS, but it doesn't support adding separate images for
+# retina displays https://sourceforge.net/p/icns/bugs/12/
+required_program(PNG2ICNS "png2icns" "Tool to create macOS icons (libicns)- https://icns.sourceforge.io/" "${CONVERT}")
+required_program(ICNS2PNG "icns2png" "If this is missing then you have the wrong png2icns" "${CONVERT}")
 
 if(OPTIMIZE_SVGS)
   required_program(SVGO "svgo" "Tool for optimizing SVG vector graphics files")
@@ -44,9 +59,9 @@ function(standalone_svg SVG_FILE_IN SVG_FILE_OUT)
     add_custom_command(
       OUTPUT "${SVG_FILE_OUT}"
       DEPENDS "${SVG_FILE_IN}" # absolute path required
-      COMMAND xmllint "${SVG_FILE_IN}" --xinclude --pretty 1 --output "${SVG_FILE_OUT}"
-      COMMAND inkscape "${SVG_FILE_OUT}" --verb=EditSelectAll --verb=EditUnlinkClone --verb=EditSelectAll --verb=org.ekips.filter.embedselectedimages --verb=FileSave --verb=FileQuit
-      COMMAND inkscape -z "${SVG_FILE_OUT}" --export-text-to-path --vacuum-defs --export-plain-svg "${SVG_FILE_OUT}"
+      COMMAND "${XMLLINT}" "${SVG_FILE_IN}" --xinclude --pretty 1 --output "${SVG_FILE_OUT}"
+      COMMAND "${INKSCAPE}" "${SVG_FILE_OUT}" --verb=EditSelectAll --verb=EditUnlinkClone --verb=EditSelectAll --verb=org.ekips.filter.embedselectedimages --verb=FileSave --verb=FileQuit
+      COMMAND "${INKSCAPE}" -z "${SVG_FILE_OUT}" --export-text-to-path --vacuum-defs --export-plain-svg "${SVG_FILE_OUT}"
       VERBATIM
       )
   endif(BUILD_ASSETS)
@@ -59,7 +74,7 @@ function(optimize_svg SVG_FILE_IN SVG_FILE_OUT)
       add_custom_command(
         OUTPUT "${SVG_FILE_OUT}"
         DEPENDS "${SVG_FILE_IN}" # absolute path required
-        COMMAND svgo "${SVG_FILE_IN}" -o "${SVG_FILE_OUT}"
+        COMMAND "${SVGO}" "${SVG_FILE_IN}" -o "${SVG_FILE_OUT}"
         VERBATIM
         )
     else(OPTIMIZE_SVGS)
@@ -74,7 +89,7 @@ function(vectorize_svg SVG_FILE_IN SVG_FILE_OUT)
     add_custom_command(
       OUTPUT "${SVG_FILE_OUT}"
       DEPENDS "${SVG_FILE_IN}" # absolute path required
-      COMMAND inkscape -z "${SVG_FILE_IN}" --export-text-to-path --vacuum-defs --export-plain-svg "${SVG_FILE_OUT}"
+      COMMAND "${INKSCAPE}" -z "${SVG_FILE_IN}" --export-text-to-path --vacuum-defs --export-plain-svg "${SVG_FILE_OUT}"
       VERBATIM
       )
   endif(BUILD_ASSETS)
@@ -87,7 +102,7 @@ function(rasterize_svg SVG_FILE_IN PNG_FILE_OUT)
     add_custom_command(
       OUTPUT "${PNG_FILE_OUT}"
       DEPENDS "${SVG_FILE_IN}" # absolute path required
-      COMMAND inkscape -z "${SVG_FILE_IN}" ${ARGN} --export-png "${PNG_FILE_OUT}"
+      COMMAND "${INKSCAPE}" -z "${SVG_FILE_IN}" ${ARGN} --export-png "${PNG_FILE_OUT}"
       VERBATIM
       )
   endif(BUILD_ASSETS)
@@ -104,7 +119,7 @@ function(optimize_png PNG_FILE_IN PNG_FILE_OUT)
       add_custom_command(
         OUTPUT "${PNG_FILE_OUT}"
         DEPENDS "${PNG_FILE_IN}" # absolute path required
-        COMMAND pngcrush ${OPTS} "${PNG_FILE_IN}" "${PNG_FILE_OUT}"
+        COMMAND "${PNGCRUSH}" ${OPTS} "${PNG_FILE_IN}" "${PNG_FILE_OUT}"
         VERBATIM
         )
     else(OPTIMIZE_PNGS)
@@ -112,6 +127,30 @@ function(optimize_png PNG_FILE_IN PNG_FILE_OUT)
     endif(OPTIMIZE_PNGS)
   endif(BUILD_ASSETS)
 endfunction(optimize_png)
+
+function(create_icon_ico ICO_FILE_OUT)
+  # ARGN additional arguments are PNG input files for ImageMagick
+  if(BUILD_ASSETS)
+    add_custom_command(
+      OUTPUT "${ICO_FILE_OUT}"
+      DEPENDS ${ARGN} # paths can be relative since all PNGs are generated
+      COMMAND "${IMAGEMAGICK}" ${ARGN} "${ICO_FILE_OUT}"
+      VERBATIM
+      )
+  endif(BUILD_ASSETS)
+endfunction(create_icon_ico)
+
+function(create_icon_icns ICNS_FILE_OUT)
+  # ARGN additional arguments are PNG input files for ImageMagick
+  if(BUILD_ASSETS)
+    add_custom_command(
+      OUTPUT "${ICNS_FILE_OUT}"
+      DEPENDS ${ARGN} # paths can be relative since all PNGs are generated
+      COMMAND "${PNG2ICNS}" "${ICNS_FILE_OUT}" ${ARGN}
+      VERBATIM
+      )
+  endif(BUILD_ASSETS)
+endfunction(create_icon_icns)
 
 function(copy_during_build SOURCE_FILE DEST_FILE)
   if(BUILD_ASSETS)

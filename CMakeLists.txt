@@ -127,10 +127,16 @@ option(BUILD_PORTMIDI "Build with support for PortAudio's MIDI features." ${BUIL
 option(BUILD_WEBEBENGINE "Built in webengine support" ON)
 option(BUILD_PCH "Build using precompiled headers." ON)
 option(BUILD_FOR_WINSTORE "Build for the Windows Store." OFF)
-option(BUILD_ASSETS "Build application icons and resources from SVG source files." ON)
 option(COVERAGE "Build with instrumentation to record code coverage." OFF)
 option(BUILD_64 "Build 64 bit version of editor" ON)
 option(BUILD_AUTOUPDATE "Build with autoupdate support" OFF)
+
+option(DOWNLOAD_ASSETS "Download MuseScores icons and resources if unable to build them due to missing dependencies." ON)
+if(MSCORE_UNSTABLE)
+  option(OPTIMIZE_PNGS_BRUTE "Use maximum PNG compression for assets (takes time)" OFF)
+else(MSCORE_UNSTABLE)
+  option(OPTIMIZE_PNGS_BRUTE "Use maximum PNG compression for assets (takes time)" ON)
+endif(MSCORE_UNSTABLE)
 
 if (APPLE)
       set (CMAKE_CXX_COMPILER   clang++)
@@ -237,9 +243,7 @@ SET(MUSESCORE_NAME_VERSION "${MUSESCORE_NAME} ${MUSESCORE_VERSION_MAJOR}")
 #
 SET(MUSESCORE_VERSION_FULL  "${MUSESCORE_VERSION}.${MUSESCORE_VERSION_PATCH}")
 
-if (BUILD_ASSETS)
-  add_subdirectory(assets)
-endif (BUILD_ASSETS)
+add_subdirectory(assets)
 
 function(copy_during_build SOURCE_FILE DEST_FILE)
   get_filename_component(BASENAME "${DEST_FILE}" NAME)
@@ -250,6 +254,7 @@ function(copy_during_build SOURCE_FILE DEST_FILE)
 endfunction(copy_during_build)
 
 # Add the appropriate splash screen for the build
+set(SPLASH splash-stable.svg)
 if (MSCORE_UNSTABLE)
     if ("$ENV{BINTRAY_REPO_OWNER}" STREQUAL "musescore")
         # This is a nightly build
@@ -258,13 +263,10 @@ if (MSCORE_UNSTABLE)
         # This is someone building on their own
         set(SPLASH splash-development.svg)
     endif ("$ENV{BINTRAY_REPO_OWNER}" STREQUAL "musescore")
-else (MSCORE_UNSTABLE)
-    # Standard splash on stable releases
-    set(SPLASH splash-stable.svg)
 endif (MSCORE_UNSTABLE)
 
-copy_during_build(${PROJECT_BINARY_DIR}/assets/splash/${SPLASH} ${PROJECT_SOURCE_DIR}/mscore/data/splash.svg)
-copy_during_build(${PROJECT_BINARY_DIR}/assets/brand/musescore-logo-alpha.svg ${PROJECT_SOURCE_DIR}/mscore/data/icons/mscore.svg)
+copy_during_build("assets/splash/${SPLASH}" "${PROJECT_SOURCE_DIR}/mscore/data/splash.svg")
+copy_during_build("assets/brand/musescore-logo-alpha.svg" "${PROJECT_SOURCE_DIR}/mscore/data/icons/mscore.svg")
 
 if (BUILD_WEBEBENGINE)
    if (MINGW)

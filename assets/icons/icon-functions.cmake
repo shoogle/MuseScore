@@ -2,14 +2,32 @@ function(rasterize_svg_sizes FILE_BASE)
   # any additional arguments are assumed to be integer sizes for exported PNGs
   foreach(SIZE ${ARGN})
     set(SVG_FILE_IN "${FILE_BASE}.svg")
-    set(PNG_FILE_TMP "${FILE_BASE}-${SIZE}-raw.png")
+    set(PNG_UNOPTIMIZED "${FILE_BASE}-${SIZE}-big.png")
     set(PNG_FILE_OUT "${FILE_BASE}-${SIZE}.png")
-    rasterize_svg("${SVG_FILE_IN}" "${PNG_FILE_TMP}" "--export-width=${SIZE}" "--export-height=${SIZE}")
-    optimize_png("${PNG_FILE_TMP}" "${PNG_FILE_OUT}")
+    rasterize_svg("${SVG_FILE_IN}" "${PNG_UNOPTIMIZED}" "--export-width=${SIZE}" "--export-height=${SIZE}")
+    optimize_png("${PNG_UNOPTIMIZED}" "${PNG_FILE_OUT}")
     list(APPEND GENERATED_FILES "${PNG_FILE_OUT}")
   endforeach(SIZE)
   set(GENERATED_FILES "${GENERATED_FILES}" PARENT_SCOPE)
 endfunction(rasterize_svg_sizes)
+
+function(create_icon_ico_sizes FILE_BASE)
+  # any additional arguments are assumed to be integer sizes for input PNGs
+  unset(PNG_INPUT_FILES) # empty list
+  foreach(SIZE ${ARGN})
+    list(APPEND PNG_INPUT_FILES "${FILE_BASE}-${SIZE}.png")
+  endforeach(SIZE)
+  create_icon_ico("${FILE_BASE}.ico" ${PNG_INPUT_FILES})
+endfunction(create_icon_ico_sizes)
+
+function(create_icon_icns_sizes FILE_BASE)
+  # any additional arguments are assumed to be integer sizes for input PNGs
+  unset(PNG_INPUT_FILES) # empty list
+  foreach(SIZE ${ARGN})
+    list(APPEND PNG_INPUT_FILES "${FILE_BASE}-${SIZE}.png")
+  endforeach(SIZE)
+  create_icon_icns("${FILE_BASE}.icns" ${PNG_INPUT_FILES})
+endfunction(create_icon_icns_sizes)
 
 function(min_index # find the smallest value in a list of numbers
   MINV # minimum value returned in this variable
