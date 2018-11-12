@@ -1,63 +1,118 @@
-# Musescore Assets
+MuseScore Assets
+================
 
-This is where all assets are stored as SVGs
+This is where all assets are stored as SVG (Scalable Vector Graphics) files.
+These source files are processed by various command line tools, including
+Inkscape, to produce more SVGs, as well as raster images (PNG) and icons (ICO,
+ICNS) at build time. There is an option to download pre-generated assets.
+
+## Why compile icons? Why not just commit PNG & ICO files into the repository?
+
+- Binary files are not stored efficiently by `git`.
+- The GPL requires all source files to be distributed.
+- Building them saves somebody from having to generate the files manually.
+  - Reduced potential for mistakes.
+  - Ensures assets match on all platforms.
 
 ## Structure
 
-- Icons: App icons
-- Files: Document icons
-- Splash: Boot splash screens
-- Glyphs: UI Glyphs (Longer Term Goal)
-- Resources: Assets that are only embedded in other assets
+- __Resources:__ Textures and basic shapes that are used to make other assets
+- __Brand:__ Logos
+- __Icons:__ App icons and document filetype/mimetype icons
+- __Splash:__ Splash screen images displayed at MuseScore's startup
+- _Glyphs:_ in-app icons are currently stored in `../mscore/data/icons`
 
+## Build
 
-## Workflow
+The CMake build system is used to generate the assets. The build rules are
+stored in `CMakeList.txt` and the `*.cmake` files.
 
-1. Start with a Master SVG, which contains:
-    - Any text in the file stored as editable text, with attributes to describe how it should be rendered
-    - Font, font size, font style (bold/italics), colour, etc.
-    - Any images included in the file stored as "xlinks" to external files
-2. Produce a standalone SVG, which contains:
-    - Any text converted to paths to ensure correctness regardless of whether the user has the right font installed
-    - Any raster images embedded into the SVG in base64 to make the file more portable since there is only one file to move around
-    - For full instructions see [here](#Exporting-SVGs-From-Master-SVG)
-3. The required raster images (PNG, ICO, ICNS) are generated on build
+The assets are built automatically as part of MuseScore's build, but it is
+possible to build the assets separately (e.g. for testing), like this:
 
-## Exporting SVGs From Master SVG
+```bash
+cd /path/to/MuseScore/assets/
+mkdir build
+cd build
+cmake ..
+make
+```
 
-### Embed images in the standalone SVGs
+## Source Files
 
-This ensures that the text looks the same regardless of whether the file was moved from the original path.
+### Input SVGs
 
-Inside of Inkscape you can embed the images by right-clicking on each of them and selecting "Embed image", or do them all at once by going to the Extensions menu > Images > Embed Images.
+Files in the repository must be readily editable "master files". This means:
 
-Remember to only do this only for standalone SVGs; master SVG should contain linked images rather than embedded images.
+  - Any text visible in an SVG image must be stored as editable text (i.e. not
+    converted to paths).
+  - Any images included in the file stored as "xlinks" to external files,
+    using relative paths.
 
-**NOTE: You DON'T need to do this for the splash images** because the SVGs are only used to generate PNGs; we aren't going to distribute the splash images as SVGs.
+You should create and edit SVGs manually in a text editor. Do not use a
+graphical SVG editing program as these add unnecessary bloat to the SVG code.
+They also tend to convert simple shapes like circles to complicated Bézier
+paths, making the code difficult to understand and edit later on.
 
-### Convert text to paths in the standalone SVGs
+However, you may use a graphical editor to help you create and edit complicated
+paths, where necessary. Simply save the edited file under a different name and
+then copy the relevant part of the code back into source file.
 
-This ensures that the text looks the same on everyone's computer regardless of whether they have the font installed. It must be done for all standalone SVGs, including SVGs that we will generate PNGs from, even if we will not be distributing the SVG itself.
+### Source rasters (PNG, JPEG, etc.)
 
-Inside of Inkscape, select the text and go to Path menu > Object to Path.
+You should avoid using raster images as source files if at all possible. If
+they are necessary (e.g. as a background texture) then they should be optimized
+to reduce the file size as much as possible without loss of quality and stored
+in the resources folder.
 
-Don't do this for the master SVGs as we will want to be able to edit the text later.
+- Use JPEG for photographs and textures
+- Use PNG for computer generated images (e.g screenshots)
 
-**NOTE: You DO need to do this for the splash images.**
+## Generated Files
 
-## SVG Formating
+### Output SVGs
 
-### Why
+Generated files must be fully self-contained (standalone). This means:
 
-- SVGs should be saved as 'plain'
-- Plain SVGs allow for easy differentiation along with smaller file sizes
-- It also helps maintain editor independence
-- To save as a plain SVG inside of Inskscape, Go to File -> Save As -> choose "Plain SVG"
+  - All text converted to paths to ensure correctness regardless of whether the
+    user has the right font installed.
+  - All raster images embedded into the SVG in base64 to make the file more
+    portable since there is only one file to move around.
+  - Formatting stored as XML attributes (`attr="val"`) rather than CSS styles
+    (`style="attr:val"`) for compatibility reasons.
+  - No specialist SVG syntax that is not widely supported by SVG viewers.
 
-### Converting Existing SVGs to Plain
+See [SVG Compatibility](#svg-compatibility) below.
 
-To convert an existing SVG to plain you can use [SVGO](https://github.com/svg/svgo)
+### Output rasters (PNG, ICO, ICNS, etc.)
 
-Easy Ways To Use SVGO:
-- [VSCode Extension](https://github.com/lishu/vscode-svg)
-- [Web Tool](https://jakearchibald.github.io/svgomg/)
+#### PNGs
+
+These should be generated from the SVGs at each required size. Do not generate
+a single large PNG and then scale it down as this leads to reduced quality and
+increased file size. Each generated PNG should be run through `pngcrush` to
+optimize the file size.
+
+#### Icon formats (ICO, ICNS)
+
+Icon files should be generated from separate PNG files at each required size.
+Do not generate them from a single PNG (not even a large one) as this leads to
+reduced quality and increased file size.
+
+## SVG Compatibility
+
+Support for SVG features varies widely between SVG viewer applications.
+Fortunately, pretty much all viewers support a core set of features, and most
+of the specialist features can be "faked" using the core set.
+
+A good way to test compatibility is to open the file in
+[Qt's example SVG Viewer][QT-svg-viewer] application. The viewer is included
+with Qt and can be [loaded from the Welcome screen in Qt Creator][Qt-examples].
+
+[QT-svg-viewer]: https://doc.qt.io/qt-5/qtsvg-svgviewer-example.html
+[Qt-examples]: https://doc.qt.io/qt-5/qtexamplesandtutorials.html
+
+Qt only supports a subset of the SVG specification called SVG Tiny, and its
+implementation appears to be somewhat buggy and incomplete. SVGs that are
+embedded within MuseScore's executable are displayed by Qt, so it is
+essential that they are displayed correctly in the viewer.

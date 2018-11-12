@@ -10,8 +10,6 @@ option(DOWNLOAD_ASSETS "Download pre-built assets if they cannot be built due to
 option(OPTIMIZE_SVGS "Optimize SVG file size using SVGO." ON)
 option(OPTIMIZE_PNGS "Optimize PNG file size using PNGCRUSH." ON)
 option(OPTIMIZE_PNGS_BRUTE "Try all PNG compression methods to ensure smallest possible size (takes time)." OFF)
-option(BUILD_ICO "Build ICO icon files for use on Windows" ON)
-option(BUILD_ICNS "Build ICNS icon files for use on MacOS" ON)
 
 if(NOT BUILD_ASSETS AND NOT DOWNLOAD_ASSETS)
   message(FATAL_ERROR "Options BUILD_ASSETS and DOWNLOAD_ASSETS can't both be disabled.")
