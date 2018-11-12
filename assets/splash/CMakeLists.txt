@@ -1,5 +1,4 @@
-set(TARGET "${TARGET}_splash")
-add_custom_target("${TARGET}")
+set(GENERATED_FILES "") # empty list
 
 function(splash SVG_FILE_IN BUILD)
   string(TOLOWER "${BUILD}" BUILD_LOWER)
@@ -7,14 +6,15 @@ function(splash SVG_FILE_IN BUILD)
   configure_file("${SVG_FILE_IN}" "${FILE_OUT}-raw.svg") # substitute @BUILD@
   standalone_svg("${FILE_OUT}-raw.svg" "${FILE_OUT}-standalone.svg")
   optimize_svg("${FILE_OUT}-standalone.svg" "${FILE_OUT}.svg")
-  add_custom_target("${TARGET}_${FILE_OUT}.svg" DEPENDS "${FILE_OUT}.svg")
-  add_dependencies("${TARGET}_${FILE_OUT}.svg" "assets_icons_app_musescore-icon-round.svg")
-  add_dependencies("${TARGET}" "${TARGET}_${FILE_OUT}.svg")
-  add_to_assets_archive("${FILE_OUT}.svg")
+  list(APPEND GENERATED_FILES "${FILE_OUT}.svg")
+  set(GENERATED_FILES "${GENERATED_FILES}" PARENT_SCOPE)
 endfunction(splash)
 
 splash(splash-stable.svg STABLE)
 splash(splash-unstable.svg NIGHTLY)
 splash(splash-unstable.svg DEVELOPMENT)
 
-propagate_assets_list()
+add_custom_target("assets_splash" DEPENDS ${GENERATED_FILES})
+add_dependencies("assets_splash" "assets_icons_app") # splash contains app icon
+add_dependencies("assets" "assets_splash")
+add_to_manifest(${GENERATED_FILES})

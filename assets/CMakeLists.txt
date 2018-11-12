@@ -3,9 +3,17 @@ project("MuseScore assets"
   LANGUAGES NONE
   )
 
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.0)
 
-option(BUILD_ASSETS "Build application icons and resources from SVG source files." ON)
+option(BUILD_ASSETS "Build MuseScore's icons and resources from SVG source files" ON)
+option(DOWNLOAD_ASSETS "Download pre-built assets if they cannot be built due to missing dependencies, or if BUILD_ASSETS is disabled." OFF)
+option(OPTIMIZE_SVGS "Optimize SVG file size using SVGO." ON)
+option(OPTIMIZE_PNGS "Optimize PNG file size using PNGCRUSH." ON)
+option(OPTIMIZE_PNGS_BRUTE "Try all PNG compression methods to ensure smallest possible size (very time consuming)." OFF)
+
+if(NOT BUILD_ASSETS AND NOT DOWNLOAD_ASSETS)
+  message(FATAL_ERROR "Options BUILD_ASSETS and DOWNLOAD_ASSETS can't both be disabled.")
+endif(NOT BUILD_ASSETS AND NOT DOWNLOAD_ASSETS)
 
 if(NOT DEFINED MUSESCORE_NAME)
   set(MUSESCORE_NAME "MuseScore")
@@ -21,41 +29,38 @@ set(ASSETS_ARCHIVE_NAME "${MUSESCORE_NAME}-assets-${MUSESCORE_VERSION_FULL}.zip"
 include("svg-functions.cmake")
 include("archive-functions.cmake")
 
-# Mark a file for inclusion in the assets ZIP archive
-macro(add_to_assets_archive FILE)
-  if(IS_ABSOLUTE "${FILE}")
-    list(APPEND _ASSETS_LIST "${FILE}")
-  else(IS_ABSOLUTE "${FILE}")
-    list(APPEND _ASSETS_LIST "${CMAKE_CURRENT_BINARY_DIR}/${FILE}")
-  endif(IS_ABSOLUTE "${FILE}")
-  set(_ASSETS_LIST "${_ASSETS_LIST}" PARENT_SCOPE)
-endmacro(add_to_assets_archive)
+set(ASSETS_MANIFEST "assets-manifest.txt")
+file(WRITE "${PROJECT_BINARY_DIR}/${ASSETS_MANIFEST}" "") # create empty file
 
-# Make changes to the assets list visible in the parent directory. Must be the
-# last thing called in any subdirectory where assets are added to the archive.
-macro(propagate_assets_list)
-  set(_ASSETS_LIST "${_ASSETS_LIST}" PARENT_SCOPE)
-endmacro(propagate_assets_list)
+function(add_to_manifest)
+  foreach(FILE ${ARGN})
+    file(RELATIVE_PATH PATH "${PROJECT_BINARY_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/${FILE}")
+    file(APPEND "${PROJECT_BINARY_DIR}/${ASSETS_MANIFEST}" "${PATH}\n")
+  endforeach(FILE)
+endfunction(add_to_manifest)
 
-function(add_directory_target DIRECTORY)
-  add_subdirectory("${DIRECTORY}")
-  add_dependencies("${TARGET}" "${TARGET}_${DIRECTORY}")
-  propagate_assets_list() # propagate outside function scope
-endfunction(add_directory_target)
+add_custom_target("assets" ALL)
 
-set(TARGET "assets")
+if(BUILD_ASSETS)
+  add_subdirectory(resources)
+  add_subdirectory(brand)
+  add_subdirectory(icons)
+  add_subdirectory(splash)
 
-add_custom_target("${TARGET}")
-
-add_subdirectory(resources)
-
-add_directory_target(brand)
-add_directory_target(icons)
-add_directory_target(splash)
-
-message("Assets: ${_ASSETS_LIST}")
-
-add_custom_target("assets_zip" ALL DEPENDS "${ASSETS_ARCHIVE_NAME}")
-
-zip_archive("${ASSETS_ARCHIVE_NAME}" ${_ASSETS_LIST})
-unzip_archive("${ASSETS_ARCHIVE_NAME}" ${_ASSETS_LIST})
+  # optional target to create a compressed ZIP archive containing all assets
+  add_custom_target("assets_archive" DEPENDS "${ASSETS_ARCHIVE_NAME}")
+  add_custom_command(
+    OUTPUT "${ASSETS_ARCHIVE_NAME}"
+    DEPENDS "assets"
+    COMMAND "${CMAKE_COMMAND}" -E tar "cfv" "${ASSETS_ARCHIVE_NAME}" --format=zip "--files-from=${ASSETS_MANIFEST}"
+    VERBATIM
+  )
+else(BUILD_ASSETS)
+  # Download pre-built assets archive during configure and extract during build
+  # file(DOWNLOAD)
+  add_custom_command( # TODO don't extract already done so
+    TARGET "assets" POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E tar "xfv" "${ASSETS_ARCHIVE_NAME}"
+    VERBATIM
+  )
+endif(BUILD_ASSETS)

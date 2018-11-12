@@ -1,12 +1,11 @@
-set(TARGET "${TARGET}_brand")
-add_custom_target("${TARGET}")
+set(GENERATED_FILES "") # empty list
 
 foreach(FILE musescore-logo-alpha)
-  add_custom_target("${TARGET}_${FILE}.svg" DEPENDS "${FILE}.svg")
-  add_dependencies("${TARGET}" "${TARGET}_${FILE}.svg")
   standalone_svg("${CMAKE_CURRENT_SOURCE_DIR}/${FILE}.svg" "${FILE}-standalone.svg")
   optimize_svg("${FILE}-standalone.svg" "${FILE}.svg")
-  add_to_assets_archive("${FILE}.svg")
+  list(APPEND GENERATED_FILES "${FILE}.svg")
 endforeach(FILE)
 
-propagate_assets_list()
+add_custom_target("assets_brand" DEPENDS ${GENERATED_FILES})
+add_dependencies("assets" "assets_brand")
+add_to_manifest(${GENERATED_FILES})
