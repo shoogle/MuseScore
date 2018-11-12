@@ -59,7 +59,7 @@ matrix:
       before_install:
         - "source build/travis/job1_Tests/environment.sh"
       install:
-        - "./build/travis/job1_Tests/install.sh && cd build.debug/assets && curl --upload-file MuseScore_assets.zip https://transfer.sh/MuseScore_assets.zip"
+        - "./build/travis/job1_Tests/install.sh && cd build.debug/assets && file=MuseScore-assets-*.zip && curl --upload-file ${file} https://transfer.sh/${file}"
       before_script:
         - "./build/travis/job1_Tests/before_script.sh"
       script:
