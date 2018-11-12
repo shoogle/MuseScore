@@ -50,7 +50,7 @@ matrix:
             # assets build
             - pngcrush
             - icnsutils
-            - python3-pip
+            - npm
             - fonts-roboto
       cache:
         directories:

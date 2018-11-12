@@ -45,7 +45,7 @@ artifacts -v || curl -sL https://raw.githubusercontent.com/travis-ci/artifacts/m
 sudo add-apt-repository -y ppa:inkscape.dev/stable
 sudo apt-get update
 sudo apt-get install -y inkscape
-sudo pip3 install scour
+sudo npm install -g svgo
 
 # IMPORTANT: Must now return shell to it's initial state:
 set +x
