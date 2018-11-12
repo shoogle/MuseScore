@@ -12,4 +12,10 @@ cd build.debug/assets
 make assets_archive
 file="$(ls MuseScore-assets-*.zip)"
 ls "${file}" # make sure file exists
-curl --upload-file "${file}" "https://transfer.sh/${file}"
+url="$(curl --upload-file "${file}" "https://transfer.sh/${file}")" # TODO: upload to MuseScore server
+if [[ "${url}" ]]; then
+  echo "Assets uploaded to: ${url}"
+else
+  echo "Assets upload failed!"
+  exit 1
+fi

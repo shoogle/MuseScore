@@ -1,3 +1,5 @@
+![MuseScore Logo](resources/mu.svg)
+
 MuseScore Assets
 ================
 
@@ -6,11 +8,11 @@ These source files are processed by various command line tools, including
 Inkscape, to produce more SVGs, as well as raster images (PNG) and icons (ICO,
 ICNS) at build time. There is an option to download pre-generated assets.
 
-## Why compile icons? Why not just commit PNG & ICO files into the repository?
+## Why compile assets? Why not just commit PNG & ICO files into the repository?
 
 - Binary files are not stored efficiently by `git`.
 - The GPL requires all source files to be distributed.
-- Building them saves somebody from having to generate the files manually.
+- Building assets saves somebody from having to generate the files manually.
   - Reduced potential for mistakes.
   - Ensures assets match on all platforms.
 
@@ -20,7 +22,8 @@ ICNS) at build time. There is an option to download pre-generated assets.
 - __Brand:__ Logos
 - __Icons:__ App icons and document filetype/mimetype icons
 - __Splash:__ Splash screen images displayed at MuseScore's startup
-- _Glyphs:_ in-app icons are currently stored in `../mscore/data/icons`
+- _Glyphs:_ in-app icons for MuseScore's buttons and menus are currently
+  stored in [../mscore/data/icons](../mscore/data/icons).
 
 ## Build
 

@@ -19,10 +19,9 @@ if(NOT DEFINED MUSESCORE_NAME)
   set(MUSESCORE_NAME "MuseScore")
 endif(NOT DEFINED MUSESCORE_NAME)
 
-if(NOT DEFINED MUSESCORE_VERSION)
-  set(MUSESCORE_VERSION "X.Y")
+if(NOT DEFINED MUSESCORE_VERSION_FULL)
   set(MUSESCORE_VERSION_FULL "X.Y.Z")
-endif(NOT DEFINED MUSESCORE_VERSION)
+endif(NOT DEFINED MUSESCORE_VERSION_FULL)
 
 set(ASSETS_ARCHIVE_NAME "${MUSESCORE_NAME}-assets-${MUSESCORE_VERSION_FULL}.zip")
 
@@ -56,8 +55,18 @@ if(BUILD_ASSETS)
     VERBATIM
   )
 else(BUILD_ASSETS)
-  # Download pre-built assets archive during configure and extract during build
-  # file(DOWNLOAD)
+  message("Downloading assets...")
+  # Download pre-built assets archive during configure
+  set(ASSETS_REMOTE "https://transfer.sh/DCGBu/${ASSETS_ARCHIVE_NAME}") # TODO: fetch from MuseScore server
+  set(ASSETS_LOCAL "${PROJECT_BINARY_DIR}/${ASSETS_ARCHIVE_NAME}")
+  file(DOWNLOAD "${ASSETS_REMOTE}" "${ASSETS_LOCAL}" SHOW_PROGRESS STATUS DL_STATUS)
+  list(GET DL_STATUS 0 RET_VAL)
+  if (NOT RET_VAL EQUAL 0)
+    list(GET DL_STATUS 1 STATUS_TEXT)
+    message(FATAL_ERROR "Unable to download assets. Error ${RET_VAL}: ${STATUS_TEXT}")
+  endif(NOT RET_VAL EQUAL 0)
+
+  # Extract assets archive at build time
   add_custom_command( # TODO don't extract if already done so
     TARGET "assets" POST_BUILD
     COMMAND "${CMAKE_COMMAND}" -E tar "xfv" "${ASSETS_ARCHIVE_NAME}"
