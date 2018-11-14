@@ -8,7 +8,9 @@ These source files are processed by various command line tools, including
 Inkscape, to produce more SVGs, as well as raster images (PNG) and icons (ICO,
 ICNS) at build time. There is an option to download pre-generated assets.
 
-## Why compile assets? Why not just commit PNG & ICO files into the repository?
+## Why compile assets?
+
+Why not just commit PNG & ICO files into the repository?
 
 - Binary files are not stored efficiently by `git`.
 - The GPL requires all source files to be distributed.
