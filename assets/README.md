@@ -5,8 +5,10 @@ MuseScore Assets
 
 This is where all assets are stored as SVG (Scalable Vector Graphics) files.
 These source files are processed by various command line tools, including
-Inkscape, to produce more SVGs, as well as raster images (PNG) and icons (ICO,
-ICNS) at build time. There is an option to download pre-generated assets.
+[Inkscape], to produce more SVGs, as well as raster images (PNG) and icons
+(ICO, ICNS) at build time. There is an option to download pre-generated assets.
+
+[Inkscape]: https://inkscape.org/ "Inkscape open source vector graphics editor"
 
 ## Why compile assets?
 
@@ -42,6 +44,31 @@ cd build
 cmake ..
 make
 ```
+
+## Dependencies
+
+### Programs
+
+The first time you run CMake you are likely to get an error message saying the
+build has failed due to a missing dependency (`Not found: [name of program]`).
+Simply install the required program and try again.
+
+### Fonts
+
+Text will not be rendered correctly unless you have the right fonts installed.
+Currently, the required fonts are:
+
+- [Raleway] (used in the splash screens)
+- [Roboto] (used in the file icons and splash screens)
+
+[Raleway]: https://fonts.google.com/specimen/Raleway
+[Roboto]: https://fonts.google.com/specimen/Roboto
+
+To avoid licensing issues, only use fonts that are open source and free. There
+are free alternatives to most of the popular proprietary fonts. [Google Fonts]
+is a good place to look for free fonts.
+
+[Google Fonts]: https://fonts.google.com
 
 ## Source Files
 

@@ -42,8 +42,8 @@ required_program(IMAGEMAGICK "magick" "ImageMagick image tool - https://www.imag
 # we can use PNG2ICNS, but it doesn't support adding separate images for retina
 # displays https://sourceforge.net/p/icns/bugs/12/. This is not currently a
 # problem since we don't have separate images for retina displays anyway.
-required_program(PNG2ICNS "png2icns" "Tool to create macOS icons (libicns)- https://icns.sourceforge.io/" "${CONVERT}")
-required_program(ICNS2PNG "icns2png" "If this is missing then you have the wrong png2icns" "${CONVERT}")
+required_program(PNG2ICNS "png2icns" "Tool to create macOS icons (libicns)- https://icns.sourceforge.io/")
+required_program(ICNS2PNG "icns2png" "If this is missing then you have the wrong png2icns")
 
 if(OPTIMIZE_SVGS)
   required_program(SVGO "svgo" "Tool for optimizing SVG vector graphics files")

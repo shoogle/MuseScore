@@ -25,7 +25,7 @@ endif(NOT DEFINED MUSESCORE_VERSION_FULL)
 
 set(ASSETS_ARCHIVE_NAME "${MUSESCORE_NAME}-assets-${MUSESCORE_VERSION_FULL}.zip")
 
-include("svg-functions.cmake")
+include("image-functions.cmake")
 include("archive-functions.cmake")
 
 set(ASSETS_MANIFEST "assets-manifest.txt")
