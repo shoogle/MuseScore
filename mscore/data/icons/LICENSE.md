@@ -17,7 +17,6 @@ grace4.svg
 grace8after.svg
 grace8b.svg
 mbeam.svg
-mscore.svg
 nbeam.svg
 sbeam.svg
 timesig_allabreve.svg

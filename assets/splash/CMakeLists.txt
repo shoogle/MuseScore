@@ -1,6 +1,9 @@
 set(GENERATED_FILES "") # empty list
 
-function(splash SVG_FILE_IN BUILD)
+function(splash # create splash screen image from a source SVG
+  SVG_FILE_IN # source SVG that may contain @BUILD@ placeholder text
+  BUILD # build type (text to set in place of @BUILD@ in the SVG)
+  )
   string(TOLOWER "${BUILD}" BUILD_LOWER)
   set(FILE_OUT "splash-${BUILD_LOWER}")
   configure_file("${SVG_FILE_IN}" "${FILE_OUT}-raw.svg") # substitute @BUILD@

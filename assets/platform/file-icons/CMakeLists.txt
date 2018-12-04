@@ -1,6 +1,9 @@
 set(GENERATED_FILES "") # empty list
 
-function(filetype_icon SVG_FILE_IN)
+function(filetype_icon # create filetype/mimetype icons from a source SVG
+  SVG_FILE_IN # source SVG that may contain @TYPE@ placeholder text
+  # ARGN remaining arguments are filetypes to set in place of @TYPE@
+  )
   foreach(TYPE ${ARGN})
     string(TOLOWER "${TYPE}" TYPE_LOWER)
     configure_file("${SVG_FILE_IN}" "${SVG_FILE_IN}") # substitute @TYPE@ in file
@@ -10,7 +13,7 @@ function(filetype_icon SVG_FILE_IN)
     configure_file("../../resources/folded-page.svg" "${TYPE_LOWER}-raw.svg") # substitute @YOUR_CONTENT_HERE@ in file
     standalone_svg("${TYPE_LOWER}-raw.svg" "${TYPE_LOWER}-vector.svg")
     optimize_svg("${TYPE_LOWER}-vector.svg" "${TYPE_LOWER}.svg")
-    list(APPEND GENERATED_FILES "${TYPE_LOWER}.svg" "${TYPE_LOWER}.ico" "${TYPE_LOWER}.icns")
+    list(APPEND GENERATED_FILES "${TYPE_LOWER}.svg")
     rasterize_svg_sizes("${TYPE_LOWER}" ${ALL_ICON_SIZES})
     create_icon_ico_sizes("${TYPE_LOWER}" ${WINDOWS_ICO_SIZES})
     create_icon_icns_sizes("${TYPE_LOWER}" ${MACOS_ICNS_SIZES})

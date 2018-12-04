@@ -1,4 +1,13 @@
-# copy resources into build directory that are linked to from other SVGs.
-foreach(FILE cymbals.svg folded-page.svg mu.svg musicxml-logo.svg splash-background.jpg)
+# list of resource files that are linked to from other SVGs (alphabetical)
+set(RESOURCES
+  cymbals.svg
+  folded-page.svg
+  mscore.svg
+  musicxml-logo.svg
+  splash-background.jpg
+  )
+
+# copy into build directory so that links can be resolved at build time
+foreach(FILE ${RESOURCES})
   file(COPY "${FILE}" DESTINATION .)
 endforeach(FILE)
