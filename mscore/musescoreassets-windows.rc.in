@@ -28,7 +28,7 @@ IDI_ICON1 ICON DISCARDABLE "@MSCORE_ICON_BASE@.ico" // icon index 0
 // The index increases by 1 for each icon subsequently mentioned in this file.
 // These can be used as filetype icons by setting the appropriate keys in the
 // Windows Registry. This is usually done by the application's installer.
-IDI_ICON2 ICON DISCARDABLE "@ASSETS_BINARY_DIR@/icons/file/mscx.ico"  // icon index 1
-IDI_ICON3 ICON DISCARDABLE "@ASSETS_BINARY_DIR@/icons/file/mscz.ico"  // icon index 2
-IDI_ICON4 ICON DISCARDABLE "@ASSETS_BINARY_DIR@/icons/file/xml.ico"   // etc.
-IDI_ICON5 ICON DISCARDABLE "@ASSETS_BINARY_DIR@/icons/file/mxl.ico"
+IDI_ICON2 ICON DISCARDABLE "@ASSETS_BINARY_DIR@/platform/file-icons/mscx.ico"  // icon index 1
+IDI_ICON3 ICON DISCARDABLE "@ASSETS_BINARY_DIR@/platform/file-icons/mscz.ico"  // icon index 2
+IDI_ICON4 ICON DISCARDABLE "@ASSETS_BINARY_DIR@/platform/file-icons/xml.ico"   // etc.
+IDI_ICON5 ICON DISCARDABLE "@ASSETS_BINARY_DIR@/platform/file-icons/mxl.ico"

@@ -7,6 +7,8 @@ set(RESOURCES
   splash-background.jpg
   )
 
+assert_alphabetical(RESOURCES) # easier to maintain if we keep lists ordered
+
 # copy into build directory so that links can be resolved at build time
 foreach(FILE ${RESOURCES})
   file(COPY "${FILE}" DESTINATION .)

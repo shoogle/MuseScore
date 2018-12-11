@@ -283,15 +283,28 @@ The assets sub-project is very different to the rest of MuseScore's source
 code, so make sure you read the [CONTRIBUTING file][CONTRIBUTING.md] before
 you make any changes to the code.
 
-## Using Assets in MuseScore's Build
+## Using Assets in MuseScore's Build and Other Projects
 [Using Assets in MuseScore's Build]: #using-assets-in-musescores-build
 
-The assets build must not depend on any files outside of the assets source
-directory, and MuseScore's build must not depend on files inside the assets
-source directory, but it is fine for MuseScore to depend on files created
-in the assets build directory (that is the whole point after all!). However,
-MuseScore must only depend on files that are listed in [assets-manifest.txt]
-as these are the only files that will be available when assets are downloaded.
+When it comes to the assets, MuseScore's build must only make use of:
+
+- The assets CMakeLists.txt (used to trigger the assets build).
+- Generated files listed in [assets-manifest.txt].
+- The assets archive (ZIP file that contains all assets in the manifest).
+
+Those files represent the API for the assets project. Everything else is an
+implementation detail and off-limits to projects using the assets.
+
+MuseScore's build shouldn't modify the asset files in any way, except to:
+
+- Move or rename the files as necessary to install them on the user's system.
+- Change their timestamps or file permissions as necessary to bundle them for
+  distribution.
+- Embed them in an installation package or binary executable.
+
+All other modifications, such as format conversions, should be done as part of
+the assets build.
+
 
 [MuseScore's CMakeLists.txt] defines a variable called `ASSETS_BINARY_DIR`,
 which points to where the asset files are built or downloaded. Simply look for
@@ -302,15 +315,38 @@ the file you need in [assets-manifest.txt] and reference its path like this:
 
 ```
 
-Assets will not be available during MuseScore's `configure` step since they
-are not built until the `build` step. This means you can't use them with CMake
-commands like [`file(COPY)`] as these run when CMake runs. However, you can use
-them with commands inside build targets as the targets do not run until the
-`build` step (see [`add_custom_target()`] and [`add_custom_command()`]), and
-you can use them with commands like [`install()`] which run after the `build`
-step is complete.
+Assets are built during the `build` step, which occurs when the native build
+tool is run (usually either Make, Xcode or MSCV). This means the assets are
+*not* available during the `configure` step when CMake is run, so you can't
+use commands like [`file(COPY)`] with the assets. However, since you already
+know what the asset filepaths will be you can use [`configure_file()`] to
+embed asset paths in source files such as [Qt Resources] (`.qrc` files).
+(Source files are not compiled until the `build` step, so the assets will be
+available by then.)
 
-[`file()`]: https://cmake.org/cmake/help/latest/command/file.html "file() CMake function"
-[`add_custom_command()`]: https://cmake.org/cmake/help/latest/command/add_custom_command.html "add_custom_command() CMake function"
-[`add_custom_target()`]: https://cmake.org/cmake/help/latest/command/add_custom_target.html "add_custom_target() CMake function"
-[`install()`]: https://cmake.org/cmake/help/latest/command/install.html "install() CMake function"
+[`file(COPY)`]: https://cmake.org/cmake/help/latest/command/file.html "CMake commands - file()"
+[`configure_file()`]: https://cmake.org/cmake/help/latest/command/configure_file.html "CMake commands - configure_file()"
+[Qt Resources]: https://doc.qt.io/qt-5/resources.html
+
+You can also use the assets with custom commands inside build targets (see
+[`add_custom_target()`] and [`add_custom_command()`]) as the targets do not
+run until the `build` step, but make sure that the commands you use will work
+on all platforms. (CMake provides a number of cross-platform command line
+tools which you can access using the `-E` option, such as `cmake -E copy` to
+copy files and `cmake -E rename` to move or rename them. See the [man page].)
+However, it is best to avoid custom commands if possible as there are better
+ways to do this. The only reason to use custom commands would be if you have
+to do something that can *only* be done during the `build` step.
+
+[man page]: https://cmake.org/cmake/help/latest/manual/cmake.1.html#command-line-tool-mode "CMake Command Line Options"
+
+Naturally, it is safe to use the assets with any commands or scripts that run
+after the `build` step is complete (e.g. in the `install` or `package` steps).
+If all you need to do is copy an asset straight from where it was generated
+to its final destination, without any modification other than renaming it or
+changing file permissions, then this is best done with the [`install()`]
+command.
+
+[`add_custom_command()`]: https://cmake.org/cmake/help/latest/command/add_custom_command.html "CMake commands - add_custom_command()"
+[`add_custom_target()`]: https://cmake.org/cmake/help/latest/command/add_custom_target.html "CMake commands - add_custom_target()"
+[`install()`]: https://cmake.org/cmake/help/latest/command/install.html "CMake commands - install()"

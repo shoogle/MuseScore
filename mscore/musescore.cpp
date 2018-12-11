@@ -1829,7 +1829,7 @@ MuseScore::MuseScore()
       connect(im, SIGNAL(localeChanged()), SLOT(inputMethodLocaleChanged()));
 
       if (enableExperimental) {
-            cornerGraphic = new QSvgWidget(":/assets/mscore.svg", this);
+            cornerGraphic = new QSvgWidget(":/assets/mscore-logo.svg", this);
             cornerGraphic->setGeometry(width() - 48, 0, 48, 48);
             }
       }

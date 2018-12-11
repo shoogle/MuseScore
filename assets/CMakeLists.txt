@@ -16,7 +16,8 @@ endif(WIN32)
 # building the assets alone. If MuseScore requires different settings then
 # these should be made in MuseScore's top-level CMakeLists.txt. Options with
 # the same name in MuseScore's CMakeLists.txt will override the ones here.
-option(CHECK_FONTS "Fail build if required fonts are not installed (disable to allow build to proceed using a fallback font)" ON)
+option(STRICT_FONTS "Fail build if required fonts are not installed (disable to allow build to proceed using a fallback font)" ON)
+option(STRICT_VARIABLES "Fail build if required variables are not defined (disable to allow build to proceed using default values)" ON)
 option(BUILD_WINDOWS_ICONS "Build ICO icons for Windows and associated PNG sizes." ON)
 option(BUILD_MACOS_ICONS "Build ICNS icons for macOS and associated PNG sizes." ON)
 option(BUILD_FREEDESKTOP_ICONS "Build PNG icons at sizes commonly used on Linux and other systems that obey the FreeDesktop.org standards." ON)
@@ -24,20 +25,23 @@ option(OPTIMIZE_SVGS "Optimize SVG file size using SVGO." ON)
 option(OPTIMIZE_PNGS "Optimize PNG file size using PNGCRUSH." ON)
 option(OPTIMIZE_PNGS_BRUTE "Try all PNG compression methods to ensure smallest possible size (takes time)." OFF)
 
-# Some assets depend on variables defined in MuseScore's CMakeLists.txt, so we
-# set default values here to allow independent building of the assets.
-if(NOT DEFINED MUSESCORE_NAME)
-  set(MUSESCORE_NAME "MuseScore")
-endif(NOT DEFINED MUSESCORE_NAME)
+# Load CMake code stored in other files - modular programming (sort of)
+include("basic-functions.cmake")
+include("image-functions.cmake")
+if(STRICT_FONTS)
+  include("font-dependencies.cmake")
+else(STRICT_FONTS)
+  message(STATUS "Not checking system fonts (STRICT_FONTS is OFF)")
+  message(WARNING "Text in assets will look wrong if required fonts are not installed.")
+endif(STRICT_FONTS)
 
-if(NOT DEFINED MUSESCORE_VERSION_FULL)
-  set(MUSESCORE_VERSION_FULL "X.Y.Z")
-endif(NOT DEFINED MUSESCORE_VERSION_FULL)
+# Some assets depend on variables defined in MuseScore's CMakeLists.txt
+# set default values here to allow independent building of the assets.
+required_variable(MUSESCORE_NAME "MuseScore")
+required_variable(MUSESCORE_VERSION_FULL "X.Y.Z")
 
 # Optionally pack assets into a ZIP file for easy distribution.
-if(NOT DEFINED ASSETS_ARCHIVE_NAME)
-  set(ASSETS_ARCHIVE_NAME "${MUSESCORE_NAME}-assets-${MUSESCORE_VERSION_FULL}.zip")
-endif(NOT DEFINED ASSETS_ARCHIVE_NAME)
+set(ASSETS_ARCHIVE_NAME "${MUSESCORE_NAME}-assets-${MUSESCORE_VERSION_FULL}.zip")
 
 # Store a list of all assets generated as part of the build.
 set(ASSETS_MANIFEST "assets-manifest.txt") # used for archiving and CI tests.
@@ -58,17 +62,11 @@ function(add_to_manifest # add assets to the manifest file
   endforeach(FILE)
 endfunction(add_to_manifest)
 
-# Load CMake code stored in other files (modular programming)
-include("image-functions.cmake")
-if(CHECK_FONTS)
-  include("font-dependencies.cmake")
-endif(CHECK_FONTS)
-
 add_custom_target("assets" ALL) # main target to build all assets
 
 add_subdirectory(resources)
 add_subdirectory(brand)
-add_subdirectory(icons)
+add_subdirectory(platform)
 add_subdirectory(splash)
 
 # optional target to create a compressed ZIP archive containing all assets

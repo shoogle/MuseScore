@@ -23,7 +23,9 @@
       actually a little bit wider than the strokes of the letters and fermata.
       This is necessary to make them appear the same width visually. The round
       linecap and non-closed path are necessary to avoid renderer bugs. -->
-      <path id="fermata-dot" stroke-linecap="round" d="m 265,72 a 1 1 0 0 0 -2,0 a 1 1 0 0 0 2,0"/>
+      <!-- <path id="fermata-dot" stroke-linecap="round" d="m 265,72 a 1 1 0 0 0 -2,0 a 1 1 0 0 0 2,0"/> -->
+      <!-- <path id="fermata-dot" stroke-linecap="round" d="m 264,72 h 0.00001"/> -->
+      <circle id="fermata-dot" stroke="none" fill="#1f74bd" cx="264" cy="72" r="13"/>
     </g>
   </g>
 </svg>

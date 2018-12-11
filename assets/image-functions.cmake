@@ -1,15 +1,3 @@
-function(required_program # ensure that a build dependency is installed
-  VARIABLE # to store the location of the program
-  DESCRIPTION # build fails with this error message if program is missing
-  COMMAND # the name of the program on the command line
-  # ARGN any alternative names for the command
-  )
-  find_program(${VARIABLE} NAMES ${COMMAND} ${ARGN} DOC "${DESCRIPTION}")
-  if(NOT ${VARIABLE} OR NOT EXISTS "${${VARIABLE}}")
-    message(FATAL_ERROR "Program not found: ${COMMAND} - ${DESCRIPTION}")
-  endif(NOT ${VARIABLE} OR NOT EXISTS "${${VARIABLE}}")
-endfunction(required_program)
-
 required_program(INKSCAPE "SVG vector graphics editing program - https://inkscape.org/" "inkscape")
 required_program(XMLLINT "Tool for parsing XML files - http://xmlsoft.org/xmllint.html" "xmllint")
 

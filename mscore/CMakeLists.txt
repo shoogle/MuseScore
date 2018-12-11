@@ -165,10 +165,10 @@ QT5_WRAP_UI (ui_headers
 # use an appropriate file for the app icon (file extension depends on platform)
 if (MSCORE_UNSTABLE)
     # square icon on development builds
-    set(MSCORE_ICON_BASE "${ASSETS_BINARY_DIR}/icons/app/musescore-icon-square")
+    set(MSCORE_ICON_BASE "${ASSETS_BINARY_DIR}/platform/app-icons/musescore-icon-square")
 else (MSCORE_UNSTABLE)
     # round icon on stable releases
-    set(MSCORE_ICON_BASE "${ASSETS_BINARY_DIR}/icons/app/musescore-icon-round")
+    set(MSCORE_ICON_BASE "${ASSETS_BINARY_DIR}/platform/app-icons/musescore-icon-round")
 endif (MSCORE_UNSTABLE)
 
 # Add the appropriate splash screen for the build
@@ -807,11 +807,11 @@ else (MINGW)
           endforeach(SIZE)
         endfunction(install_icon_freedesktop)
         install_icon_freedesktop("${MSCORE_ICON_BASE}" "mscore${MSCORE_INSTALL_SUFFIX}" "apps")
-        install_icon_freedesktop("${ASSETS_BINARY_DIR}/icons/file/mscx" "application-x-musescore${MSCORE_INSTALL_SUFFIX}+xml" "mimetypes")
-        install_icon_freedesktop("${ASSETS_BINARY_DIR}/icons/file/mscz" "application-x-musescore${MSCORE_INSTALL_SUFFIX}"     "mimetypes")
+        install_icon_freedesktop("${ASSETS_BINARY_DIR}/platform/file-icons/mscx" "application-x-musescore${MSCORE_INSTALL_SUFFIX}+xml" "mimetypes")
+        install_icon_freedesktop("${ASSETS_BINARY_DIR}/platform/file-icons/mscz" "application-x-musescore${MSCORE_INSTALL_SUFFIX}"     "mimetypes")
         # use a custom icon for MusicXML files (there isn't a standard icon for MusicXML files)
-        install_icon_freedesktop("${ASSETS_BINARY_DIR}/icons/file/xml"  "application-vnd.recordare.musicxml${MSCORE_INSTALL_SUFFIX}+xml" "mimetypes")
-        install_icon_freedesktop("${ASSETS_BINARY_DIR}/icons/file/mxl"  "application-vnd.recordare.musicxml${MSCORE_INSTALL_SUFFIX}"     "mimetypes")
+        install_icon_freedesktop("${ASSETS_BINARY_DIR}/platform/file-icons/xml"  "application-vnd.recordare.musicxml${MSCORE_INSTALL_SUFFIX}+xml" "mimetypes")
+        install_icon_freedesktop("${ASSETS_BINARY_DIR}/platform/file-icons/mxl"  "application-vnd.recordare.musicxml${MSCORE_INSTALL_SUFFIX}"     "mimetypes")
         # Note: Must now run "gtk-update-icon-cache" to set the new icons. This is done in the Makefile.
       endif (APPLE)
    else ( NOT MSVC )

@@ -73,7 +73,7 @@
             <enum>Qt::PlainText</enum>
            </property>
            <property name="pixmap">
-            <pixmap>:/assets/mscore.svg</pixmap>
+            <pixmap resource="musescore.qrc">:/data/musescore_logo_full.png</pixmap>
            </property>
            <property name="margin">
             <number>0</number>
@@ -124,7 +124,7 @@
               <string notr="true"/>
              </property>
              <property name="icon">
-              <iconset>
+              <iconset resource="musescore.qrc">
                <normaloff>:/data/icons/edit-copy.svg</normaloff>:/data/icons/edit-copy.svg</iconset>
              </property>
             </widget>
@@ -184,7 +184,9 @@ p, li { white-space: pre-wrap; }
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="musescore.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

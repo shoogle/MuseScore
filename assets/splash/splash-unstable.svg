@@ -5,7 +5,7 @@
   <image xlink:href="../resources/splash-background.jpg" width="622" height="378"/>
   <!-- <use> doesn't work with gradients, so must use Xinclude and pre-process with xmllint utility -->
   <g transform="translate(247,90) scale(0.25)">
-    <xi:include href="../icons/app/musescore-icon-round.svg" xpointer="xpointer(*/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+    <xi:include href="../platform/app-icons/musescore-icon-round.svg" xpointer="xpointer(*/*)" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   </g>
   <rect y="328" width="622" height="50" fill="#404756"/>
   <use xlink:href="../resources/cymbals.svg#crash-cymbals" transform="translate(10,276) scale(0.2)"/>

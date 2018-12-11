@@ -253,11 +253,11 @@ if (DOWNLOAD_ASSETS)
   set(ASSETS_REMOTE "https://transfer.sh/DCGBu/${ASSETS_ARCHIVE_NAME}") # TODO: fetch from MuseScore server
   set(ASSETS_LOCAL "${ASSETS_BINARY_DIR}/${ASSETS_ARCHIVE_NAME}")
   set(ASSETS_PREVIOUS "${ASSETS_BINARY_DIR}/last_extracted") # file contains name of the last archive extracted
-  set(EXTRACT_ASSETS TRUE)
+  set(EXTRACT_ASSETS TRUE) # whether to extract the archive
   if(EXISTS "${ASSETS_LOCAL}")
     message("Using existing assets archive: ${ASSETS_LOCAL}")
     # Although we can reuse the archive, we still need to extract it if an
-    # archive from a branch with different assets has been extracted.
+    # archive from a branch with different assets has been extracted
     if(EXISTS "${ASSETS_PREVIOUS}")
       file(STRINGS "${ASSETS_PREVIOUS}" PREVIOUS_ARCHIVE)
       string(COMPARE NOTEQUAL "${ASSETS_ARCHIVE_NAME}" "${PREVIOUS_ARCHIVE}" EXTRACT_ASSETS)
@@ -273,6 +273,7 @@ if (DOWNLOAD_ASSETS)
   endif(EXISTS "${ASSETS_LOCAL}")
   if(EXTRACT_ASSETS)
     message("Extracting assets...")
+    # Extract with CMake's built-in tar to avoid depending on system tar
     execute_process(
       COMMAND "${CMAKE_COMMAND}" -E tar "xfv" "${ASSETS_ARCHIVE_NAME}"
       WORKING_DIRECTORY "${ASSETS_BINARY_DIR}"
@@ -283,8 +284,12 @@ if (DOWNLOAD_ASSETS)
     endif(NOT RET_VAL STREQUAL "0")
     file(WRITE "${ASSETS_PREVIOUS}" "${ASSETS_ARCHIVE_NAME}")
   endif(EXTRACT_ASSETS)
-else (DOWNLOAD_ASSETS) # Try to build the assets from source
-  add_subdirectory(assets) # builds (or downloads) icons and resources
+else (DOWNLOAD_ASSETS)
+  # build icons and resources from source files
+  add_subdirectory(assets)
+  # NOTE: downloaded assets are available immediately whereas built assets will
+  # not be available until the build takes place. This affects which CMake
+  # commands can be used to interact with them. See assets/README.md.
 endif (DOWNLOAD_ASSETS)
 
 if (BUILD_WEBEBENGINE)

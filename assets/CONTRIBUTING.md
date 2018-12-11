@@ -27,10 +27,12 @@ Contributing to MuseScore's Assets
 [Basic Requirements]: #basic-requirements
 
 ### Requirements for Source Files
+[Requirements for Source Files]: #requirements-for-source-files
 
 These requirements apply to all files that get checked into the repository.
 
 #### Source SVGs
+[Source SVGs]: #source-svgs
 
 Files in the repository must be fully editable "master" files. This means:
 
@@ -43,6 +45,7 @@ Files in the repository must be fully editable "master" files. This means:
 [Avoiding Copy and Paste]: #avoiding-copy-and-paste
 
 #### Source Rasters
+[Source Rasters]: #source-rasters
 
 You should avoid using raster images (PNGs, JPEG, etc.) as source files if at
 all possible. If they are necessary (e.g. as a background texture) then they
@@ -53,6 +56,7 @@ of quality* and stored in the resources folder.
 - Use PNG for computer generated images (e.g screenshots)
 
 ### Requirements for Generated Files
+[Requirements for Generated Files]: #requirements-for-generated-files
 
 These requirements apply to all files intended for external use (i.e. the ones
 listed in the [assets manifest]).
@@ -68,6 +72,7 @@ There are additional requirements for file that must integrate with the
 operating system. These are explained in <platform/README.md>.
 
 #### Generated SVGs
+[Generated SVGs]: #generated-svgs
 
 Generated SVGs must be fully portable and self-contained (standalone). This
 means:
@@ -86,6 +91,7 @@ means:
 See [SVG Compatibility](#svg-compatibility) below.
 
 ### Generated Rasters
+[Generated Rasters]: #generated-rasters
 
 These should be generated from SVGs at each required size. Do not generate one
 PNG at the largest size and then scale it down to the other required sizes;
@@ -95,6 +101,7 @@ each size of PNG straight from the SVG. All PNGs should be run through
 used for other things, such as embedding into icon files.
 
 ### Generated Icon Files
+[Generated Icon Files]: #generated-icon-files
 
 ICO and ICNS icon files contain the same image at multiple image sizes. Many
 icon tools allow you to create an icon from a single PNG file, but you __must
@@ -104,27 +111,34 @@ as outlined in the section above, and then embed all the sizes into the icon.
 Additional requirements for icon files are given in <platform/README.md>.
 
 ## Coding Techniques
+[Coding Techniques]: #coding-techniques
 
-### Avoiding Copy and Paste
+### DRY: Don't Repeat Yourself!
+[DRY: Don't Repeat Yourself!]: #dry-dont-repeat-yourself
 
-__DRY:__ Don't Repeat Yourself!
+Try to avoid copying and pasting code as much as possible as this makes things
+harder to understand and maintain. Instead, make use of functions and links
+that you define once and then call upon elsewhere in the code. This means that
+changes can be made easily by updating the definition; there's no need to go
+hunting for other places where the same code is used.
 
-This applies both in the SVG sources and in the build rules (the CMake files).
+These sections explain how to apply this principle in various parts of the
+code:
 
-See the following sections for how to apply this principle in the code:
-
-- [Re-using SVG Content](#re-using-svg-content)
-- [CMake Functions and Macros](#cmake-functions-and-macros)
+- [Re-using SVG Content]
+- [CMake Functions and Macros]
 
 See the [splash images](splash) and associated build rules for examples of all
-the techniques explained in those sections.
+the techniques explained in those sections, and they also show how you can use
+[`configure_file()`] to substitute CMake variables inside SVG files.
 
-, and also how to include CMake variables as text
-
+[`configure_file()`]: https://cmake.org/cmake/help/latest/command/configure_file.html "CMake Commands - configure_file()"
 
 ## SVG Best Practice
+[SVG Best Practice]: #svg-best-practice
 
 ### Editing SVGs
+[Editing SVGs]: #editing-svgs
 
 You should create and edit SVGs manually in a text editor. Do not use a
 graphical SVG editing program as these tend to add unnecessary bloat to the
@@ -136,6 +150,7 @@ where necessary. Simply save the edited file under a different name and then
 copy the relevant part of the code back into source file.
 
 #### Re-using SVG Content
+[Re-using SVG Content]: #re-using-svg-content
 
 If any SVG group or shape is given an ID (e.g. `<circle id="my-circle" ...`)
 then it can be cloned elsewhere in the file with the `<use>` element
@@ -166,6 +181,7 @@ is inefficient in terms of file size and has other limitations besides. The
 only when it is [appropriate to do so](#source-rasters)).
 
 ### Fonts
+[Fonts]: #fonts
 
 To avoid most licensing issues, only use fonts that are open source and free.
 This excludes pretty much any font included with Windows or macOS, or shipped
@@ -182,6 +198,7 @@ Many proprietary fonts have an open source equivalent that can be used as a
 drop-in replacement.
 
 ### SVG Compatibility
+[SVG Compatibility]: #svg-compatibility
 
 Support for SVG features varies widely between SVG viewer applications.
 Fortunately, pretty much all viewers support a core set of features, and most
@@ -200,8 +217,10 @@ displayed within MuseScore are rendered using Qt, so it is essential that they
 are displayed correctly in the viewer.
 
 ### Understanding the Build Process
+[Understanding the Build Process]: #understanding-the-build-process
 
 #### Why CMake?
+[Why CMake?]: #why-cmake
 
 The CMake build system is used to generate the assets. It uses a strange
 syntax which is very verbose and not particularly friendly for beginners.
@@ -225,6 +244,7 @@ number of writes made to disk. These features could be written in Bash, but we
 would have to write them ourselves whereas CMake gives us them for free.
 
 #### CMake Files
+[CMake Files]: #cmake-files
 
 CMake builds the assets based on the instructions in the `CMakeList.txt` and
 `*.cmake` files, which are together known as the "CMake files". Each directory
@@ -243,45 +263,53 @@ in that directory and any subdirectories.
 
 None of those situations require detailed knowledge of how the build process
 works or of CMake in general. However, if you are trying to do something a bit
-more complicated, or if you encounter errors or are simply curious, then it is
-useful to understand a bit about how CMake works.
+more complicated then it is useful to understand a bit about how CMake works.
 
 ### Where the Build Begins
+[Where the Build Begins]: #where-the-build-begins
 
 The assets build begins with the [top-level CMakeList.txt], and this is the
-file you should look at first. The code in this file pulls in more build rules
-stored in the `*.cmake` files (`include(FILE.cmake)`) and from `CMakeList.txt`
+file you should look at first. The code in this file sets the default options
+and creates the
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+for the assets build and pulls in some function definitions from the `*.cmake`
+files to use later in the build.
+
+ and from `CMakeList.txt`
 files in the subdirectories (`add_subdirectory(DIRECTORY)`).
 
 [top-level CMakeLists.txt]: CMakeLists.txt
 [image-functions.cmake]: image-functions.cmake
 
-The [top-level CMakeLists.txt] sets some options and variables that are needed
-elsewhere in the assets project, and the file [image-functions.cmake] defines
-various functions that are used in other CMake files for the purpose of
-manipulating SVG files.
+The assets build is a separate project to MuseScore as far as CMake is
+concerned. Within assets CMake files the variables `${PROJECT_SOURCE_DIR}`
+and `${PROJECT_BINARY_DIR}` always refer to the assets' source and build
+directories, not MuseScore's, even when building the assets with MuseScore.
 
 ### CMake Functions and Macros
+[CMake Functions and Macros]: #cmake-functions-and-macros
 
 CMake allows you to create [functions] and [macros] that you can use later in
-the project. This saves having to write out the code in the function multiple
-times and makes it easier to make changes later on. If you see any functions
-that you don't recognize the chances are they are defined in another file.
+the project. This avoids having to write out the code in the function multiple
+times, which is considered [bad coding practice][DRY: Don't Repeat Yourself!].
 
 [functions]: https://cmake.org/cmake/help/latest/command/function.html "Custom CMake functions"
 [macros]: https://cmake.org/cmake/help/latest/command/macro.html "Custom CMake macros"
 
 __Tip:__ the difference between a macro and a function is that variables set
-in functions are not available outside the function unless you ask them to be
-(you do this by [setting them with the `PARENT_SCOPE` keyword][PARENT_SCOPE]).
-Variables set in macros are *always* available outside the macro, which means
-they can overwrite other variables with the same name. *Always use a function
-unless you specifically need the behavior of a macro.*
+in functions are not available outside the function (not unless you ask them
+to be by setting them with the [`PARENT_SCOPE`] keyword). Variables set in
+macros are *always* available outside the macro, which means they overwrite
+other variables with the same name. *Always use a function unless you have a
+specific need for a macro.* If you do need to create a macro then make sure
+you leave a comment to say why a function wouldn't do the job.
 
-[PARENT_SCOPE]: https://cmake.org/cmake/help/latest/command/set.html#set-normal-variable
-
+[`PARENT_SCOPE`]: https://cmake.org/cmake/help/latest/command/set.html#set-normal-variable
 
 ### Command Execution Order
+[Command Execution Order]: #command-execution-order
 
 The key point to understand about CMake is that it is a build generator, not
 a complete build system. CMake's job is to take the set of build rules we
