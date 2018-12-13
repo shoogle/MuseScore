@@ -1,5 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 512 512">
-  <!-- https://github.com/shoogle/document-icon-template by Peter Jonas - CC0 1.0 Universal -->
+  <!--
+    Document Icon Template by Peter Jonas - CC0 1.0 Universal
+    https://github.com/shoogle/document-icon-template
+  -->
   <defs>
     <linearGradient id="lgrad-shadow">
       <stop offset="0" stop-opacity="0.5"/>

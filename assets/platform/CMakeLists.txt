@@ -7,7 +7,7 @@ set(FREEDESKTOP_COMMON_SIZES "")
 if(BUILD_WINDOWS_ICONS)
   # https://docs.microsoft.com/en-gb/windows/desktop/uxguide/vis-icons
   set(WINDOWS_ICO_SIZES 16 24 32 48 64 96 128 256)
-  assert_ascending(WINDOWS_ICO_SIZES)
+  assert_ascending(WINDOWS_ICO_SIZES) # keep ordered for easy maintainability
 endif(BUILD_WINDOWS_ICONS)
 
 if(BUILD_MACOS_ICONS)

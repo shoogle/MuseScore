@@ -67,14 +67,20 @@ endfunction(copy_during_build)
 function(standalone_svg # resolve and embed an SVG's external dependencies
   SVG_FILE_IN # path to the input SVG
   SVG_FILE_OUT # path where the output SVG will be written
+  # ARGN remaining arguments are additional dependencies
   )
   absolute_path(SVG_FILE_IN_ABS "${SVG_FILE_IN}") # needed for DEPENDS
   absolute_path(SVG_FILE_OUT_ABS "${SVG_FILE_OUT}") # needed for Inkscape on macOS
+  set(DEPENDENCIES "") # empty list
+  foreach(DEPENDENCY ${ARGN})
+    absolute_path(DEPENDENCY_ABS "${DEPENDENCY}") # needed for DEPENDS
+    list(APPEND DEPENDENCIES "${DEPENDENCY_ABS}")
+  endforeach(DEPENDENCY)
   add_custom_command(
     OUTPUT "${SVG_FILE_OUT}" # relative path required
-    DEPENDS "${SVG_FILE_IN_ABS}" # absolute path required
+    DEPENDS "${SVG_FILE_IN_ABS}" ${DEPENDENCIES} # absolute paths required
     COMMAND "${XMLLINT}" "${SVG_FILE_IN}" --xinclude --pretty 1 --output "${SVG_FILE_OUT}"
-    COMMAND "${INKSCAPE}" "${SVG_FILE_OUT_ABS}" --verb=EditSelectAll --verb=mcepl.ungroup_deep.noprefs --verb=EditSelectAll --verb=EditUnlinkClone --verb=EditSelectAll --verb=org.ekips.filter.embedselectedimages --verb=FileSave --verb=FileQuit
+    COMMAND "${INKSCAPE}" "${SVG_FILE_OUT_ABS}" --verb=EditSelectAll --verb=org.ekips.filter.embedselectedimages --verb=FileSave --verb=FileQuit
     COMMAND "${INKSCAPE}" -z "${SVG_FILE_OUT_ABS}" --export-text-to-path --vacuum-defs --export-plain-svg "${SVG_FILE_OUT_ABS}"
     VERBATIM
     )

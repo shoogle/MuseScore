@@ -24,8 +24,8 @@ function(required_variable # ensure that a required variable has been set
       message(SEND_ERROR "Variable not defined: ${NAMEV}")
     else(STRICT_VARIABLES)
       message(STATUS "Using default value for ${NAMEV}: \"${DEFAULT_VALUE}\"")
+      set("${NAMEV}" "${DEFAULT_VALUE}" PARENT_SCOPE)
     endif(STRICT_VARIABLES)
-    set("${NAMEV}" "${DEFAULT_VALUE}") # set to default even if failing build
   endif(NOT DEFINED "${NAMEV}")
 endfunction(required_variable)
 
