@@ -84,6 +84,9 @@ PaletteBox::PaletteBox(QWidget* parent)
       vbox->addStretch();
       paletteList->show();
 
+      paletteTree = new QTreeWidget(this);
+      vl->addWidget(paletteTree);
+
       connect(addWorkspaceButton, SIGNAL(clicked()), SLOT(newWorkspaceClicked()));
       connect(workspaceList, SIGNAL(activated(int)), SLOT(workspaceSelected(int)));
       retranslate();
@@ -163,12 +166,12 @@ void PaletteBox::updateWorkspaces()
                   curIdx = idx;
             ++idx;
             }
-      
+
       //select first workspace in the list if the stored workspace vanished
       Q_ASSERT(!pl.isEmpty());
       if (curIdx == -1)
             curIdx = 0;
-      
+
       workspaceList->setCurrentIndex(curIdx);
       }
 
@@ -199,7 +202,7 @@ void PaletteBox::selectWorkspace(int idx)
             else
                   idx = 0;
             }
-      
+
       workspaceList->setCurrentIndex(idx);
       workspaceSelected(idx);
       }
@@ -418,7 +421,18 @@ bool PaletteBox::read(XmlReader& e)
                   Palette* p = new Palette();
                   QString name = e.attribute("name");
                   p->setName(name);
-                  p->read(e);
+                  QTreeWidgetItem *paletteItem = new QTreeWidgetItem(paletteTree);
+                  paletteItem->setText(0, name);
+                  QTreeWidgetItem *paletteElementsItem = new QTreeWidgetItem(paletteItem);
+                  paletteElementsItem->setText(0, "Elements");
+                  QListWidget *listWidget = new QListWidget(paletteTree);
+
+                  paletteTree->setItemWidget(paletteElementsItem, 0, listWidget);
+                  listWidget->setAutoFillBackground(true);
+                  listWidget->setViewMode(QListView::IconMode);
+                  listWidget->setMovement(QListView::Static);
+                  listWidget->setResizeMode(QListView::Adjust);
+                  p->read(e, listWidget);
                   addPalette(p);
                   connect(p, SIGNAL(displayMore(const QString&)), mscore, SLOT(showMasterPalette(const QString&)));
                   }

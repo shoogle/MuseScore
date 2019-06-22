@@ -177,7 +177,7 @@ class Palette : public QWidget {
       bool drawGrid() const          { return _drawGrid; }
       bool read(const QString& path);
       void write(const QString& path);
-      void read(XmlReader&);
+      void read(XmlReader&, QListWidget* list = nullptr);
       void write(XmlWriter&) const;
       bool read(QFile*);
       void clear();

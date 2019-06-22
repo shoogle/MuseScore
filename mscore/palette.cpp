@@ -1500,7 +1500,7 @@ void Palette::write(const QString& p)
 //   read
 //---------------------------------------------------------
 
-void Palette::read(XmlReader& e)
+void Palette::read(XmlReader& e, QListWidget *list)
       {
       while (e.readNextStartElement()) {
             const QStringRef& t(e.name());
@@ -1550,6 +1550,7 @@ void Palette::read(XmlReader& e)
                                           if (ac) {
                                                 QIcon qicon(ac->icon());
                                                 icon->setAction(icon->action(), qicon);
+                                                QListWidgetItem *elementItem = new QListWidgetItem(qicon, cell->name, list);
                                                 }
                                           else {
                                                 add = false; // action is not valid, don't add it to the palette.
