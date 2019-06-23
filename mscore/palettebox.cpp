@@ -432,6 +432,9 @@ bool PaletteBox::read(XmlReader& e)
                   listWidget->setViewMode(QListView::IconMode);
                   listWidget->setMovement(QListView::Static);
                   listWidget->setResizeMode(QListView::Adjust);
+                  listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+                  listWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+                  //listWidget->setFixedSize(list.sizeHintForColumn(0) + 2 * list.frameWidth(), list.sizeHintForRow(0) * list.count() + 2 * list.frameWidth());
                   p->read(e, listWidget);
                   addPalette(p);
                   connect(p, SIGNAL(displayMore(const QString&)), mscore, SLOT(showMasterPalette(const QString&)));
