@@ -1928,5 +1928,82 @@ void Palette::dropEvent(QDropEvent* event)
       emit changed();
       }
 
+PaletteList::PaletteList(QWidget* parent) : QListWidget(parent)
+      {
+      setAutoFillBackground(true);
+      setViewMode(QListView::IconMode);
+      }
+
+void PaletteList::read(XmlReader& e)
+      {
+      while (e.readNextStartElement()) {
+            const QStringRef& t(e.name());
+            if (t == "gridWidth")
+                  /*hgrid =*/ e.readDouble();
+            else if (t == "gridHeight")
+                  /*vgrid =*/ e.readDouble();
+            else if (t == "mag")
+                  /*extraMag =*/ e.readDouble();
+            else if (t == "grid")
+                  /*_drawGrid =*/ e.readInt();
+            else if (t == "moreElements")
+                  /*setMoreElements(*/ e.readInt();
+            else if (t == "yoffset")
+                  /*_yOffset =*/ e.readDouble();
+            else if (t == "drumPalette")      // obsolete
+                  e.skipCurrentElement();
+            else if(t == "Cell") {
+                  PaletteCellItem* cell = new PaletteCellItem(this);
+                  cell->setName(e.attribute("name"));
+                  if(!cell->read(e)){
+                        if(cell->element == 0){
+                              delete cell;
+                              return;
+                              }
+                        delete cell;
+                        }
+                  }
+            else
+                  e.unknown();
+            }
+      }
+        
+      
+
+PaletteCellItem::PaletteCellItem(PaletteList* parent) : QListWidgetItem(parent)
+      {     
+
+      }
+
+
+bool PaletteCellItem::read(XmlReader& e)
+      {     
+      while (e.readNextStartElement()) {
+            const QStringRef& t1(e.name());
+            element = Element::name2Element(t1, gscore);
+            if (element == 0) {
+                  e.unknown();                  
+                  return false;
+                  }
+            else {
+                  element->read(e);
+                  element->styleChanged();
+                  if (element->type() == ElementType::ICON) {
+                        Icon* icon = static_cast<Icon*>(element);
+                        QAction* ac = getAction(icon->action());
+                        if (ac) {
+                              QIcon qicon(ac->icon());
+                              icon->setAction(icon->action(), qicon);
+                              setIcon(qicon);
+                              }
+                        else {
+                              return false;
+                              }
+                        }
+                  }
+            }
+      return true;
+      }
+
 }
 
