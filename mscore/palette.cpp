@@ -1952,23 +1952,20 @@ void PaletteList::read(XmlReader& e)
                   /*_yOffset =*/ e.readDouble();
             else if (t == "drumPalette")      // obsolete
                   e.skipCurrentElement();
-            else if(t == "Cell") {
+            else if (t == "Cell") {
                   PaletteCellItem* cell = new PaletteCellItem(this);
                   cell->setName(e.attribute("name"));
-                  if(!cell->read(e)){
-                        if(cell->element == 0){
-                              delete cell;
-                              return;
-                              }
+                  if (!cell->read(e)) {
+                        Element* element = cell->element;
                         delete cell;
+                        if (!element)
+                              return;
                         }
                   }
             else
                   e.unknown();
             }
       }
-        
-      
 
 PaletteCellItem::PaletteCellItem(PaletteList* parent) : QListWidgetItem(parent)
       {     
@@ -1977,27 +1974,39 @@ PaletteCellItem::PaletteCellItem(PaletteList* parent) : QListWidgetItem(parent)
 
 
 bool PaletteCellItem::read(XmlReader& e)
-      {     
+      {
       while (e.readNextStartElement()) {
             const QStringRef& t1(e.name());
-            element = Element::name2Element(t1, gscore);
-            if (element == 0) {
-                  e.unknown();                  
-                  return false;
-                  }
+            if (t1 == "staff")
+                  /* cell->drawStaff = */ e.readInt();
+            else if (t1 == "xoffset")
+                  /* cell->xoffset = */ e.readDouble();
+            else if (t1 == "yoffset")
+                  /* cell->yoffset = */ e.readDouble();
+            else if (t1 == "mag")
+                  /* cell->mag = */ e.readDouble();
+            else if (t1 == "tag")
+                  /* cell->tag = */ e.readElementText();
             else {
-                  element->read(e);
-                  element->styleChanged();
-                  if (element->type() == ElementType::ICON) {
-                        Icon* icon = static_cast<Icon*>(element);
-                        QAction* ac = getAction(icon->action());
-                        if (ac) {
-                              QIcon qicon(ac->icon());
-                              icon->setAction(icon->action(), qicon);
-                              setIcon(qicon);
-                              }
-                        else {
-                              return false;
+                  element = Element::name2Element(t1, gscore);
+                  if (!element) {
+                        e.unknown();
+                        return false;
+                        }
+                  else {
+                        element->read(e);
+                        element->styleChanged();
+                        if (element->type() == ElementType::ICON) {
+                              Icon* icon = static_cast<Icon*>(element);
+                              QAction* ac = getAction(icon->action());
+                              if (ac) {
+                                    QIcon qicon(ac->icon());
+                                    icon->setAction(icon->action(), qicon);
+                                    setIcon(qicon);
+                                    }
+                              else {
+                                    return false; // action is not valid, don't add it to the palette.
+                                    }
                               }
                         }
                   }
