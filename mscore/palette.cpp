@@ -1939,6 +1939,7 @@ PaletteList::PaletteList(QWidget* parent) : QListWidget(parent)
       setAutoFillBackground(true);
       setViewMode(QListView::IconMode);
       setResizeMode(QListView::Adjust);
+      setUniformItemSizes(true);
       }
 
 void PaletteList::read(XmlReader& e)
@@ -1946,9 +1947,9 @@ void PaletteList::read(XmlReader& e)
       while (e.readNextStartElement()) {
             const QStringRef& t(e.name());
             if (t == "gridWidth")
-                  /*hgrid =*/ e.readDouble();
+                  hgrid = e.readDouble();
             else if (t == "gridHeight")
-                  /*vgrid =*/ e.readDouble();
+                  vgrid = e.readDouble();
             else if (t == "mag")
                   extraMag = e.readDouble();
             else if (t == "grid")
@@ -1962,6 +1963,7 @@ void PaletteList::read(XmlReader& e)
             else if (t == "Cell") {
                   PaletteCellItem* cell = new PaletteCellItem(this);
                   cell->setName(e.attribute("name"));
+                  cell->setToolTip(e.attribute("name"));
                   if (!cell->read(e, extraMag)){
                         Element* element = cell->element;
                         delete cell;
@@ -1972,7 +1974,22 @@ void PaletteList::read(XmlReader& e)
             else
                   e.unknown();
             }
+            qDebug()<<"The HGrid is: "<< hgrid;
+            qDebug()<<"The VGrid is: "<< vgrid;
+            setGrid(hgrid,vgrid);
 
+      }
+
+void PaletteList::setGrid(int hh, int vv)
+      {
+      hgrid = hh+20;
+      vgrid = vv+10;
+      QSize s(hgrid, vgrid);
+      setGridSize(s);
+      //setSizeIncrement(s);
+      //setBaseSize(s);
+      //setMinimumSize(s);
+      //updateGeometry();
       }
 
  void PaletteList::resizeEvent(QResizeEvent *event)
@@ -1983,6 +2000,40 @@ void PaletteList::read(XmlReader& e)
             QRect lastItem = visualItemRect(last);
             int yPos = lastItem.bottom();
             setFixedHeight(yPos);
+      }
+
+void PaletteList::keyPressEvent(QKeyEvent *event)
+      {
+      QAbstractItemView::keyPressEvent(event);
+      //int numItems = count();
+      currIdx = this->currentItem();
+      int pos = row(currIdx);
+      qDebug()<<"The position of the current element is "<< pos;
+      switch(event->key()){
+            case Qt::Key_Down:
+                  pos++;
+                  currIdx = item(pos); 
+                  setCurrentItem(currIdx);
+                  break;
+            case Qt::Key_Up:
+            
+                  break;
+            case Qt::Key_Left:
+                  /*QTreeWidgetItem* parent = static_cast<QTreeWidgetItem*>(this->parentWidget()); 
+                  if(parent->isExpanded()){
+                        parent->setExpanded(true);
+                  }
+                  */
+                  break;
+            case Qt::Key_Right:
+                  /*QTreeWidgetItem* parent = static_cast<QTreeWidgetItem*>(this->parentWidget()); 
+                  if(!this->isExpanded()){
+                        this->setExpanded(false);
+                  }*/
+                  break;
+            default:
+                  break;
+            }
       }
 
 //---------------------------------------------------------
