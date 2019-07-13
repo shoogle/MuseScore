@@ -2004,36 +2004,47 @@ void PaletteList::setGrid(int hh, int vv)
 
 void PaletteList::keyPressEvent(QKeyEvent *event)
       {
-      QAbstractItemView::keyPressEvent(event);
-      //int numItems = count();
+      int numItems = count();
       currIdx = this->currentItem();
       int pos = row(currIdx);
       qDebug()<<"The position of the current element is "<< pos;
       switch(event->key()){
             case Qt::Key_Down:
-                  pos++;
-                  currIdx = item(pos); 
-                  setCurrentItem(currIdx);
-                  break;
+                pos++;
+                if (pos < numItems) {
+                    currIdx = item(pos);
+                    setCurrentItem(currIdx);
+                    return;
+                }
+                break;
             case Qt::Key_Up:
-            
-                  break;
+                if (pos > 0) {
+                    pos--;
+                    currIdx = item(pos);
+                    setCurrentItem(currIdx);
+                    return;
+                }
+                break;
             case Qt::Key_Left:
-                  /*QTreeWidgetItem* parent = static_cast<QTreeWidgetItem*>(this->parentWidget()); 
-                  if(parent->isExpanded()){
-                        parent->setExpanded(true);
-                  }
-                  */
-                  break;
+                if (pos > 0) {
+                    pos--;
+                    currIdx = item(pos);
+                    setCurrentItem(currIdx);
+                    return;
+                }
+                break;
             case Qt::Key_Right:
-                  /*QTreeWidgetItem* parent = static_cast<QTreeWidgetItem*>(this->parentWidget()); 
-                  if(!this->isExpanded()){
-                        this->setExpanded(false);
-                  }*/
-                  break;
+                pos++;
+                if (pos < numItems) {
+                    currIdx = item(pos);
+                    setCurrentItem(currIdx);
+                    return;
+                }
+                break;
             default:
                   break;
             }
+        QAbstractItemView::keyPressEvent(event);
       }
 
 //---------------------------------------------------------
@@ -2042,7 +2053,7 @@ void PaletteList::keyPressEvent(QKeyEvent *event)
 
 PaletteCellItem::PaletteCellItem(PaletteList* parent) : QListWidgetItem(parent)
       {     
-            paletteList = parent;
+
       }
 
 

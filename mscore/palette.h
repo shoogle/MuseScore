@@ -239,7 +239,6 @@ class PaletteList : public QListWidget {
 
 class PaletteCellItem : public  QListWidgetItem {
 
-         PaletteList* paletteList;
          QPixmap pixmap(qreal extraMag) const;
          QString name;           // used for tool tip
          QString tag;
