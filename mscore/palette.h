@@ -219,42 +219,56 @@ class Palette : public QWidget {
       int idx(const QPoint&) const;
       };
 
+class PaletteCellItem;
+
 class PaletteList : public QListWidget {
          Q_OBJECT
 
-         int hgrid;
-         int vgrid;
-         qreal extraMag;
+         qreal extraMag = 1.0;
+         qreal _yOffset; // in spatium
          QListWidgetItem* currIdx;
+         bool _moreElements = false;
+         bool _drawGrid = false;
 
          protected:
             virtual void resizeEvent(QResizeEvent *event) override;
             virtual void keyPressEvent(QKeyEvent *event) override;
 
          public:
-            PaletteList(QWidget* parent); 
+            PaletteList(QWidget* parent);
             void  read(XmlReader& e);
-            void setGrid(int ,int);
+            void setMoreElements(bool val);
+            qreal mag()       { return extraMag; }
+            qreal offset()    { return _yOffset; }
+
+         private:
+            QPixmap cellPixmap(PaletteCellItem* cell) const;
+
+      friend class PaletteCellItem;
       };
 
 class PaletteCellItem : public  QListWidgetItem {
 
-         QPixmap pixmap(qreal extraMag) const;
-         QString name;           // used for tool tip
-         QString tag;
          bool drawStaff { false };
-         double x       { 0.0   };
-         double y       { 0.0   };
-         double xoffset { 0.0   };
-         double yoffset { 0.0   };      // in spatium units of "gscore"
+         double xoffset { 0.0   }; // in spatium
+         double yoffset { 0.0   };
          qreal mag      { 1.0   };
          bool readOnly  { false };
 
          public:
-            PaletteCellItem(PaletteList* parent);
+            PaletteCellItem(PaletteList* parent = nullptr);
+            QString tag;
             Element* element = nullptr;
             void setName(QString name){setText(name);}
-            bool read(XmlReader& e, qreal extraMag);
+            bool read(XmlReader& e);
+            QPixmap pixmap(qreal extraMag) const;
+
+         private:
+            void paint(QPainter& p, const QRectF& target) const;
+            void paintTag(QPainter& p, const QRectF& target) const;
+            QColor elementColor() const;
+
+      friend class PaletteList;
       };
 
 
