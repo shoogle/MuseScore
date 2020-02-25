@@ -127,6 +127,7 @@ enum class ViewState {
 class ScoreView : public QWidget, public MuseScoreView {
       Q_OBJECT
 
+      QTreeView* _scoreItemView;
       ViewState state;
       OmrView* _omrView;
 

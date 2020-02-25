@@ -592,6 +592,11 @@ class Score : public QObject, public ScoreElement {
 
       static void onElementDestruction(Element* se);
 
+      // Score Heirachy functions. TODO: Make these pure virtual to force implementation.
+      virtual ScoreElement* treeChild(int idx) const override;
+      virtual int treeChildIdx(ScoreElement* child) const override;
+      virtual int treeChildCount() const override { return _staves.size(); }
+
       virtual inline QList<Excerpt*>& excerpts();
       virtual inline const QList<Excerpt*>& excerpts() const;
 

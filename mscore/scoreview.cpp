@@ -26,6 +26,7 @@
 #include "navigator.h"
 #include "preferences.h"
 #include "scoreaccessibility.h"
+#include "scoreitemmodel.h"
 #include "scoretab.h"
 #include "seq.h"
 #include "splitstaff.h"
@@ -202,6 +203,8 @@ ScoreView::ScoreView(QWidget* parent)
       connect(getAction("loop"), SIGNAL(toggled(bool)), SLOT(loopToggled(bool)));
       if (seq)
             connect(seq, SIGNAL(stopped()), SLOT(seqStopped()));
+
+      _scoreItemView = new QTreeView(this);
       }
 
 //---------------------------------------------------------
@@ -252,6 +255,10 @@ void ScoreView::setScore(Score* s)
 
             connect(s, SIGNAL(posChanged(POS,unsigned)), SLOT(posChanged(POS,unsigned)));
             connect(this, SIGNAL(viewRectChanged()), this, SLOT(updateContinuousPanel()));
+
+//            QAbstractItemModel *m = _scoreItemView->model();
+//            _scoreItemView->setModel(new ScoreItemModel(this, _scoreItemView));
+//            delete m;
             }
       }
 

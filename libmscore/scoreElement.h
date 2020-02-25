@@ -186,6 +186,12 @@ class ScoreElement {
 
       virtual ~ScoreElement();
 
+      // Score Heirachy functions. TODO: Make these pure virtual to force implementation.
+      virtual ScoreElement* treeParent() const              { return nullptr; }
+      virtual ScoreElement* treeChild(int idx) const        { Q_UNUSED(idx) return nullptr; }
+      virtual int treeChildIdx(ScoreElement* child) const   { Q_UNUSED(child) return -1; }
+      virtual int treeChildCount() const                    { return 0; }
+
       Score* score() const                 { return _score;      }
       MasterScore* masterScore() const;
       virtual void setScore(Score* s)      { _score = s;         }

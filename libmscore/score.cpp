@@ -391,6 +391,24 @@ void Score::onElementDestruction(Element* e)
       }
 
 //---------------------------------------------------------
+//   Score::treeChild
+//---------------------------------------------------------
+
+ScoreElement* Score::treeChild(int idx) const
+      {
+      return _staves.at(idx);
+      }
+
+//---------------------------------------------------------
+//   Score::treeChildIdx
+//---------------------------------------------------------
+
+int Score::treeChildIdx(ScoreElement* child) const
+      {
+      return _staves.indexOf(static_cast<Staff*>(child));
+      }
+
+//---------------------------------------------------------
 //   addMeasure
 //---------------------------------------------------------
 
