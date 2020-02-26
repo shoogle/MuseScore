@@ -77,6 +77,8 @@ class MeasureBase : public Element {
       ~MeasureBase();
       MeasureBase(const MeasureBase&);
 
+      virtual ScoreElement* treeParent() const override;
+
       virtual MeasureBase* clone() const = 0;
       virtual ElementType type() const = 0;
 

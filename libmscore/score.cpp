@@ -396,7 +396,11 @@ void Score::onElementDestruction(Element* e)
 
 ScoreElement* Score::treeChild(int idx) const
       {
-      return _staves.at(idx);
+      Q_ASSERT(idx < _measures.size());
+      MeasureBase* m = first();
+      for (int i = 0; i < idx; i++)
+            m = m->next();
+      return m;
       }
 
 //---------------------------------------------------------
@@ -405,7 +409,16 @@ ScoreElement* Score::treeChild(int idx) const
 
 int Score::treeChildIdx(ScoreElement* child) const
       {
-      return _staves.indexOf(static_cast<Staff*>(child));
+      Q_ASSERT(child && child->isMeasureBase());
+      MeasureBase* m = first();
+      Q_ASSERT(m);
+      for (int i = 0; i < _measures.size(); i++) {
+            if (m == toMeasureBase(child))
+                  return i;
+            m = m->next();
+            }
+      Q_ASSERT(false); // shouldn't get here
+      return -1; // child not found
       }
 
 //---------------------------------------------------------

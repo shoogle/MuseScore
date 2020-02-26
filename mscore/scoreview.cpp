@@ -256,9 +256,9 @@ void ScoreView::setScore(Score* s)
             connect(s, SIGNAL(posChanged(POS,unsigned)), SLOT(posChanged(POS,unsigned)));
             connect(this, SIGNAL(viewRectChanged()), this, SLOT(updateContinuousPanel()));
 
-//            QAbstractItemModel *m = _scoreItemView->model();
-//            _scoreItemView->setModel(new ScoreItemModel(this, _scoreItemView));
-//            delete m;
+            QAbstractItemModel *m = _scoreItemView->model();
+            _scoreItemView->setModel(new ScoreItemModel(this, _scoreItemView));
+            delete m;
             }
       }
 

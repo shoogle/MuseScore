@@ -628,5 +628,14 @@ LayoutBreak* MeasureBase::sectionBreakElement() const
             }
       return 0;
       }
+
+//---------------------------------------------------------
+//   MeasureBase::treeParent
+//---------------------------------------------------------
+
+ScoreElement* MeasureBase::treeParent() const
+      {
+      return score();
+      }
 }
 

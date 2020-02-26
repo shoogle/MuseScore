@@ -110,9 +110,6 @@ class Staff final : public ScoreElement {
 
       ElementType type() const override { return ElementType::STAFF; }
 
-      // Score Heirachy functions. TODO: Make these pure virtual to force implementation.
-      virtual ScoreElement* treeParent() const override;
-
       bool isTop() const;
       QString partName() const;
       int rstaff() const;

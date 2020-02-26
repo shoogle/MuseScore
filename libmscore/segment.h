@@ -80,6 +80,11 @@ class Segment final : public Element {
       Segment* clone() const override      { return new Segment(*this); }
       ElementType type() const override    { return ElementType::SEGMENT; }
 
+      // Score Heirachy functions.
+      virtual ScoreElement* treeChild(int idx) const override;
+      virtual int treeChildIdx(ScoreElement* child) const override;
+      virtual int treeChildCount() const override;
+
       void setScore(Score*) override;
 
       Segment* next() const               { return _next;   }

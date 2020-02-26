@@ -101,6 +101,11 @@ class Measure final : public MeasureBase {
       void setScore(Score* s) override;
       Measure* cloneMeasure(Score*, const Fraction& tick, TieMap*);
 
+      // Score Heirachy functions.
+      virtual ScoreElement* treeChild(int idx) const override;
+      virtual int treeChildIdx(ScoreElement* child) const override;
+      virtual int treeChildCount() const override { return _segments.size(); }
+
       void read(XmlReader&, int idx);
       void read(XmlReader& d) { read(d, 0); }
       void readAddConnector(ConnectorInfoReader* info, bool pasteMode) override;

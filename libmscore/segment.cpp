@@ -2286,4 +2286,38 @@ qreal Segment::minHorizontalDistance(Segment* ns, bool systemHeaderGap) const
       return w;
       }
 
+//---------------------------------------------------------
+//   Segment::treeChild
+//---------------------------------------------------------
+
+ScoreElement* Segment::treeChild(int idx) const
+      {
+      return _elist.at(idx);
+      }
+
+//---------------------------------------------------------
+//   Segment::treeChildIdx
+//---------------------------------------------------------
+
+int Segment::treeChildIdx(ScoreElement* child) const
+      {
+      int i = 0;
+      for (ScoreElement* e : _elist) {
+            if (e == child)
+                  return i;
+            i++;
+            }
+      Q_ASSERT(false); // shouldn't get here
+      return -1; // child not found
+      }
+
+//---------------------------------------------------------
+//   Segment::treeChildCount
+//---------------------------------------------------------
+
+int Segment::treeChildCount() const
+      {
+      return _elist.size();
+      }
+
 }           // namespace Ms

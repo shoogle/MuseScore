@@ -196,6 +196,7 @@ class Element : public ScoreElement {
       void deleteLater();
 
       Element* parent() const                 { return _parent;     }
+      virtual ScoreElement* treeParent() const override { return parent(); }
       void setParent(Element* e)              { _parent = e;        }
 
       Element* findAncestor(ElementType t);

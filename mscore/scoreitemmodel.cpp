@@ -100,8 +100,11 @@ QModelIndex ScoreItemModel::index(int row, int column, const QModelIndex &parent
 
       ScoreElement* parentElement = scoreElementFromIndex(parent);
 
-      if (row < parentElement->treeChildCount())
-            return createIndex(row, column, parentElement->treeChild(row));
+      if (row < parentElement->treeChildCount()) {
+            ScoreElement* childElement = parentElement->treeChild(row);
+            if (childElement) // might be empty ChordRest segment
+                  return createIndex(row, column, childElement);
+            }
 
       return QModelIndex();
       }

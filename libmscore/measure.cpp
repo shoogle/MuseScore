@@ -4404,4 +4404,35 @@ void Measure::computeMinWidth()
       computeMinWidth(s, x, isSystemHeader);
       }
 
+//---------------------------------------------------------
+//   Measure::treeChild
+//---------------------------------------------------------
+
+ScoreElement* Measure::treeChild(int idx) const
+      {
+      Q_ASSERT(idx < _segments.size());
+      Segment* s = first();
+      for (int i = 0; i < idx; i++)
+            s = s->next();
+      return s;
+      }
+
+//---------------------------------------------------------
+//   Measure::treeChildIdx
+//---------------------------------------------------------
+
+int Measure::treeChildIdx(ScoreElement* child) const
+      {
+      Q_ASSERT(child && child->isSegment());
+      Segment* s = first();
+      Q_ASSERT(s);
+      for (int i = 0; i < _segments.size(); i++) {
+            if (s == toSegment(child))
+                  return i;
+            s = s->next();
+            }
+      Q_ASSERT(false); // shouldn't get here
+      return -1; // child not found
+      }
+
 }
