@@ -257,6 +257,11 @@ public:
     virtual EngravingObject* scanChild(int n) const { Q_UNUSED(n); return nullptr; }
     virtual int scanChildCount() const { return 0; }
     virtual void scanElements(void* data, void (* func)(void*, EngravingItem*), bool all=true);
+    int scanIndexOf(const EngravingObject *child) const;
+    EngravingObject* nextScanSibling() const;
+    EngravingObject* prevScanSibling() const;
+    EngravingObject* nextScanElement() const;
+    EngravingObject* prevScanElement() const;
 
     // context
     virtual void setScore(Score* s);

@@ -556,6 +556,8 @@ public:
     bool symIsValid(SymId id) const;
 
     bool concertPitch() const;
+    EngravingItem* nextNavElement() const;
+    EngravingItem* prevNavElement() const;
     virtual EngravingItem* nextElement();   // selects the next score element, (notes, rests etc. as well as articulation etc.)
     virtual EngravingItem* prevElement();   // selects the next score element, (notes, rests etc. as well as articulation etc.)
     virtual EngravingItem* nextSegmentElement();    //< Used for navigation

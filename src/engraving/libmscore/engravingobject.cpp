@@ -180,6 +180,124 @@ void EngravingObject::scanElements(void* data, void (* func)(void*, EngravingIte
 }
 
 //---------------------------------------------------------
+//   scanIndexOf
+/// Return index position of a child element, or -1 if it's not a child.
+//---------------------------------------------------------
+
+int EngravingObject::scanIndexOf(const EngravingObject* child) const
+{
+    int childCount = scanChildCount();
+
+    for (int i = 0; i < childCount; ++i) {
+        if (child == scanChild(i)) {
+            return i;
+        }
+    }
+
+    return -1; // child not found
+}
+
+//---------------------------------------------------------
+//   nextScanSibling
+/// Return next child of parent element. Useful for navigation and iterating
+/// through elements in chronological order.
+//---------------------------------------------------------
+
+EngravingObject* EngravingObject::nextScanSibling() const
+{
+    EngravingObject* parent = scanParent();
+
+    if (!parent) {
+        return nullptr; // no siblings
+    }
+
+    int nextIndex = parent->scanIndexOf(this) + 1;
+
+    Q_ASSERT(nextIndex > 0);
+    Q_ASSERT(nextIndex <= parent->scanChildCount());
+
+    if (nextIndex < parent->scanChildCount()) {
+        return parent->scanChild(nextIndex); // next sibling
+    }
+
+    return nullptr; // no more siblings
+}
+
+//---------------------------------------------------------
+//   prevScanSibling
+/// Return previous child of parent element. Useful for navigation and
+/// iterating through elements in reverse chronological order.
+//---------------------------------------------------------
+
+EngravingObject* EngravingObject::prevScanSibling() const
+{
+    EngravingObject* parent = scanParent();
+
+    if (!parent) {
+        return nullptr; // no siblings
+    }
+
+    int index = parent->scanIndexOf(this);
+
+    Q_ASSERT(index >= 0);
+    Q_ASSERT(index < parent->scanChildCount());
+
+    if (index > 0) {
+        return parent->scanChild(index - 1); // previous sibling
+    }
+
+    return nullptr; // no previous siblings
+}
+
+//---------------------------------------------------------
+//   nextScanElement
+/// Return next element in score tree. Useful for navigation and iterating
+/// through elements in chronological order.
+//---------------------------------------------------------
+
+EngravingObject* EngravingObject::nextScanElement() const
+{
+    if (scanChildCount() > 0) {
+        return scanChild(0); // first child
+    }
+
+    // no children, so look for a sibling of this element or of its ancestors
+    for (const EngravingObject* el = this; el; el = el->scanParent()) {
+        if (EngravingObject* nextSibling = el->nextScanSibling()) {
+            return nextSibling;
+        }
+    }
+
+    return nullptr; // no next element
+}
+
+//---------------------------------------------------------
+//   prevScanElement
+/// Return previous element in score tree. Useful for navigation and iterating
+/// through elements in reverse chronological order.
+//---------------------------------------------------------
+
+EngravingObject* EngravingObject::prevScanElement() const
+{
+    EngravingObject* prevSibling = prevScanSibling();
+
+    if (!prevSibling) {
+        return scanParent(); // can be nullptr
+    }
+
+    // return last decendant of previous sibling, or previous sibling itself
+    EngravingObject* descendant = prevSibling;
+    int childCount = descendant->scanChildCount();
+
+    while (childCount > 0) {
+        descendant = descendant->scanChild(childCount - 1); // last child
+        childCount = descendant->scanChildCount();
+    }
+
+    return descendant;
+}
+
+//---------------------------------------------------------
 //   propertyDefault
 //---------------------------------------------------------
 

@@ -1982,7 +1982,7 @@ void NotationInteraction::moveElementSelection(MoveDirection d)
 
     EngravingItem* toEl = nullptr;
     if (el) {
-        toEl = (MoveDirection::Left == d) ? score()->prevElement() : score()->nextElement();
+        toEl = (MoveDirection::Left == d) ? el->prevNavElement() : el->nextNavElement();
     } else {
         toEl = (MoveDirection::Left == d) ? score()->lastElement() : score()->firstElement();
     }

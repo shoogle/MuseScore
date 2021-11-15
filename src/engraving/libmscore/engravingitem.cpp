@@ -1703,6 +1703,38 @@ bool EngravingItem::concertPitch() const
 }
 
 //---------------------------------------------------------
+//   nextNavElement
+//   selects the next score element
+//---------------------------------------------------------
+
+EngravingItem* EngravingItem::nextNavElement() const
+{
+    EngravingObject* el = nextScanElement();
+
+    while (el && !el->isEngravingItem()) {
+        el = el->nextScanElement();
+    }
+
+    return toEngravingItem(el);
+}
+
+//---------------------------------------------------------
+//   prevNavElement
+//   selects the previous score element
+//---------------------------------------------------------
+
+EngravingItem* EngravingItem::prevNavElement() const
+{
+    EngravingObject* el = prevScanElement();
+
+    while (el && !el->isEngravingItem()) {
+        el = el->prevScanElement();
+    }
+
+    return toEngravingItem(el);
+}
+
+//---------------------------------------------------------
 //   nextElement
 //   selects the next score element
 //---------------------------------------------------------
