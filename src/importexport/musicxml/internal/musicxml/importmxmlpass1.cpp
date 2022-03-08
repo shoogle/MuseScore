@@ -1524,6 +1524,9 @@ void MusicXMLParserPass1::defaults()
             if (isImportLayout) {
                 _score->setSpatium(_spatium);
             }
+        } else if (_e.name() == "concert-score") {
+            _score->setStyleValue(Sid::concertPitch, true);
+            _e.skipCurrentElement();
         } else if (_e.name() == "page-layout") {
             PageFormat pf;
             pageLayout(pf, millimeter / (tenths * INCH));
@@ -2328,6 +2331,16 @@ void MusicXMLParserPass1::attributes(const QString& partId, const Fraction cTime
             time(cTime);
         } else if (_e.name() == "transpose") {
             transpose(partId, cTime);
+        } else if (_e.name() == "for-part") {
+            while (_e.readNextStartElement()) {
+                if (_e.name() == "part-clef") {
+                    clef(partId);
+                } else if (_e.name() == "part-transpose") {
+                    transpose(partId, cTime, true);
+                } else {
+                    skipLogCurrElem();
+                }
+            }
         } else {
             skipLogCurrElem();
         }
@@ -2479,11 +2492,14 @@ void MusicXMLParserPass1::time(const Fraction cTime)
  Parse the /score-partwise/part/measure/attributes/transpose node.
  */
 
-void MusicXMLParserPass1::transpose(const QString& partId, const Fraction& tick)
+void MusicXMLParserPass1::transpose(const QString& partId, const Fraction& tick, bool forPart)
 {
     Interval interval;
     while (_e.readNextStartElement()) {
         int i = _e.readElementText().toInt();
+//        if (forPart) {
+//            i = -i;
+//        }
         if (_e.name() == "diatonic") {
             interval.diatonic = i;
         } else if (_e.name() == "chromatic") {

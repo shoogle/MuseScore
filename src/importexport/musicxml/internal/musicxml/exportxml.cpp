@@ -1290,29 +1290,38 @@ static void writePageFormat(const Score* const s, XmlWriter& xml, double convers
 
 // _spatium = DPMM * (millimeter * 10.0 / tenths);
 
-static void defaults(XmlWriter& xml, const Score* const s, double& millimeters, const int& tenths)
+static void defaults(XmlWriter& xml, const Score* const s, double& millimeters, const int& tenths, bool exportLayout)
 {
     xml.startObject("defaults");
-    xml.startObject("scaling");
-    xml.tag("millimeters", millimeters);
-    xml.tag("tenths", tenths);
-    xml.endObject();
 
-    writePageFormat(s, xml, INCH / millimeters * tenths);
+    if (exportLayout) {
+        xml.startObject("scaling");
+        xml.tag("millimeters", millimeters);
+        xml.tag("tenths", tenths);
+        xml.endObject();
+    }
 
-    // TODO: also write default system layout here
-    // when exporting only manual or no breaks, system-distance is not written at all
+    if (s->styleB(Sid::concertPitch)) {
+        xml.tagE(QString("concert-score"));
+    }
 
-    // font defaults
-    // as MuseScore supports dozens of different styles, while MusicXML only has defaults
-    // for music (TODO), words and lyrics, use Tid STAFF (typically used for words)
-    // and LYRIC1 to get MusicXML defaults
+    if (exportLayout) {
+        writePageFormat(s, xml, INCH / millimeters * tenths);
 
-    // TODO xml.tagE("music-font font-family=\"TBD\" font-size=\"TBD\"");
-    xml.tagE(QString("word-font font-family=\"%1\" font-size=\"%2\"").arg(s->styleSt(Sid::staffTextFontFace)).arg(s->styleD(Sid::
-                                                                                                                            staffTextFontSize)));
-    xml.tagE(QString("lyric-font font-family=\"%1\" font-size=\"%2\"").arg(s->styleSt(Sid::lyricsOddFontFace)).arg(s->styleD(Sid::
-                                                                                                                             lyricsOddFontSize)));
+        // TODO: also write default system layout here
+        // when exporting only manual or no breaks, system-distance is not written at all
+
+        // font defaults
+        // as MuseScore supports dozens of different styles, while MusicXML only has defaults
+        // for music (TODO), words and lyrics, use Tid STAFF (typically used for words)
+        // and LYRIC1 to get MusicXML defaults
+
+        // TODO xml.tagE("music-font font-family=\"TBD\" font-size=\"TBD\"");
+        xml.tagE(QString("word-font font-family=\"%1\" font-size=\"%2\"").arg(s->styleSt(Sid::staffTextFontFace)).arg(s->styleD(Sid::
+                                                                                                                                staffTextFontSize)));
+        xml.tagE(QString("lyric-font font-family=\"%1\" font-size=\"%2\"").arg(s->styleSt(Sid::lyricsOddFontFace)).arg(s->styleD(Sid::
+                                                                                                                                 lyricsOddFontSize)));
+    }
     xml.endObject();
 }
 
@@ -6660,14 +6669,27 @@ void ExportMusicXml::writeInstrumentDetails(const Instrument* instrument)
 {
     if (instrument->transpose().chromatic) {
         _attr.doAttr(_xml, true);
-        _xml.startObject("transpose");
-        _xml.tag("diatonic",  instrument->transpose().diatonic % 7);
-        _xml.tag("chromatic", instrument->transpose().chromatic % 12);
-        int octaveChange = instrument->transpose().chromatic / 12;
-        if (octaveChange != 0) {
-            _xml.tag("octave-change", octaveChange);
+        if (_score->styleB(Sid::concertPitch)) {
+            _xml.startObject("for-part");
+            _xml.startObject("transpose");
+            _xml.tag("diatonic",  instrument->transpose().diatonic % 7);
+            _xml.tag("chromatic", instrument->transpose().chromatic % 12);
+            int octaveChange = instrument->transpose().chromatic / 12;
+            if (octaveChange != 0) {
+                _xml.tag("octave-change", octaveChange);
+            }
+            _xml.endObject();
+            _xml.endObject();
+        } else {
+            _xml.startObject("transpose");
+            _xml.tag("diatonic",  instrument->transpose().diatonic % 7);
+            _xml.tag("chromatic", instrument->transpose().chromatic % 12);
+            int octaveChange = instrument->transpose().chromatic / 12;
+            if (octaveChange != 0) {
+                _xml.tag("octave-change", octaveChange);
+            }
+            _xml.endObject();
         }
-        _xml.endObject();
         _attr.doAttr(_xml, false);
     }
 }
@@ -7237,16 +7259,8 @@ static std::vector<const Jump*> findJumpElements(const Score* score)
 
 void ExportMusicXml::write(QIODevice* dev)
 {
-    // must export in transposed pitch to prevent
-    // losing the transposition information
-    // if necessary, switch concert pitch mode off
-    // before export and restore it after export
     bool concertPitch = score()->styleB(Sid::concertPitch);
-    if (concertPitch) {
-        score()->startCmd();
-        score()->undo(new ChangeStyleVal(score(), Sid::concertPitch, false));
-        score()->doLayout();        // this is only allowed in a cmd context to not corrupt the undo/redo stack
-    }
+    bool exportLayout = configuration()->musicxmlExportLayout();
 
     calcDivisions();
 
@@ -7272,20 +7286,17 @@ void ExportMusicXml::write(QIODevice* dev)
     work(_score->measures()->first());
     identification(_xml, _score);
 
-    if (configuration()->musicxmlExportLayout()) {
-        defaults(_xml, _score, millimeters, tenths);
-        credits(_xml);
+    if (exportLayout || concertPitch) {
+        defaults(_xml, _score, millimeters, tenths, exportLayout);
+        if (exportLayout) {
+            credits(_xml);
+        }
     }
 
     partList(_xml, _score, instrMap);
     writeParts();
 
     _xml.endObject();
-
-    if (concertPitch) {
-        // restore concert pitch
-        score()->endCmd(true);            // rollback
-    }
 }
 
 //---------------------------------------------------------

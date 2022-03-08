@@ -276,7 +276,7 @@ private:
     void measureStyle(Measure* measure);
     void barline(const QString& partId, Measure* measure, const Fraction& tick);
     void key(const QString& partId, Measure* measure, const Fraction& tick);
-    void clef(const QString& partId, Measure* measure, const Fraction& tick);
+    void clef(const QString& partId, Measure* measure, const Fraction& tick, bool forPart = false);
     void time(const QString& partId, Measure* measure, const Fraction& tick);
     void divisions();
     void transpose(const QString& partId, const Fraction& tick);

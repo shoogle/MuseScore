@@ -244,7 +244,7 @@ static int MusicXMLStepAltOct2Pitch(int step, int alter, int octave)
  Note that n's staff and track have not been set yet
  */
 
-static void xmlSetPitch(Note* n, int step, int alter, int octave, const int octaveShift, const Instrument* const instr)
+static void xmlSetPitch(Note* n, int step, int alter, int octave, const int octaveShift, const Instrument* const instr, bool concertPitch)
 {
     //LOGD("xmlSetPitch(n=%p, step=%d, alter=%d, octave=%d, octaveShift=%d)",
     //       n, step, alter, octave, octaveShift);
@@ -252,19 +252,29 @@ static void xmlSetPitch(Note* n, int step, int alter, int octave, const int octa
     //const Staff* staff = n->score()->staff(track / VOICES);
     //const Instrument* instr = staff->part()->instr();
 
-    const Interval intval = instr->transpose();
+    Interval intval = instr->transpose();
 
     //LOGD("  staff=%p instr=%p dia=%d chro=%d",
     //       staff, instr, static_cast<int>(intval.diatonic), static_cast<int>(intval.chromatic));
 
     int pitch = MusicXMLStepAltOct2Pitch(step, alter, octave);
-    pitch += intval.chromatic;   // assume not in concert pitch
-    pitch += 12 * octaveShift;   // correct for octave shift
+    if (!concertPitch) {
+        pitch += intval.chromatic;  // assume not in concert pitch
+        pitch += 12 * octaveShift;  // correct for octave shift
+    }
     // ensure sane values
     pitch = limit(pitch, 0, 127);
 
-    int tpc2 = step2tpc(step, AccidentalVal(alter));
-    int tpc1 = Ms::transposeTpc(tpc2, intval, true);
+    int tpc1;
+    int tpc2;
+    if (concertPitch) {
+        intval.flip();
+        tpc1 = step2tpc(step, AccidentalVal(alter));
+        tpc2 = Ms::transposeTpc(tpc1, intval, true);
+    } else {
+        tpc2 = step2tpc(step, AccidentalVal(alter));
+        tpc1 = Ms::transposeTpc(tpc2, intval, true);
+    }
     n->setPitch(pitch, tpc1, tpc2);
     //LOGD("  pitch=%d tpc1=%d tpc2=%d", n->pitch(), n->tpc1(), n->tpc2());
 }
@@ -2269,6 +2279,16 @@ void MusicXMLParserPass2::attributes(const QString& partId, Measure* measure, co
             time(partId, measure, tick);
         } else if (_e.name() == "transpose") {
             _e.skipCurrentElement();        // skip but don't log
+        } else if (_e.name() == "for-part") {
+            while (_e.readNextStartElement()) {
+                if (_e.name() == "part-clef") {
+                    clef(partId, measure, tick, true);
+                } else if (_e.name() == "part-transpose") {
+                    _e.skipCurrentElement();    // skip but don't log
+                } else {
+                    skipLogCurrElem();
+                }
+            }
         } else {
             skipLogCurrElem();
         }
@@ -3756,7 +3776,7 @@ void MusicXMLParserPass2::key(const QString& partId, Measure* measure, const Fra
  Parse the /score-partwise/part/measure/attributes/clef node.
  */
 
-void MusicXMLParserPass2::clef(const QString& partId, Measure* measure, const Fraction& tick)
+void MusicXMLParserPass2::clef(const QString& partId, Measure* measure, const Fraction& tick, bool forPart)
 {
     ClefType clef   = ClefType::G;
     StaffTypes st = StaffTypes::STANDARD;
@@ -3873,10 +3893,16 @@ void MusicXMLParserPass2::clef(const QString& partId, Measure* measure, const Fr
         s = measure->getSegment(tick.isNotZero() ? SegmentType::Clef : SegmentType::HeaderClef, tick);
     }
 
-    Clef* clefs = Factory::createClef(s);
-    clefs->setClefType(clef);
     track_idx_t track = _pass1.trackForPart(partId) + clefno * VOICES;
-    clefs->setTrack(track);
+    Clef* clefs;
+    if (forPart) {
+        clefs = toClef(s->element(track)); // existing clef
+        clefs->setTransposingClef(clef);
+    } else {
+        clefs = Factory::createClef(s); // new clef
+        clefs->setClefType(clef);
+        clefs->setTrack(track);
+    }
     s->add(clefs);
 
     // set the correct staff type
@@ -4338,7 +4364,7 @@ static void addTremolo(ChordRest* cr,
 // TODO: refactor: optimize parameters
 
 static void setPitch(Note* note, MusicXMLParserPass1& pass1, const QString& partId, const QString& instrumentId, const mxmlNotePitch& mnp,
-                     const int octaveShift, const Instrument* const instrument)
+                     const int octaveShift, const Instrument* const instrument, bool concertPitch)
 {
     const auto& instruments = pass1.getInstruments(partId);
     if (mnp.unpitched()) {
@@ -4352,10 +4378,10 @@ static void setPitch(Note* note, MusicXMLParserPass1& pass1, const QString& part
             note->setTpc(pitch2tpc(unpitched, Key::C, Prefer::NEAREST));             // TODO: necessary ?
         } else {
             //LOGD("disp step %d oct %d", displayStep, displayOctave);
-            xmlSetPitch(note, mnp.displayStep(), 0, mnp.displayOctave(), 0, instrument);
+            xmlSetPitch(note, mnp.displayStep(), 0, mnp.displayOctave(), 0, instrument, concertPitch);
         }
     } else {
-        xmlSetPitch(note, mnp.step(), mnp.alter(), mnp.octave(), octaveShift, instrument);
+        xmlSetPitch(note, mnp.step(), mnp.alter(), mnp.octave(), octaveShift, instrument, concertPitch);
     }
 }
 
@@ -4643,7 +4669,7 @@ Note* MusicXMLParserPass2::note(const QString& partId,
         const int octaveShift = _pass1.octaveShift(partId, ottavaStaff, noteStartTime);
         const auto part = _pass1.getPart(partId);
         const auto instrument = part->instrument(noteStartTime);
-        setPitch(note, _pass1, partId, instrumentId, mnp, octaveShift, instrument);
+        setPitch(note, _pass1, partId, instrumentId, mnp, octaveShift, instrument, _score->styleB(Sid::concertPitch));
         c->add(note);
         //c->setStemDirection(stemDir); // already done in handleBeamAndStemDir()
         //c->setNoStem(noStem);
