@@ -2497,9 +2497,6 @@ void MusicXMLParserPass1::transpose(const QString& partId, const Fraction& tick,
     Interval interval;
     while (_e.readNextStartElement()) {
         int i = _e.readElementText().toInt();
-//        if (forPart) {
-//            i = -i;
-//        }
         if (_e.name() == "diatonic") {
             interval.diatonic = i;
         } else if (_e.name() == "chromatic") {

@@ -3895,8 +3895,18 @@ void MusicXMLParserPass2::clef(const QString& partId, Measure* measure, const Fr
 
     track_idx_t track = _pass1.trackForPart(partId) + clefno * VOICES;
     Clef* clefs;
+
+    if (EngravingItem* el = s->element(track)) {
+        // use existing clef
+        clef = toClef(el);
+    } else {
+        // create new clef
+        clefs = Factory::createClef(s);
+        clefs->setTrack(track);
+        clefs->setClefType(clef);
+    }
+
     if (forPart) {
-        clefs = toClef(s->element(track)); // existing clef
         clefs->setTransposingClef(clef);
     } else {
         clefs = Factory::createClef(s); // new clef
