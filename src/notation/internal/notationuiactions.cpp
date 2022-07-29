@@ -2305,6 +2305,7 @@ const UiActionList NotationUiActions::m_scoreConfigActions = {
              Checkable::Yes
              ),
     UiAction(SHOW_IRREGULAR_CODE,
+             ActionCategory::Measures,
              mu::context::UiCtxNotationOpened,
              mu::context::CTX_NOTATION_OPENED,
              TranslatableString("action", "Mark i&rregular measures"),

@@ -207,6 +207,7 @@ enum class ActionCategory {
     Musicalsymbols,
     Dialogspanels,
     Noteinput,
+    Workspace,
     Plugins
 };
 
@@ -216,7 +217,7 @@ struct UiAction
         = { "Undefined", "Internal", "Tablature", "Viewing & Navigation", "Playback", "Layout & Formatting", "Selecting & Editing",
             "Application", "Accessibility", "File", "Selection & Navigation",
             "Text & Lyrics", "Chord symbols & figured bass", "Measures", "Musical Symbols", "Dialogs & Panels",
-            "Note Input", "Plugins" };
+            "Note Input", "Workspace", "Plugins" };
 
     actions::ActionCode code;
     UiContext uiCtx = UiCtxAny;
@@ -244,7 +245,8 @@ struct UiAction
              const TranslatableString& desc, IconCode::Code icon, Checkable ch = Checkable::No)
         : code(code), category(cat), uiCtx(ctx), scCtx(scCtx), title(title), description(desc), iconCode(icon), checkable(ch) {}
 
-    UiAction(const actions::ActionCode& code, ActionCategory cat, UiContext ctx, std::string scCtx, const TranslatableString& title, IconCode::Code icon,
+    UiAction(const actions::ActionCode& code, ActionCategory cat, UiContext ctx, std::string scCtx, const TranslatableString& title,
+             IconCode::Code icon,
              Checkable ch = Checkable::No)
         : code(code), category(cat), uiCtx(ctx), scCtx(scCtx), title(title), iconCode(icon), checkable(ch) {}
 
