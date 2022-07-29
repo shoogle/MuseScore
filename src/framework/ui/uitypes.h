@@ -223,28 +223,28 @@ struct UiAction
     std::string scCtx = "any";
     TranslatableString title;
     TranslatableString description;
-    ActionCategory category;
+    ActionCategory category = ActionCategory::Internal;
     IconCode::Code iconCode = IconCode::Code::NONE;
     Checkable checkable = Checkable::No;
     std::vector<std::string> shortcuts;
 
     UiAction() = default;
-    UiAction(const actions::ActionCode& code, ActionCategory cat = ActionCategory::Internal, UiContext ctx, std::string scCtx, Checkable ch = Checkable::No)
+    UiAction(const actions::ActionCode& code, ActionCategory cat, UiContext ctx, std::string scCtx, Checkable ch = Checkable::No)
         : code(code), category(cat), uiCtx(ctx), scCtx(scCtx), checkable(ch) {}
 
-    UiAction(const actions::ActionCode& code, ActionCategory cat = ActionCategory::Internal, UiContext ctx, std::string scCtx, const TranslatableString& title,
+    UiAction(const actions::ActionCode& code, ActionCategory cat, UiContext ctx, std::string scCtx, const TranslatableString& title,
              Checkable ch = Checkable::No)
         : code(code), category(cat), uiCtx(ctx), scCtx(scCtx), title(title), checkable(ch) {}
 
-    UiAction(const actions::ActionCode& code, ActionCategory cat = ActionCategory::Internal, UiContext ctx, std::string scCtx, const TranslatableString& title,
+    UiAction(const actions::ActionCode& code, ActionCategory cat, UiContext ctx, std::string scCtx, const TranslatableString& title,
              const TranslatableString& desc, Checkable ch = Checkable::No)
         : code(code), category(cat), uiCtx(ctx), scCtx(scCtx), title(title), description(desc),  checkable(ch) {}
 
-    UiAction(const actions::ActionCode& code, ActionCategory cat = ActionCategory::Internal, UiContext ctx, std::string scCtx, const TranslatableString& title,
+    UiAction(const actions::ActionCode& code, ActionCategory cat, UiContext ctx, std::string scCtx, const TranslatableString& title,
              const TranslatableString& desc, IconCode::Code icon, Checkable ch = Checkable::No)
         : code(code), category(cat), uiCtx(ctx), scCtx(scCtx), title(title), description(desc), iconCode(icon), checkable(ch) {}
 
-    UiAction(const actions::ActionCode& code, ActionCategory cat = ActionCategory::Internal, UiContext ctx, std::string scCtx, const TranslatableString& title, IconCode::Code icon,
+    UiAction(const actions::ActionCode& code, ActionCategory cat, UiContext ctx, std::string scCtx, const TranslatableString& title, IconCode::Code icon,
              Checkable ch = Checkable::No)
         : code(code), category(cat), uiCtx(ctx), scCtx(scCtx), title(title), iconCode(icon), checkable(ch) {}
 
