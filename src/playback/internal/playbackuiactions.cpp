@@ -30,7 +30,7 @@ using namespace mu::actions;
 
 const UiActionList PlaybackUiActions::m_mainActions = {
     UiAction("play",
-             ActionCategory::Playback,
+             ActionCategory::PLAYBACK,
              mu::context::UiCtxNotationOpened,
              mu::context::CTX_NOTATION_FOCUSED,
              TranslatableString("action", "Play"),
@@ -38,7 +38,7 @@ const UiActionList PlaybackUiActions::m_mainActions = {
              IconCode::Code::PLAY
              ),
     UiAction("stop",
-             ActionCategory::Playback,
+             ActionCategory::PLAYBACK,
              mu::context::UiCtxNotationOpened,
              mu::context::CTX_NOTATION_OPENED,
              TranslatableString("action", "Stop"),
@@ -46,7 +46,7 @@ const UiActionList PlaybackUiActions::m_mainActions = {
              IconCode::Code::STOP
              ),
     UiAction("rewind",
-             ActionCategory::Playback,
+             ActionCategory::PLAYBACK,
              mu::context::UiCtxNotationOpened,
              mu::context::CTX_NOTATION_FOCUSED,
              TranslatableString("action", "Rewind"),
@@ -54,7 +54,7 @@ const UiActionList PlaybackUiActions::m_mainActions = {
              IconCode::Code::REWIND
              ),
     UiAction("loop",
-             ActionCategory::Playback,
+             ActionCategory::PLAYBACK,
              mu::context::UiCtxNotationOpened,
              mu::context::CTX_NOTATION_FOCUSED,
              TranslatableString("action", "Loop playback"),
@@ -63,7 +63,7 @@ const UiActionList PlaybackUiActions::m_mainActions = {
              Checkable::Yes
              ),
     UiAction("metronome",
-             ActionCategory::Playback,
+             ActionCategory::PLAYBACK,
              mu::context::UiCtxNotationOpened,
              mu::context::CTX_NOTATION_FOCUSED,
              TranslatableString("action", "Metronome"),
@@ -75,7 +75,7 @@ const UiActionList PlaybackUiActions::m_mainActions = {
 
 const UiActionList PlaybackUiActions::m_settingsActions = {
     UiAction("midi-on",
-             ActionCategory::Noteinput,
+             ActionCategory::NOTEINPUT,
              mu::context::UiCtxAny,
              mu::context::CTX_ANY,
              TranslatableString("action", "Enable MIDI input"),
@@ -84,7 +84,7 @@ const UiActionList PlaybackUiActions::m_settingsActions = {
              Checkable::Yes
              ),
     UiAction("repeat",
-             ActionCategory::Playback,
+             ActionCategory::PLAYBACK,
              mu::context::UiCtxAny,
              mu::context::CTX_NOTATION_FOCUSED,
              TranslatableString("action", "Play repeats"),
@@ -93,7 +93,7 @@ const UiActionList PlaybackUiActions::m_settingsActions = {
              Checkable::Yes
              ),
     UiAction("pan",
-             ActionCategory::Playback,
+             ActionCategory::PLAYBACK,
              mu::context::UiCtxAny,
              mu::context::CTX_ANY,
              TranslatableString("action", "Pan score automatically"),
@@ -102,7 +102,7 @@ const UiActionList PlaybackUiActions::m_settingsActions = {
              Checkable::Yes
              ),
     UiAction("countin",
-             ActionCategory::Playback,
+             ActionCategory::PLAYBACK,
              mu::context::UiCtxAny,
              mu::context::CTX_ANY,
              TranslatableString("action", "Enable count-in when playing"),
@@ -114,7 +114,7 @@ const UiActionList PlaybackUiActions::m_settingsActions = {
 
 const UiActionList PlaybackUiActions::m_loopBoundaryActions = {
     UiAction("loop-in",
-             ActionCategory::Playback,
+             ActionCategory::PLAYBACK,
              mu::context::UiCtxAny,
              mu::context::CTX_NOTATION_FOCUSED,
              TranslatableString("action", "Set loop marker left"),
@@ -122,7 +122,7 @@ const UiActionList PlaybackUiActions::m_loopBoundaryActions = {
              IconCode::Code::LOOP_IN
              ),
     UiAction("loop-out",
-             ActionCategory::Playback,
+             ActionCategory::PLAYBACK,
              mu::context::UiCtxAny,
              mu::context::CTX_NOTATION_FOCUSED,
              TranslatableString("action", "Set loop marker right"),

@@ -28,7 +28,7 @@ using namespace mu::ui;
 
 const UiActionList ProjectUiActions::m_actions = {
     UiAction("file-open",
-             ActionCategory::File,
+             ActionCategory::FILE,
              mu::context::UiCtxAny,
              mu::context::CTX_ANY,
              TranslatableString("action", "&Open…"),
@@ -36,7 +36,7 @@ const UiActionList ProjectUiActions::m_actions = {
              IconCode::Code::OPEN_FILE
              ),
     UiAction("file-new",
-             ActionCategory::File,
+             ActionCategory::FILE,
              mu::context::UiCtxAny,
              mu::context::CTX_ANY,
              TranslatableString("action", "&New…"),
@@ -44,14 +44,14 @@ const UiActionList ProjectUiActions::m_actions = {
              IconCode::Code::NEW_FILE
              ),
     UiAction("file-close",
-             ActionCategory::File,
+             ActionCategory::FILE,
              mu::context::UiCtxNotationOpened,
              mu::context::CTX_ANY,
              TranslatableString("action", "&Close"),
              TranslatableString("action", "Close")
              ),
     UiAction("file-save",
-             ActionCategory::File,
+             ActionCategory::FILE,
              mu::context::UiCtxNotationOpened,
              mu::context::CTX_ANY,
              TranslatableString("action", "&Save"),
@@ -59,28 +59,28 @@ const UiActionList ProjectUiActions::m_actions = {
              IconCode::Code::SAVE
              ),
     UiAction("file-save-as",
-             ActionCategory::File,
+             ActionCategory::FILE,
              mu::context::UiCtxNotationOpened,
              mu::context::CTX_ANY,
              TranslatableString("action", "Save &as…"),
              TranslatableString("action", "Save as…")
              ),
     UiAction("file-save-a-copy",
-             ActionCategory::File,
+             ActionCategory::FILE,
              mu::context::UiCtxNotationOpened,
              mu::context::CTX_ANY,
              TranslatableString("action", "Save a cop&y…"),
              TranslatableString("action", "Save a copy…")
              ),
     UiAction("file-save-selection",
-             ActionCategory::File,
+             ActionCategory::FILE,
              mu::context::UiCtxNotationOpened,
              mu::context::CTX_ANY,
              TranslatableString("action", "Save se&lection…"),
              TranslatableString("action", "Save selection…")
              ),
     UiAction("file-save-to-cloud",
-             ActionCategory::File,
+             ActionCategory::FILE,
              mu::context::UiCtxNotationOpened,
              mu::context::CTX_ANY,
              TranslatableString("action", "Save to clo&ud…"),
@@ -88,7 +88,7 @@ const UiActionList ProjectUiActions::m_actions = {
              IconCode::Code::CLOUD_FILE
              ),
     UiAction("file-publish",
-             ActionCategory::File,
+             ActionCategory::FILE,
              mu::context::UiCtxNotationOpened,
              mu::context::CTX_NOTATION_OPENED,
              TranslatableString("action", "Pu&blish to MuseScore.com…"),
@@ -96,7 +96,7 @@ const UiActionList ProjectUiActions::m_actions = {
              IconCode::Code::CLOUD_FILE
              ),
     UiAction("file-export",
-             ActionCategory::File,
+             ActionCategory::FILE,
              mu::context::UiCtxNotationOpened,
              mu::context::CTX_NOTATION_OPENED,
              TranslatableString("action", "Export…"),
@@ -104,21 +104,21 @@ const UiActionList ProjectUiActions::m_actions = {
              IconCode::Code::SHARE_FILE
              ),
     UiAction("file-import-pdf",
-             ActionCategory::Undefined,
+             ActionCategory::UNDEFINED,
              mu::context::UiCtxAny,
              mu::context::CTX_ANY,
              TranslatableString("action", "Import P&DF…"),
              IconCode::Code::IMPORT
              ),
     UiAction("project-properties",
-             ActionCategory::Dialogspanels,
+             ActionCategory::DIALOGSPANELS,
              mu::context::UiCtxNotationOpened,
              mu::context::CTX_NOTATION_OPENED,
              TranslatableString("action", "Project propert&ies…"),
              TranslatableString("action", "Project properties…")
              ),
     UiAction("print",
-             ActionCategory::File,
+             ActionCategory::FILE,
              mu::context::UiCtxAny,
              mu::context::CTX_ANY,
              TranslatableString("action", "Print…"),
@@ -126,7 +126,7 @@ const UiActionList ProjectUiActions::m_actions = {
              IconCode::Code::PRINT
              ),
     UiAction("clear-recent",
-             ActionCategory::File,
+             ActionCategory::FILE,
              mu::context::UiCtxAny,
              mu::context::CTX_ANY,
              TranslatableString("action", "&Clear recent files")

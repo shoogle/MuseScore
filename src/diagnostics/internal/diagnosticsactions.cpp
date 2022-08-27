@@ -30,37 +30,37 @@ using namespace mu::diagnostics;
 
 const UiActionList DiagnosticsActions::m_actions = {
     UiAction("diagnostic-show-paths",
-             ActionCategory::Undefined,
+             ActionCategory::UNDEFINED,
              mu::context::UiCtxAny,
              mu::context::CTX_ANY,
              TranslatableString("action", "Show p&aths…")
              ),
     UiAction("diagnostic-show-profiler",
-             ActionCategory::Undefined,
+             ActionCategory::UNDEFINED,
              mu::context::UiCtxAny,
              mu::context::CTX_ANY,
              TranslatableString("action", "Show pr&ofiler…")
              ),
     UiAction("diagnostic-show-navigation-tree",
-             ActionCategory::Undefined,
+             ActionCategory::UNDEFINED,
              mu::context::UiCtxAny,
              mu::context::CTX_ANY,
              TranslatableString("action", "Show &navigation tree…")
              ),
     UiAction("diagnostic-show-accessible-tree",
-             ActionCategory::Undefined,
+             ActionCategory::UNDEFINED,
              mu::context::UiCtxAny,
              mu::context::CTX_ANY,
              TranslatableString("action", "Show &accessible tree…")
              ),
     UiAction("diagnostic-accessible-tree-dump",
-             ActionCategory::Accessibility,
+             ActionCategory::ACCESSIBILITY,
              mu::context::UiCtxAny,
              mu::context::CTX_ANY,
              TranslatableString("action", "Accessible &dump")
              ),
     UiAction("diagnostic-show-engraving-elements",
-             ActionCategory::Undefined,
+             ActionCategory::UNDEFINED,
              mu::context::UiCtxAny,
              mu::context::CTX_ANY,
              TranslatableString("action", "Engraving &elements")
