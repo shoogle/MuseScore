@@ -235,11 +235,11 @@ struct UiAction
             TranslatableString("framework/actioncategory", "Plugins") };
 
     actions::ActionCode code;
+    ActionCategory category = ActionCategory::INTERNAL;
     UiContext uiCtx = UiCtxAny;
     std::string scCtx = "any";
     TranslatableString title;
     TranslatableString description;
-    ActionCategory category = ActionCategory::INTERNAL;
     IconCode::Code iconCode = IconCode::Code::NONE;
     Checkable checkable = Checkable::No;
     std::vector<std::string> shortcuts;
@@ -272,11 +272,11 @@ struct UiAction
 
     QString getCategory() const
     {
-        if ((int)category + 1 >= 0 && (int)category + 1 < categories.size()) {
-            return categories[(int)category + 1].qTranslated();
+        size_t c = static_cast<int>(category) + 1;
+        IF_ASSERT_FAILED(c < categories.size()) {
+            return QString();
         }
-        LOGE() << "Categories: " << categories.size() << "| Requested Category: " << (int)category << " by: " << code;
-        return "NULL";
+        return categories[c].qTranslated();
     }
 
     bool operator==(const UiAction& other) const

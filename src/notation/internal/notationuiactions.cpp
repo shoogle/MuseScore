@@ -1405,6 +1405,7 @@ const UiActionList NotationUiActions::m_actions = {
              TranslatableString("action", "Add tied note to chord")
              ),
     UiAction("add-image",
+             ActionCategory::UNDEFINED,
              mu::context::UiCtxNotationOpened,
              mu::context::CTX_NOTATION_FOCUSED,
              TranslatableString("action", "Image")
@@ -1445,6 +1446,7 @@ const UiActionList NotationUiActions::m_actions = {
              TranslatableString("action", "Add text: part name")
              ),
     UiAction("frame-text",
+             ActionCategory::UNDEFINED,
              mu::context::UiCtxNotationOpened,
              mu::context::CTX_NOTATION_OPENED,
              TranslatableString("action", "Text"),
