@@ -24,6 +24,7 @@
 #include "accessibleroot.h"
 #include "../libmscore/score.h"
 #include "../libmscore/measure.h"
+#include "../libmscore/staff.h"
 
 #include "translation.h"
 #include "log.h"
@@ -190,12 +191,13 @@ QString AccessibleItem::accessibleName() const
 
     barsAndBeats.remove(u';'); // Too many pauses in speech
 
-    QString name = QString("%1%2%3%4%5")
+    QString name = QString("%1%2%3%4%5%6")
                    .arg(!commandInfo.isEmpty() ? (commandInfo + "; ") : "")
                    .arg(!staffInfo.isEmpty() ? (staffInfo + "; ") : "")
                    .arg(m_element->screenReaderInfo().toQString())
                    .arg(m_element->visible() ? "" : " " + qtrc("engraving", "invisible"))
-                   .arg(!barsAndBeats.isEmpty() ? ("; " + barsAndBeats) : "");
+                   .arg(!barsAndBeats.isEmpty() ? ("; " + barsAndBeats) : "")
+                   .arg(m_element->score()->selection().isRange() ? ("; " + qtrc("engraving", "selected")) : "");
 
     return readable(name);
 }
@@ -206,7 +208,41 @@ QString AccessibleItem::accessibleDescription() const
         return QString();
     }
 
-    return readable(m_element->accessibleExtraInfo());
+    Selection selection = m_element->score()->selection();
+
+    if (!selection.isRange()) {
+        return readable(m_element->accessibleExtraInfo());
+    }
+
+    String start = selection.startSegment()->formatBarsAndBeats();
+    String end;
+    if (Segment* endSeg = selection.endSegment()->prev1(SegmentType::ChordRest)) {
+        end = endSeg->formatBarsAndBeats();
+    }
+
+    start.remove(u';'); // Too many pauses in speech
+    end.remove(u';');
+
+    QString staffInstrument1, staffInstrument2 = "";
+    staff_idx_t startStaff = selection.staffStart();
+    staff_idx_t endStaff = selection.staffEnd() - 1;
+
+    if (startStaff != endStaff) {
+        Staff* staff1 = m_element->score()->staff(startStaff);
+        Staff* staff2 = m_element->score()->staff(endStaff);
+        staffInstrument1 = qtrc("engraving", "Staff %1 (Instrument %2)")
+                           .arg(QString::number(startStaff + 1))
+                           .arg(staff1 ? staff1->partName().toQString() : "");
+        staffInstrument2 = qtrc("engraving", "Staff %1 (Instrument %2)")
+                           .arg(QString::number(endStaff + 1))
+                           .arg(staff2 ? staff2->partName().toQString() : "");
+    }
+
+    return readable(qtrc("engraving", "Range selection starts %1%2 ends %3%4")
+                    .arg(start)
+                    .arg(!staffInstrument1.isEmpty() ? ("; " + staffInstrument1) : "")
+                    .arg(end)
+                    .arg(!staffInstrument2.isEmpty() ? ("; " + staffInstrument2) : ""));
 }
 
 QVariant AccessibleItem::accessibleValue() const
