@@ -214,35 +214,43 @@ QString AccessibleItem::accessibleDescription() const
         return readable(m_element->accessibleExtraInfo());
     }
 
-    String start = selection.startSegment()->formatBarsAndBeats();
-    String end;
-    if (Segment* endSeg = selection.endSegment()->prev1(SegmentType::ChordRest)) {
-        end = endSeg->formatBarsAndBeats();
+    Segment* startSeg = selection.startSegment();
+    Segment* endSeg = selection.endSegment();
+    if (endSeg) {
+        endSeg = endSeg->prev1(SegmentType::ChordRest);
     }
 
-    start.remove(u';'); // Too many pauses in speech
-    end.remove(u';');
+    IF_ASSERT_FAILED(startSeg && endSeg) {
+        return QString();
+    }
 
-    QString staffInstrument1, staffInstrument2 = "";
+    String startBarBeat = startSeg->formatBarsAndBeats().remove(u';'); // Too many pauses in speech
+    String endBarBeat = endSeg->formatBarsAndBeats().remove(u';');
+
+    QString staffInstrument1;
+    QString staffInstrument2;
     staff_idx_t startStaff = selection.staffStart();
     staff_idx_t endStaff = selection.staffEnd() - 1;
 
     if (startStaff != endStaff) {
         Staff* staff1 = m_element->score()->staff(startStaff);
         Staff* staff2 = m_element->score()->staff(endStaff);
-        staffInstrument1 = qtrc("engraving", "Staff %1 (Instrument %2)")
+        //: %1 = staff number, %2 = instrument name
+        staffInstrument1 = qtrc("engraving", "Staff %1 (%2)")
                            .arg(QString::number(startStaff + 1))
                            .arg(staff1 ? staff1->partName().toQString() : "");
-        staffInstrument2 = qtrc("engraving", "Staff %1 (Instrument %2)")
+        //: %1 = staff number, %2 = instrument name
+        staffInstrument2 = qtrc("engraving", "Staff %1 (%2)")
                            .arg(QString::number(endStaff + 1))
                            .arg(staff2 ? staff2->partName().toQString() : "");
     }
 
+    //: %1%2 and %3%4 represent locations in terms of measures, beats, and staff numbers
     return readable(qtrc("engraving", "Range selection starts %1%2 ends %3%4")
-                    .arg(start)
-                    .arg(!staffInstrument1.isEmpty() ? ("; " + staffInstrument1) : "")
-                    .arg(end)
-                    .arg(!staffInstrument2.isEmpty() ? ("; " + staffInstrument2) : ""));
+                    .arg(startBarBeat)
+                    .arg(!staffInstrument1.isEmpty() ? (" " + staffInstrument1) : "")
+                    .arg(endBarBeat)
+                    .arg(!staffInstrument2.isEmpty() ? (" " + staffInstrument2) : ""));
 }
 
 QVariant AccessibleItem::accessibleValue() const
