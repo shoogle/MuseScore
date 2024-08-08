@@ -1,0 +1,26 @@
+name: 'Build: All'
+
+# Set-up prior to first run:
+# 1. Create 'production' environment: https://github.com/musescore/MuseScore/settings/environments
+# 2. Enable 'required reviewers': MuseScore Editor Team
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Mode: testing, alpha, beta, rc, stable'
+        required: true
+        default: 'alpha'
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  linux:
+    name: Build Linux
+    uses: ./.github/workflows/build_linux.yml
+    with:
+      build_mode: ${{ inputs.mode == 'stable' && 'stable' || 'testing' }}  # Build mode: devel, nightly, testing, stable
+      publish: 'off'        # Publish to FTP: on - publish
+      sentry_project: ''    # Upload symbols and dumps to Sentry project: mu4, sandbox
