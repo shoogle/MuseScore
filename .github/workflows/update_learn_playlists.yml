@@ -5,8 +5,15 @@ on:
     inputs:
       mode:
         description: 'Mode: stable, testing'
-        required: true
         default: 'testing'
+        required: true
+  workflow_call:
+    inputs:
+      mode:
+        description: 'Mode: stable, testing'
+        default: 'testing'
+        type: string
+        required: true
 
 defaults:
   run:
@@ -37,6 +44,7 @@ jobs:
             --file_name "playlist.json"
 
   update-advanced-playlist:
+    if: ${{ false }} # old playlist no longer in use https://www.youtube.com/playlist?list=PL24C760637A625BB6
     runs-on: ubuntu-20.04
     steps:
       - name: Clone repository

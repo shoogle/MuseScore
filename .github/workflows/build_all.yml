@@ -1,0 +1,116 @@
+name: 'Build: All'
+
+# Set-up prior to first run:
+# 1. Create 'production' environment: https://github.com/musescore/MuseScore/settings/environments
+# 2. Enable 'required reviewers': MuseScore Editor Team
+
+on:
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: 'Platforms to build:'
+        default: 'backend linux_arm32 linux_arm64 linux_x64 macos windows_x64 windows_portable'
+        required: true
+      build_mode:
+        description: 'Build mode: devel, nightly, testing, stable'
+        default: 'devel'
+        required: true
+      publish:
+        description: 'Publish to FTP: on - publish'
+        default: 'off'
+        required: false
+      sentry_project:
+        description: 'Upload symbols and dumps to Sentry (choose a project): mu4(default for stable build), sandbox'
+        default: ''
+        required: false
+  workflow_call:
+    inputs:
+      platforms:
+        description: 'Platforms to build:'
+        default: 'backend linux_arm32 linux_arm64 linux_x64 macos windows_x64 windows_portable'
+        type: string
+        required: true
+      build_mode:
+        description: 'Build mode: devel, nightly, testing, stable'
+        default: 'devel'
+        type: string
+        required: true
+      publish:
+        description: 'Publish to FTP: on - publish'
+        default: 'off'
+        type: string
+        required: false
+      sentry_project:
+        description: 'Upload symbols and dumps to Sentry (choose a project): mu4(default for stable build), sandbox'
+        default: ''
+        type: string
+        required: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+
+  backend:
+    name: Backend
+    if: ${{ contains(inputs.platforms, 'backend') }}
+    uses: ./.github/workflows/build_backend.yml
+    with:
+      build_mode: ${{ inputs.build_mode }}
+      publish: ${{ inputs.publish }}
+
+  linux_arm:
+    name: Linux ARM
+    uses: ./.github/workflows/build_linux_arm.yml
+    with:
+      platforms: ${{ inputs.platforms }}
+      build_mode: ${{ inputs.build_mode }}
+      publish: ${{ inputs.publish }}
+      sentry_project: ${{ inputs.sentry_project }}
+
+  linux_x64:
+    name: Linux x64
+    if: ${{ contains(inputs.platforms, 'linux_x64') }}
+    uses: ./.github/workflows/build_linux.yml
+    with:
+      build_mode: ${{ inputs.build_mode }}
+      publish: ${{ inputs.publish }}
+      sentry_project: ${{ inputs.sentry_project }}
+
+  macos:
+    name: macOS
+    if: ${{ contains(inputs.platforms, 'macos') }}
+    uses: ./.github/workflows/build_macos.yml
+    with:
+      build_mode: ${{ inputs.build_mode }}
+      publish: ${{ inputs.publish }}
+      sentry_project: ${{ inputs.sentry_project }}
+
+  windows:
+    name: Windows
+    uses: ./.github/workflows/build_windows.yml
+    with:
+      platforms: ${{ inputs.platforms }}
+      build_mode: ${{ inputs.build_mode }}
+      publish: ${{ inputs.publish }}
+      sentry_project: ${{ inputs.sentry_project }}
+
+  # Dummy build for testing purposes
+  dummy:
+    if: ${{ contains(inputs.platforms, 'dummy') }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Prepare dummy artifact
+      run: |
+        mkdir build.artifacts
+        echo "Hello, world!" >build.artifacts/hello.txt
+        BUILD_NUMBER="$(date -u +%y%j%H%M)"
+        UPLOAD_ARTIFACT_NAME="MU4_${BUILD_NUMBER}_Dummy_${GITHUB_REF_NAME}"
+        UPLOAD_ARTIFACT_NAME="$(tr '":<>|*?/\\’' '_' <<<"${UPLOAD_ARTIFACT_NAME}")"
+        echo "UPLOAD_ARTIFACT_NAME=${UPLOAD_ARTIFACT_NAME}" | tee -a "${GITHUB_ENV}"
+    - name: Upload artifacts to GitHub
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.UPLOAD_ARTIFACT_NAME }}
+        path: ./build.artifacts/
