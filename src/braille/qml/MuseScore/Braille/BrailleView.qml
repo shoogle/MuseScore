@@ -56,19 +56,6 @@ StyledFlickable {
             root.visible = brailleModel.enabled
         }
 
-        onBrailleModeChanged: {
-            switch(brailleModel.mode) {
-                case 1: {
-                    fakeNavCtrl.accessible.setName("Braille: Normal mode");
-                    break;
-                }
-                case 2: {
-                    fakeNavCtrl.accessible.setName("Braille: Note input mode");
-                    break;
-                }
-            }
-        }
-
         Component.onCompleted: {
             root.visible = brailleModel.enabled
         }
@@ -180,7 +167,12 @@ StyledFlickable {
             order: 1
 
             accessible.role: MUAccessible.EditableText
-            accessible.name: "Braille"
+            accessible.name: {
+                switch (brailleModel.mode) {
+                    case 1: return qsTrc("braille", "Braille: Normal mode")
+                    case 2: return qsTrc("braille", "Braille: Note input mode")
+                }
+            }
             accessible.visualItem: brailleTextArea
             accessible.text: brailleTextArea.text
             accessible.selectedText: brailleTextArea.selectedText
@@ -199,6 +191,20 @@ StyledFlickable {
                     brailleTextArea.focus = false
                 }
             }
+        }
+
+        // Sibling to receive temporary focus when fakeNavCtrl's accessible name
+        // changes. See AccessibilityController::triggerRevoicingOfChangedName().
+        NavigationControl {
+            id: fakeNavCtrlSibling
+            name: "Sibling"
+            enabled: brailleTextArea.enabled && brailleTextArea.visible
+
+            panel: root.navigationPanel
+            order: 2
+
+            accessible.role: MUAccessible.Button
+            accessible.name: name
         }
 
         NavigationFocusBorder {

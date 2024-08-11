@@ -352,18 +352,22 @@ void AccessibilityController::savePanelAccessibleName(const IAccessible* oldItem
 
 void AccessibilityController::triggerRevoicingOfChangedName(IAccessible* item)
 {
+    LOGI() << "1: " << item->accessibleName();
     if (!configuration()->active()) {
         return;
     }
+    LOGI() << "2: " << item->accessibleName();
 
     if (m_lastFocused != item) {
         return;
     }
+    LOGI() << "3: " << item->accessibleName();
 
     const IAccessible* itemPanel = panel(item);
     if (!itemPanel) {
         return;
     }
+    LOGI() << "4: " << item->accessibleName();
 
     m_ignorePanelChangingVoice = true;
 
@@ -373,6 +377,7 @@ void AccessibilityController::triggerRevoicingOfChangedName(IAccessible* item)
     if (!tmpFocusedItem) {
         tmpFocusedItem = const_cast<IAccessible*>(itemPanel);
     }
+    LOGI() << "tmp: " << tmpFocusedItem->accessibleName();
 
     tmpFocusedItem->setState(State::Focused, true);
     m_itemForRestoreFocus = item;
@@ -388,6 +393,8 @@ void AccessibilityController::triggerRevoicingOfChangedName(IAccessible* item)
         }
 
         m_ignorePanelChangingVoice = false;
+
+        LOGI() << "5: " << item->accessibleName();
     });
 }
 
