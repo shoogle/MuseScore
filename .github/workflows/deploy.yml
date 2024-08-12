@@ -1,0 +1,70 @@
+name: Deploy
+
+# Set-up prior to first run:
+# 1. Create 'production' environment: https://github.com/musescore/MuseScore/settings/environments
+# 2. Enable 'required reviewers': MuseScore Editor Team
+
+on:
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: 'Platforms to build:'
+        default: 'dummy' # TODO: 'backend linux_arm32 linux_arm64 linux_x64 macos windows_x64 windows_portable'
+        required: true
+      release_type:
+        description: 'Release type: test,alpha,beta,rc,stable'
+        default: 'test'
+        required: true
+      create_tag:
+        description: 'Create tag: on, off'
+        default: 'off'
+        required: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+
+  build:
+    name: Build
+    uses: ./.github/workflows/build_all.yml
+    with:
+      platforms: ${{ inputs.platforms }}
+      build_mode: ${{ inputs.release_type == 'stable' && 'stable' || 'testing' }}
+      publish: 'off'
+      sentry_project: ${{ inputs.mode == 'stable' && 'mu4' || 'sandbox' }}
+
+  update_learn_playlists:
+    name: 'Update Home→Learn playlists'
+    needs: build
+    uses: ./.github/workflows/update_learn_playlists.yml
+    with:
+      mode: ${{ inputs.mode }}
+      environment: production # requires approval
+
+  create_draft_release:
+    name: Create draft ${{ needs.get_tag_info.outputs.tag_name }} release
+    needs: update_learn_playlists
+    if: ${{ inputs.create_tag == 'on' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://github.com
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+      # create release tag
+      # create release page
+
+  # check release page and publish, wait for day, if there is no critical issues, then continue
+
+  notify-users:
+    needs: create_draft_release
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://github.com
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
