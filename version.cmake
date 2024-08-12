@@ -16,7 +16,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 set(MUSE_APP_NAME "MuseScore")
 set(MUSE_APP_TITLE "MuseScore Studio")
@@ -26,7 +26,9 @@ set(MUSE_APP_VERSION_MINOR "4")
 set(MUSE_APP_VERSION_PATCH "0")
 set(MUSE_APP_VERSION_MAJ_MIN "${MUSE_APP_VERSION_MAJOR}.${MUSE_APP_VERSION_MINOR}")
 set(MUSE_APP_VERSION "${MUSE_APP_VERSION_MAJ_MIN}.${MUSE_APP_VERSION_PATCH}")
-set(MUSE_APP_VERSION_LABEL "")
+if (NOT DEFINED MUSE_APP_VERSION_LABEL)
+    set(MUSE_APP_VERSION_LABEL "") # override on command line (e.g. "-DMUSE_APP_VERSION_LABEL=-rc.2")
+endif()
 set(MUSE_APP_TITLE_VERSION "${MUSE_APP_TITLE} ${MUSE_APP_VERSION_MAJOR}")
 set(MUSE_APP_NAME_VERSION "${MUSE_APP_NAME} ${MUSE_APP_VERSION_MAJOR}")
 set(MUSE_APP_UNSTABLE ON)
@@ -45,5 +47,9 @@ if(MUSE_APP_BUILD_MODE MATCHES "release")
 endif()
 
 # Print variables which are needed by CI build scripts.
-message(STATUS "MUSE_APP_RELEASE_CHANNEL ${MUSE_APP_RELEASE_CHANNEL}")
-message(STATUS "MUSE_APP_VERSION ${MUSE_APP_VERSION}")
+foreach(VAR
+    MUSE_APP_RELEASE_CHANNEL
+    MUSE_APP_VERSION
+)
+    message(STATUS "${VAR} ${${VAR}}")
+endforeach()

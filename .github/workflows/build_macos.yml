@@ -39,6 +39,11 @@ on:
         default: ''
         type: string
         required: false
+      version_label:
+        description: 'Version label: test, alpha, alpha.2, beta, rc'
+        default: ''
+        type: string
+        required: false
 
 env:
   # CURRENT_RELEASE_BRANCH: 4.3.2
@@ -206,10 +211,10 @@ jobs:
         bash ./buildscripts/ci/translation/tx_install.sh -t ${{ secrets.TRANSIFEX_API_TOKEN }} -s macos
         bash ./buildscripts/ci/translation/tx_pull.sh
     - name: Build
-      if: env.DO_BUILD == 'true'    
+      if: env.DO_BUILD == 'true'
       run: |
         C_URL=${SENTRY_URL}; if [ -z "$C_URL" ]; then C_URL="''"; fi
-        bash ./buildscripts/ci/macos/build.sh -n ${{ env.BUILD_NUMBER }} --crash_log_url $C_URL
+        bash ./buildscripts/ci/macos/build.sh -n ${{ env.BUILD_NUMBER }} --crash_log_url $C_URL --label "${{ inputs.version_label }}"
         echo "============== ccache ==============="
         ccache -s
     - name: Package 

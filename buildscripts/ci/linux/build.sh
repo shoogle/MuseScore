@@ -36,6 +36,7 @@ while [[ "$#" -gt 0 ]]; do
         -n|--number) BUILD_NUMBER="$2"; shift ;;
         --crash_log_url) CRASH_REPORT_URL="$2"; shift ;;
         --build_mode) BUILD_MODE="$2"; shift ;;
+        --label) MUSE_APP_VERSION_LABEL="$2"; shift ;;
         --arch) PACKARCH="$2"; shift ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
@@ -55,6 +56,7 @@ case "${BUILD_MODE}" in
 esac
 
 echo "MUSE_APP_BUILD_MODE: $MUSE_APP_BUILD_MODE"
+echo "MUSE_APP_VERSION_LABEL: ${MUSE_APP_VERSION_LABEL}"
 echo "BUILD_NUMBER: $BUILD_NUMBER"
 echo "CRASH_REPORT_URL: $CRASH_REPORT_URL"
 echo "BUILD_MODE: $BUILD_MODE"
@@ -85,6 +87,7 @@ MUSESCORE_REVISION=$(git rev-parse --short=7 HEAD)
 
 # Build portable AppImage
 MUSE_APP_BUILD_MODE=$MUSE_APP_BUILD_MODE \
+MUSE_APP_VERSION_LABEL="${MUSE_APP_VERSION_LABEL}" \
 MUSE_APP_INSTALL_SUFFIX=$SUFFIX \
 MUSESCORE_BUILD_NUMBER=$BUILD_NUMBER \
 MUSESCORE_REVISION=$MUSESCORE_REVISION \

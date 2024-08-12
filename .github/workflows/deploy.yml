@@ -26,14 +26,39 @@ defaults:
 
 jobs:
 
+  get_tag_info:
+    name: Get tag info
+    runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.make_tag_info.outputs.TAG_NAME }}
+      version_label: ${{ steps.make_tag_info.outputs.VERSION_LABEL }}
+    steps:
+    - name: Clone repo with history
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # entire history for all branches and tags
+    - id: make_tag_info
+      name: Make tag info
+      env:
+        RELEASE_TYPE: ${{ inputs.release_type }}
+        CREATE_TAG: ${{ inputs.create_tag }}
+      run: |
+        git tag --list
+        echo ----------
+        buildscripts/ci/release/make_tag_name.sh | tee -a "${GITHUB_OUTPUT}"
+        echo ----------
+        echo "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}"
+
   build:
     name: Build
+    needs: get_tag_info
     uses: ./.github/workflows/build_all.yml
     with:
       platforms: ${{ inputs.platforms }}
       build_mode: ${{ inputs.release_type == 'stable' && 'stable' || 'testing' }}
       publish: 'off'
       sentry_project: ${{ inputs.mode == 'stable' && 'mu4' || 'sandbox' }}
+      version_label: ${{ needs.get_tag_info.outputs.version_label }}
 
   update_learn_playlists:
     name: 'Update Home→Learn playlists'

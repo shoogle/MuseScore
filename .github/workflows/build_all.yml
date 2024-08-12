@@ -45,6 +45,11 @@ on:
         default: ''
         type: string
         required: false
+      version_label:
+        description: 'Version label: test, alpha, alpha.2, beta, rc'
+        default: ''
+        type: string
+        required: false
 
 defaults:
   run:
@@ -59,6 +64,7 @@ jobs:
     with:
       build_mode: ${{ inputs.build_mode }}
       publish: ${{ inputs.publish }}
+      version_label: ${{ inputs.version_label }}
 
   linux_arm:
     name: Linux ARM
@@ -68,6 +74,7 @@ jobs:
       build_mode: ${{ inputs.build_mode }}
       publish: ${{ inputs.publish }}
       sentry_project: ${{ inputs.sentry_project }}
+      version_label: ${{ inputs.version_label }}
 
   linux_x64:
     name: Linux x64
@@ -77,6 +84,7 @@ jobs:
       build_mode: ${{ inputs.build_mode }}
       publish: ${{ inputs.publish }}
       sentry_project: ${{ inputs.sentry_project }}
+      version_label: ${{ inputs.version_label }}
 
   macos:
     name: macOS
@@ -86,6 +94,7 @@ jobs:
       build_mode: ${{ inputs.build_mode }}
       publish: ${{ inputs.publish }}
       sentry_project: ${{ inputs.sentry_project }}
+      version_label: ${{ inputs.version_label }}
 
   windows:
     name: Windows
@@ -95,6 +104,7 @@ jobs:
       build_mode: ${{ inputs.build_mode }}
       publish: ${{ inputs.publish }}
       sentry_project: ${{ inputs.sentry_project }}
+      version_label: ${{ inputs.version_label }}
 
   # Dummy build for testing purposes
   dummy:

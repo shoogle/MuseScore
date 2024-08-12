@@ -30,6 +30,7 @@ while [[ "$#" -gt 0 ]]; do
     case $1 in
         -n|--number) BUILD_NUMBER="$2"; shift ;;
         --crash_log_url) CRASH_REPORT_URL="$2"; shift ;;
+        --label) MUSE_APP_VERSION_LABEL="$2"; shift ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
@@ -52,6 +53,7 @@ else
 fi
 
 echo "MUSE_APP_BUILD_MODE: $MUSE_APP_BUILD_MODE"
+echo "MUSE_APP_VERSION_LABEL: ${MUSE_APP_VERSION_LABEL}"
 echo "BUILD_NUMBER: $BUILD_NUMBER"
 echo "CRASH_REPORT_URL: $CRASH_REPORT_URL"
 echo "VST3_SDK_PATH: $VST3_SDK_PATH"
@@ -62,6 +64,7 @@ MUSESCORE_MACOS_DEPS_PATH="$HOME/musescore_deps_macos" \
 CMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
 MUSESCORE_INSTALL_DIR="../applebuild" \
 MUSE_APP_BUILD_MODE=$MUSE_APP_BUILD_MODE \
+MUSE_APP_VERSION_LABEL="${MUSE_APP_VERSION_LABEL}" \
 MUSESCORE_BUILD_NUMBER=$BUILD_NUMBER \
 MUSESCORE_REVISION=$MUSESCORE_REVISION \
 MUSESCORE_CRASHREPORT_URL=$CRASH_REPORT_URL \

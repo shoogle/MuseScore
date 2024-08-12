@@ -26,6 +26,11 @@ on:
         default: 'off'
         type: string
         required: false
+      version_label:
+        description: 'Version label: test, alpha, alpha.2, beta, rc'
+        default: ''
+        type: string
+        required: false
 
 jobs:
   backend:
@@ -71,7 +76,7 @@ jobs:
 
     - name: Build
       run: |
-        sudo bash ./buildscripts/ci/backend/build.sh -n ${{ env.BUILD_NUMBER }} --build_videoexport
+        sudo bash ./buildscripts/ci/backend/build.sh -n ${{ env.BUILD_NUMBER }} --build_videoexport --label "${{ inputs.version_label }}"
     
     - name: Package
       run: |
