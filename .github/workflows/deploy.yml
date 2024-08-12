@@ -13,11 +13,11 @@ on:
         required: true
       release_type:
         description: 'Release type: test,alpha,beta,rc,stable'
-        default: 'test'
+        default: 'alpha' # TODO: test
         required: true
       create_tag:
         description: 'Create tag: on, off'
-        default: 'off'
+        default: 'on' # TODO: off
         required: false
 
 defaults:
@@ -70,17 +70,42 @@ jobs:
 
   create_draft_release:
     name: Create draft ${{ needs.get_tag_info.outputs.tag_name }} release
-    needs: update_learn_playlists
-    if: ${{ inputs.create_tag == 'on' }}
+    needs:
+      - get_tag_info # explicit dependency necessary to access outputs
+      - update_learn_playlists
+    if: ${{ ! cancelled() && inputs.create_tag == 'on' }}
     runs-on: ubuntu-latest
     environment:
-      name: production
-      url: https://github.com
+      name: production # requires approval
+      url: ${{ github.repositoryUrl }}/releases/tag/${{ needs.get_tag_info.outputs.tag_name }}
+    env:
+      TAG_NAME: ${{ needs.get_tag_info.outputs.tag_name }}
+      RELEASE_TYPE: ${{ inputs.release_type }}
     steps:
-      - name: Clone repository
-        uses: actions/checkout@v4
-      # create release tag
-      # create release page
+    - name: Clone repository
+      uses: actions/checkout@v4
+    - name: Make release name
+      run: |
+        buildscripts/ci/release/make_release_name.sh | tee -a "${GITHUB_ENV}"
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: build.artifact
+    - name: Extract artifacts
+      run: |
+        find build.artifact -type f
+        exit 1 # TODO: check
+    - name: Create tag
+      run: |
+        git tag "${TAG_NAME}" "${GITHUB_SHA}"
+        git push origin "${TAG_NAME}"
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      with: # https://github.com/softprops/action-gh-release?tab=readme-ov-file#inputs
+        draft: true
+        prerelease: ${{ inputs.RELEASE_TYPE != 'stable' }}
+        name: ${{ env.RELEASE_NAME }}
+        tag_name: ${{ env.TAG_NAME }}
 
   # check release page and publish, wait for day, if there is no critical issues, then continue
 
