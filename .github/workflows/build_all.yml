@@ -111,16 +111,44 @@ jobs:
     if: ${{ contains(inputs.platforms, 'dummy') }}
     runs-on: ubuntu-latest
     steps:
+    - name: Clone repository
+      uses: actions/checkout@v4
     - name: Prepare dummy artifact
       run: |
-        mkdir build.artifacts
-        echo "Hello, world!" >build.artifacts/hello.txt
-        BUILD_NUMBER="$(date -u +%y%j%H%M)"
-        UPLOAD_ARTIFACT_NAME="MU4_${BUILD_NUMBER}_Dummy_${GITHUB_REF_NAME}"
-        UPLOAD_ARTIFACT_NAME="$(tr '":<>|*?/\\’' '_' <<<"${UPLOAD_ARTIFACT_NAME}")"
+        ARTIFACTS_DIR="build.artifacts"
+        echo "ARTIFACTS_DIR=${ARTIFACTS_DIR}" | tee -a "${GITHUB_ENV}"
+
+        buildscripts/ci/tools/make_build_mode_env.sh -e "${{ github.event_name }}" -m "${{ inputs.build_mode }}"
+        BUILD_MODE="$(<"${ARTIFACTS_DIR}/env/build_mode.env")"
+
+        case "${BUILD_MODE}" in
+        testing)  MUSE_APP_BUILD_MODE=testing;;
+        stable)   MUSE_APP_BUILD_MODE=release;;
+        *)        MUSE_APP_BUILD_MODE=dev;;
+        esac
+
+        buildscripts/ci/tools/make_build_number.sh
+        BUILD_NUMBER="$(<"${ARTIFACTS_DIR}/env/build_number.env")"
+
+        buildscripts/ci/tools/make_version_env.sh "${BUILD_NUMBER}"
+        BUILD_VERSION="$(<"${ARTIFACTS_DIR}/env/build_version.env")"
+
+        buildscripts/ci/tools/make_branch_env.sh
+        BUILD_BRANCH="$(<"${ARTIFACTS_DIR}/env/build_branch.env")"
+
+        buildscripts/ci/tools/make_release_channel_env.sh -c "${MUSE_APP_BUILD_MODE}"
+        buildscripts/ci/tools/make_revision_env.sh "$(git rev-parse --short=7 HEAD)"
+
+        buildscripts/ci/tools/make_artifact_name_env.sh "MuseScore-Dummy-${BUILD_VERSION}-x86_64.txt"
+        ARTIFACT_NAME="$(<"${ARTIFACTS_DIR}/env/artifact_name.env")"
+
+        echo "Hello, world!" >"${ARTIFACTS_DIR}/${ARTIFACT_NAME}"
+        buildscripts/ci/tools/checksum.sh
+
+        UPLOAD_ARTIFACT_NAME="$(tr '":<>|*?/\\’' '_' <<<"MU4_${BUILD_NUMBER}_Dummy_${BUILD_BRANCH}")"
         echo "UPLOAD_ARTIFACT_NAME=${UPLOAD_ARTIFACT_NAME}" | tee -a "${GITHUB_ENV}"
     - name: Upload artifacts to GitHub
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.UPLOAD_ARTIFACT_NAME }}
-        path: ./build.artifacts/
+        path: ${{ env.ARTIFACTS_DIR }}

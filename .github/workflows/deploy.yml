@@ -16,7 +16,7 @@ on:
         default: 'alpha' # TODO: test
         required: true
       create_tag:
-        description: 'Create tag: on, off'
+        description: 'Create tag: on,off (if on, release type must be alpha,beta,rc,stable)'
         default: 'on' # TODO: off
         required: false
 
