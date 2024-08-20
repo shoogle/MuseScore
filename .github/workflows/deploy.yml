@@ -69,8 +69,8 @@ jobs:
       mode: ${{ inputs.mode }}
       environment: production # requires approval
 
-  create_draft_release:
-    name: 'Create draft release: ${{ needs.get_tag_info.outputs.tag_name }}'
+  create_release:
+    name: 'Create release: ${{ needs.get_tag_info.outputs.tag_name }}'
     needs:
       - get_tag_info # to access outputs
       - update_learn_playlists
@@ -170,7 +170,7 @@ jobs:
   # check release page and publish, wait for day, if there is no critical issues, then continue
 
   notify-users:
-    needs: create_draft_release
+    needs: create_release
     runs-on: ubuntu-latest
     environment:
       name: production
@@ -178,3 +178,14 @@ jobs:
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
+
+  notify_users:
+    name: Notify users
+    needs:
+      - get_tag_info # to access outputs
+      - create_release
+    uses: ./.github/workflows/update_release_info.yml
+    with:
+      mode: ${{ inputs.release_type == 'stable' && 'stable' || 'testing' }}
+      # tag: ${{ needs.get_tag_info.outputs.tag_name }}
+      environment: production # requires approval
