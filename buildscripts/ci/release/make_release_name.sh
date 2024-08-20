@@ -36,7 +36,7 @@ int="(0|[1-9][0-9]*)"
 
 if [[ ! "${version}" =~ ^${int}\.${int}(\.[1-9][0-9]*)?$ ]]; then
     echo >&2 "$o: Error: version '${version}' is badly formed."
-    echo >&2 "$o: The patch number should be omitted if it is zero."
+    echo >&2 "$o: The patch number should be omitted if it's zero."
     exit 1
 fi
 
