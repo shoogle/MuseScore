@@ -30,6 +30,7 @@
 #endif
 
 #include "../ioretcodes.h"
+#include "internal/platform/win/shellshortcut.h"
 #include "log.h"
 
 using namespace muse;
@@ -226,6 +227,17 @@ Ret FileSystem::makePath(const io::path_t& path) const
     }
 
     return make_ret(Err::NoError);
+}
+
+Ret FileSystem::makeLink(const io::path_t& targetPath, io::path_t linkPath) const
+{
+    bool success;
+#if defined(Q_OS_WIN)
+    success = ShellShortcut::create(targetPath, linkPath);
+#else
+    success = QFile().link(targetPath, linkPath);
+#endif
+    return success ? make_ret(Err::NoError) : make_ret(Err::FSMakingError);
 }
 
 EntryType FileSystem::entryType(const io::path_t& path) const

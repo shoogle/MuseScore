@@ -227,6 +227,8 @@ else()
         set(MODULE_SRC ${MODULE_SRC}
             ${CMAKE_CURRENT_LIST_DIR}/internal/platform/win/wininteractivehelper.cpp
             ${CMAKE_CURRENT_LIST_DIR}/internal/platform/win/wininteractivehelper.h
+            ${CMAKE_CURRENT_LIST_DIR}/internal/platform/win/shellshortcut.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/internal/platform/win/shellshortcut.h
             ${CMAKE_CURRENT_LIST_DIR}/platform/win/waitabletimer.h
         )
         list(APPEND MODULE_LINK Winmm) # needed for timeBeginPeriod

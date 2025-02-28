@@ -213,6 +213,9 @@ void NotationConfiguration::init()
 
     if (!userStylesPath().empty()) {
         fileSystem()->makePath(userStylesPath());
+        io::path_t p1 = globalConfiguration()->appDataPath() + "/styles";
+        io::path_t p2 = userStylesPath() + "/Built";
+        fileSystem()->makeLink(p1, p2);
     }
 
     settings()->setDefaultValue(DEFAULT_NOTE_INPUT_METHOD, Val(BY_NOTE_NAME_INPUT_METHOD));
