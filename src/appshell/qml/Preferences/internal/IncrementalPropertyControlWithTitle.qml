@@ -61,7 +61,7 @@ Row {
         decimals: 0
         step: 1
 
-        navigation.accessible.name: titleLabel.text + " " + currentValue + " " + measureUnitsSymbol
+        navigation.accessible.name: titleLabel.text
 
         onValueEdited: function(newValue) {
             root.valueEdited(newValue)

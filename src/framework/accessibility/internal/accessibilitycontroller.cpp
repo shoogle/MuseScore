@@ -205,61 +205,77 @@ void AccessibilityController::propertyChanged(IAccessible* item, IAccessible::Pr
 
     QAccessible::Event etype = QAccessible::InvalidEvent;
     switch (property) {
-    case IAccessible::Property::Undefined:
-        return;
-    case IAccessible::Property::Parent: etype = QAccessible::ParentChanged;
-        break;
-    case IAccessible::Property::Name: {
-        bool triggerRevoicing = false;
+//     case IAccessible::Property::Undefined:
+//         return;
+//     case IAccessible::Property::Parent: etype = QAccessible::ParentChanged;
+//         break;
+//     case IAccessible::Property::Name: {
+//         bool triggerRevoicing = false;
 
-#ifdef Q_OS_MAC
-        triggerRevoicing = false;
-#elif defined(Q_OS_WIN)
-        triggerRevoicing = true;
-#else
-        //! if it is one character than we can send NameChange and don't use hack with revoicing
-        triggerRevoicing = item->accessibleName().size() > 1;
-#endif
+// #ifdef Q_OS_MAC
+//         triggerRevoicing = false;
+// #elif defined(Q_OS_WIN)
+//         triggerRevoicing = true;
+// #else
+//         //! if it is one character than we can send NameChange and don't use hack with revoicing
+//         triggerRevoicing = item->accessibleName().size() > 1;
+// #endif
 
-        if (triggerRevoicing) {
-            triggerRevoicingOfChangedName(item);
-            return;
-        } else {
-            m_needToVoicePanelInfo = false;
-            etype = QAccessible::NameChanged;
-            break;
+//         if (triggerRevoicing) {
+//             triggerRevoicingOfChangedName(item);
+//             return;
+//         } else {
+//             m_needToVoicePanelInfo = false;
+//             etype = QAccessible::NameChanged;
+//             break;
+//         }
+//     }
+//     case IAccessible::Property::Description: etype = QAccessible::DescriptionChanged;
+//         break;
+//     case IAccessible::Property::Value: {
+//         QAccessibleValueChangeEvent ev(it.object, it.item->accessibleValue());
+//         sendEvent(&ev);
+//         return;
+//     }
+//     case IAccessible::Property::TextCursor: {
+//         int selectionStart, selectionEnd;
+//         it.item->accessibleSelection(0 /* selectionIndex */, &selectionStart, &selectionEnd);
+//         if (selectionStart == selectionEnd || (selectionStart == m_prevSelectionStart && selectionEnd == m_prevSelectionEnd)) {
+//             QAccessibleTextCursorEvent ev(it.object, it.item->accessibleCursorPosition());
+//             sendEvent(&ev);
+//         }
+//         return;
+//     }
+//     case IAccessible::Property::TextInsert: {
+//         IAccessible::TextRange range(value.toQVariant().toMap());
+//         QAccessibleTextInsertEvent ev(it.iface, range.startPosition,
+//                                       it.item->accessibleText(range.startPosition, range.endPosition));
+//         sendEvent(&ev);
+//         return;
+//     }
+//     case IAccessible::Property::TextRemove: {
+//         IAccessible::TextRange range(value.toQVariant().toMap());
+//         QAccessibleTextRemoveEvent ev(it.object, range.startPosition,
+//                                       it.item->accessibleText(range.startPosition, range.endPosition));
+//         sendEvent(&ev);
+//         return;
+//     }
+    case IAccessible::Property::TextSelection: {
+        int selectionStart, selectionEnd;
+        it.item->accessibleSelection(0 /* selectionIndex */, &selectionStart, &selectionEnd);
+        if (it.object != m_prevObject || selectionStart != m_prevSelectionStart || selectionEnd != m_prevSelectionEnd) {
+            QAccessibleTextSelectionEvent ev(it.iface, selectionStart, selectionEnd);
+            sendEvent(&ev);
+            m_prevObject = it.object;
+            m_prevSelectionStart = selectionStart;
+            m_prevSelectionEnd = selectionEnd;
         }
-    }
-    case IAccessible::Property::Description: etype = QAccessible::DescriptionChanged;
-        break;
-    case IAccessible::Property::Value: {
-        QAccessibleValueChangeEvent ev(it.object, it.item->accessibleValue());
-        sendEvent(&ev);
-        return;
-    }
-    case IAccessible::Property::TextCursor: {
-        QAccessibleTextCursorEvent ev(it.object, it.item->accessibleCursorPosition());
-        sendEvent(&ev);
-        return;
-    }
-    case IAccessible::Property::TextInsert: {
-        IAccessible::TextRange range(value.toQVariant().toMap());
-        QAccessibleTextInsertEvent ev(it.object, range.startPosition,
-                                      it.item->accessibleText(range.startPosition, range.endPosition));
-        sendEvent(&ev);
-        return;
-    }
-    case IAccessible::Property::TextRemove: {
-        IAccessible::TextRange range(value.toQVariant().toMap());
-        QAccessibleTextRemoveEvent ev(it.object, range.startPosition,
-                                      it.item->accessibleText(range.startPosition, range.endPosition));
-        sendEvent(&ev);
         return;
     }
     }
 
-    QAccessibleEvent ev(it.object, etype);
-    sendEvent(&ev);
+    // QAccessibleEvent ev(it.object, etype);
+    // sendEvent(&ev);
 }
 
 void AccessibilityController::stateChanged(IAccessible* aitem, State state, bool arg)

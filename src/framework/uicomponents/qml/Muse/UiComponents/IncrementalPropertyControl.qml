@@ -148,8 +148,14 @@ Item {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
 
-        navigation.accessible.role: MUAccessible.SpinBox
-        navigation.accessible.value: currentValue + (measureUnitsSymbol !== "" ? " " + measureUnitsSymbol : "")
+        accessible.role: MUAccessible.SpinBox
+        accessible.description: measureUnitsSymbol
+        //accessible.text: currentText + (measureUnitsSymbol !== "" ? " " + measureUnitsSymbol : "")
+        accessible.value: Number(currentValue) // + (measureUnitsSymbol !== "" ? " " + measureUnitsSymbol : "")
+        accessible.minimumValue: root.minValue
+        accessible.maximumValue: root.maxValue
+        accessible.stepSize: root.step
+
         navigation.onNavigationEvent: function(event) {
             if (!textInputField.activeFocus) {
                 return
@@ -158,12 +164,12 @@ Item {
             switch (event.type) {
             case NavigationEvent.Up:
                 root.increment()
-                selectAll()
+                // selectAll()
                 event.accepted = true
                 break
             case NavigationEvent.Down:
                 root.decrement()
-                selectAll()
+                // selectAll()
                 event.accepted = true
                 break
             }

@@ -172,6 +172,10 @@ private:
 
     bool m_ignorePanelChangingVoice = false;
     bool m_needToVoicePanelInfo = false;
+
+    AccessibleObject* m_prevObject = nullptr;
+    int m_prevSelectionStart = -1;
+    int m_prevSelectionEnd = -1;
 };
 }
 

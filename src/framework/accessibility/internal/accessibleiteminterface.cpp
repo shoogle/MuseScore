@@ -149,10 +149,20 @@ QAccessible::State AccessibleItemInterface::state() const
         state.checked = item->accessibleState(IAccessible::State::Checked);
     } break;
     case IAccessible::Role::EditableText: {
+        state.selectable = true;
+        state.selectableText = true;
+        state.editable = true;
+        state.readOnly = false;
+        state.multiLine = true;
+        state.multiSelectable = true;
+        state.extSelectable = true;
+        state.disabled = false;
+        state.active = true;
         state.focusable = true;
         state.focused = item->accessibleState(IAccessible::State::Focused);
     } break;
     case IAccessible::Role::StaticText: {
+        state.editable = false;
         state.focusable = true;
         state.focused = item->accessibleState(IAccessible::State::Focused);
     } break;
@@ -197,10 +207,20 @@ QAccessible::State AccessibleItemInterface::state() const
         state.focused = item->accessibleState(IAccessible::State::Focused);
     } break;
     case IAccessible::Role::SpinBox: {
+        state.searchEdit = true;
+        state.multiLine = false;
+        state.selectable = true;
+        state.selectableText = true;
+        state.editable = true;
         state.focusable = true;
         state.focused = item->accessibleState(IAccessible::State::Focused);
     } break;
     case IAccessible::Role::Range: {
+        state.searchEdit = true;
+        state.multiLine = false;
+        state.selectable = true;
+        state.selectableText = true;
+        state.editable = true;
         state.focusable = true;
         state.focused = item->accessibleState(IAccessible::State::Focused);
     } break;
@@ -290,12 +310,24 @@ QString AccessibleItemInterface::text(QAccessible::Text textType) const
 #if defined(Q_OS_WINDOWS)
     // Narrator doesn't read descriptions but it does read accelerators.
     // NVDA reads both so it should be safe to give just an Accelerator.
-    case QAccessible::Accelerator: return m_object->item()->accessibleDescription();
+    //case QAccessible::Accelerator: return m_object->item()->accessibleDescription();
 #elif !defined(Q_OS_MACOS)
     //  Orca on Linux does read descriptions.
     case QAccessible::Description: return m_object->item()->accessibleDescription();
 #endif
-    default: break;
+    case QAccessible::Value: {
+        IAccessible::Role internalRole = m_object->item()->accessibleRole();
+        switch (internalRole) {
+        case IAccessible::SpinBox:
+        case IAccessible::Range:
+            return m_object->item()->accessibleValue().toString(); // + " " + m_object->item()->accessibleDescription();
+        default:
+            break;
+        }
+        return text(0, characterCount());
+    }
+    default:
+        break;
     }
 
     return QString();
@@ -469,22 +501,40 @@ QAccessibleInterface* AccessibleItemInterface::table() const
 
 void* AccessibleItemInterface::interface_cast(QAccessible::InterfaceType type)
 {
-    QAccessible::Role itemRole = role();
-    if (type == QAccessible::InterfaceType::ValueInterface && itemRole == QAccessible::Slider) {
-        return static_cast<QAccessibleValueInterface*>(this);
-    } else if (type == QAccessible::InterfaceType::TextInterface) {
+    //! NOTE: Sometimes, as a hack to get optimum speech, we broadcast a
+    //! different role to the screen reader than we use internally.
+    IAccessible::Role internalRole = m_object->item()->accessibleRole();
+    QAccessible::Role externalRole = role();
+
+    // https://doc.qt.io/qt-6/qaccessible.html#InterfaceType-enum
+    switch (type) {
+    case QAccessible::TextInterface: {
         return static_cast<QAccessibleTextInterface*>(this);
     }
-
-    bool isListType = type == QAccessible::InterfaceType::TableCellInterface;
+    case QAccessible::EditableTextInterface: {
+        return static_cast<QAccessibleEditableTextInterface*>(this);
+    }
+    case QAccessible::ValueInterface: {
+        switch (internalRole) {
+        case IAccessible::SpinBox:
+        case IAccessible::Range:
+            return static_cast<QAccessibleValueInterface*>(this);
+        default:
+            break;
+        }
+        break;
+    }
 #ifdef Q_OS_WIN
-    //! NOTE: Without Action and Text interfaces NVDA doesn't work
-    isListType |= type == QAccessible::InterfaceType::ActionInterface;
+    case QAccessible::ActionInterface: //! NOTE: Without Action and Text interfaces NVDA doesn't work
+        return static_cast<QAccessibleActionInterface*>(this);
 #endif
-
-    if (isListType && itemRole == QAccessible::ListItem) {
-        //! NOTE: Without Action and Text interfaces NVDA doesn't work
-        return static_cast<QAccessibleTableCellInterface*>(this);
+    case QAccessible::TableCellInterface: {
+        if (externalRole == QAccessible::ListItem) {
+            return static_cast<QAccessibleTableCellInterface*>(this);
+        }
+    }
+    default:
+        break;
     }
 
     //! NOTE Not implemented

@@ -82,7 +82,38 @@ FocusScope {
         }
     }
 
+    function s(val) {
+        if (typeof val == 'boolean') {
+            return val ? "true" : "false"
+        }
+
+        switch (val) {
+        case Qt.MouseFocusReason:           return "mouse"
+        case Qt.TabFocusReason:             return "tab"
+        case Qt.BacktabFocusReason:         return "backtab"
+        case Qt.ActiveWindowFocusReason:    return "window"
+        case Qt.PopupFocusReason:           return "popup"
+        case Qt.ShortcutFocusReason:        return "shortcut"
+        case Qt.MenuBarFocusReason:         return "menu"
+        case Qt.OtherFocusReason:           return "other"
+        }
+
+        return "unknown"
+    }
+
+    function l(msg, ...args) {
+        console.info(msg, ...args.map(root.s))
+    }
+
+    // forceActiveFocus: function(reason) {
+    //     if (reason === Qt.ActiveWindowFocusReason) {
+    //         return
+    //     }
+    //     valueInput.forceActiveFocus(reason)
+    // }
+
     onActiveFocusChanged: {
+        root.l("focusScope:", activeFocus)
         if (activeFocus) {
             valueInput.forceActiveFocus()
         }
@@ -227,6 +258,12 @@ FocusScope {
             }
 
             onActiveFocusChanged: {
+                root.l("valueInput:", activeFocus, focusReason)
+
+                if (focusReason === Qt.ActiveWindowFocusReason) {
+                    return // preserve selection when another application is focused
+                }
+
                 if (activeFocus) {
                     navCtrl.requestActive()
                     selectAll()

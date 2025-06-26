@@ -169,7 +169,7 @@ FlatButton {
                 }
                 navigation.row: 2
                 navigation.column: 0
-                navigation.accessible.name: numberOfMeasuresLabel.text + " " + currentValue
+                navigation.accessible.name: numberOfMeasuresLabel.text
 
                 onValueEdited: function(newValue) {
                     root.model.measureCount = newValue

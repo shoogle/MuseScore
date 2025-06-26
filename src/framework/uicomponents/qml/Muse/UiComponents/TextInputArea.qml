@@ -194,6 +194,10 @@ FocusScope {
                 }
 
                 onActiveFocusChanged: {
+                    if (focusReason === Qt.ActiveWindowFocusReason) {
+                        return // preserve selection when another application is focused
+                    }
+
                     if (activeFocus) {
                         navCtrl.requestActive()
                         selectAll()

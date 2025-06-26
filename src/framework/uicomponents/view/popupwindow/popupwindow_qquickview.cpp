@@ -275,7 +275,8 @@ bool PopupWindow_QQuickView::eventFilter(QObject* watched, QEvent* event)
         }
 
         if (event->type() == QEvent::FocusIn) {
-            m_view->rootObject()->forceActiveFocus();
+            auto focusEvent = static_cast<QFocusEvent*>(event);
+            m_view->rootObject()->forceActiveFocus(focusEvent->reason());
         }
 
         if (m_takeFocusOnClick && event->type() == QEvent::MouseButtonPress) {

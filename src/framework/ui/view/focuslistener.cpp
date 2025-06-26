@@ -72,7 +72,7 @@ bool FocusListener::eventFilter(QObject* watched, QEvent* event)
 
         bool needResetFocus = !globalItemGeometry.contains(mouseEvent->globalPosition());
         if (needResetFocus) {
-            m_item->setFocus(false);
+            m_item->setFocus(false, Qt::MouseFocusReason);
         }
     }
 

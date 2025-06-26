@@ -28,10 +28,20 @@
 
 #include "modularity/ioc.h"
 #include "ui/iinteractiveprovider.h"
+#include "log.h"
 
 namespace muse::accessibility {
-class AccessibleItemInterface : public QAccessibleInterface, public QAccessibleValueInterface, public QAccessibleTextInterface,
-    public QAccessibleTableCellInterface, public muse::Injectable
+class AccessibleItemInterface :
+    public muse::Injectable,
+
+    // Inherited interfaces must be returned in this->interface_cast(type)
+    // or their virual methods won't be discovered by screen readers.
+    public QAccessibleInterface,
+    public QAccessibleTextInterface,
+    public QAccessibleEditableTextInterface,
+    public QAccessibleValueInterface,
+    public QAccessibleActionInterface,
+    public QAccessibleTableCellInterface
 {
     Inject<ui::IInteractiveProvider> interactiveProvider = { this };
 
@@ -63,6 +73,22 @@ public:
     QVariant minimumValue() const override;
     QVariant minimumStepSize() const override;
 
+    // Action Interface
+    QStringList actionNames() const override { return { pressAction(), increaseAction(), decreaseAction() }; }
+    void doAction(const QString &actionName) override { UNUSED(actionName); }
+    QStringList keyBindingsForAction(const QString &actionName) const override {
+        if (actionName == pressAction()) {
+            return { "Space" };
+        }
+        if (actionName == increaseAction()) {
+            return { "Up" };
+        }
+        if (actionName == decreaseAction()) {
+            return { "Down" };
+        }
+        return {};
+    }
+
     // Text Interface
     void selection(int selectionIndex, int* startOffset, int* endOffset) const override;
     int selectionCount() const override;
@@ -84,6 +110,11 @@ public:
 
     void scrollToSubstring(int startIndex, int endIndex) override;
     QString attributes(int /* offset */, int* startOffset, int* endOffset) const override;
+
+    // Editable Text Interface
+    void deleteText(int startOffset, int endOffset) override { UNUSED(startOffset); UNUSED(endOffset); }
+    void insertText(int offset, const QString &text) override { UNUSED(offset); UNUSED(text); }
+    void replaceText(int startOffset, int endOffset, const QString &text) override { UNUSED(startOffset); UNUSED(endOffset); UNUSED(text); }
 
     // Table cell(list view item) Interface
     bool isSelected() const override;

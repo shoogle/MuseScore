@@ -84,7 +84,8 @@ public:
         Value,
         TextCursor,
         TextInsert,
-        TextRemove
+        TextRemove,
+        TextSelection
     };
 
     enum TextBoundaryType {

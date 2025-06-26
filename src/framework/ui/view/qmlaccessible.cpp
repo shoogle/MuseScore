@@ -161,7 +161,7 @@ void AccessibleItem::accessibleSelection(int selectionIndex, int* startOffset, i
 
 int AccessibleItem::accessibleSelectionCount() const
 {
-    return m_selectedText.size();
+    return 1;
 }
 
 int AccessibleItem::accessibleCursorPosition() const
@@ -614,6 +614,7 @@ void AccessibleItem::setSelectionStart(int selectionStart)
 
     m_selectionStart = selectionStart;
     emit selectionStartChanged();
+    m_accessiblePropertyChanged.send(IAccessible::Property::TextSelection, Val());
 }
 
 void AccessibleItem::setSelectionEnd(int selectionEnd)
@@ -624,6 +625,7 @@ void AccessibleItem::setSelectionEnd(int selectionEnd)
 
     m_selectionEnd = selectionEnd;
     emit selectionEndChanged();
+    m_accessiblePropertyChanged.send(IAccessible::Property::TextSelection, Val());
 }
 
 void AccessibleItem::setCursorPosition(int cursorPosition)
