@@ -2,29 +2,55 @@ name: "Translate1: lupdate strings PR"
 
 on:
   workflow_dispatch:
-    inputs:
-      cleanup_obsolete:
-        description: "Clean up obsolete strings"
-        required: true
-        type: boolean
-        default: false
   schedule:
-    - cron: "0 12 * * Sun"
+    # Comment out the appropriate cron line to disable the scheduled workflow on that branch.
+    - cron: "0 12 * * Sun" # main branch
+    - cron: "0 13 * * Sun" # release branch
+
+env:
+  # Identify the current release branch for the scheduled workflow.
+  BRANCH: ${{ github.event.schedule == '0 13 * * Sun' && '4.7' || github.ref_name }}
 
 jobs:
   lupdate:
     runs-on: ubuntu-slim
-    if: github.event_name != 'schedule' || github.repository == 'musescore/MuseScore'
+    if: github.repository == 'musescore/MuseScore' || github.event_name != 'schedule'
     steps:
       - name: Clone repository
         uses: actions/checkout@v7
         with:
+          ref: ${{ env.BRANCH }}
           submodules: recursive
+
       - name: Configure workflow
         run: |
+          VERSION="$(cmake -P version.cmake | sed -n 's|^-- MUSE_APP_VERSION ||p')"
+          int='(0|[1-9][0-9]*)'
+
+          if [[ ! "${VERSION}" =~ ^${int}\.${int}\.(${int})$ ]]; then
+            echo >&2 "Badly formed app version from version.cmake: ${VERSION}"
+            exit 1
+          fi
+
+          PATCH_VERSION="${BASH_REMATCH[1]}"
+
+          # Does a remote tag exist for this version? E.g. if VERSION is 5.0.0,
+          # TAG can be v5.0.0, v5.0, v5, or empty if it's not yet released.
+          repo='origin' # Note: Forked repos often don't have upstream's tags.
+          patterns=("v${VERSION}" "v${VERSION%.0}" "v${VERSION%.0.0}")
+          TAG="$(git ls-remote --refs --tags "${repo}" "${patterns[@]}")" || {
+            echo >&2 "Unable to fetch tags for remote repo: ${repo}"
+            exit 1
+          }
+
           LUPDATE_ARGS=''
-          if [[ "${{ github.event_name }}" == "schedule" || "${{ inputs.cleanup_obsolete }}" == "true" ]]; then
-            LUPDATE_ARGS='-no-obsolete'
+
+          # For in-app language updates, each major or minor release gets a new
+          # location on S3 storage, but patches share with the previous release.
+          if [[ "${PATCH_VERSION}" == 0 && ! "${TAG}" ]]; then
+            # This is an unreleased major or minor version. It doesn't share
+            # translations on S3 with prior releases, so we can delete strings.
+            LUPDATE_ARGS='-no-obsolete' # Reduces workload for translators.
           fi
 
           echo "LUPDATE_ARGS=$LUPDATE_ARGS" | tee -a $GITHUB_ENV
@@ -48,7 +74,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
           commit-message: "Run `lupdate` with arguments `${{ env.LUPDATE_ARGS }}`"
-          branch: "ci_lupdate${{github.ref_name && format('_{0}', github.ref_name) || ''}}"
+          base: ${{ env.BRANCH }}
+          branch: "ci_lupdate_${{ env.BRANCH }}"
           add-paths: share/locale/*
           title: "Update in-repo translation source files"
           body: "Run `lupdate` with arguments `${{ env.LUPDATE_ARGS }}`"
