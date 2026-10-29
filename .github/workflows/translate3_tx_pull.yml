@@ -1,4 +1,4 @@
-name: "Translate: tx pull translations to S3"
+name: "Translate3: tx pull from Transifex"
 
 on:
   schedule:
@@ -70,6 +70,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           submodules: recursive
+
       - name: Install Qt for lrelease
         if: steps.configure.outputs.DO_PUSH_TO_S3 == 'true'
         uses: jurplel/install-qt-action@v4

@@ -1,4 +1,4 @@
-name: 'Translate: tx push new strings to Transifex'
+name: "Translate2: tx push to Transifex"
 
 on:
   workflow_dispatch:
@@ -10,7 +10,6 @@ on:
 jobs:
   tx_push:
     runs-on: ubuntu-slim
-
     steps:
       - name: Check preconditions
         env:
