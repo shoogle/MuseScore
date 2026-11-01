@@ -1,0 +1,18 @@
+name: "Test: print default branch"
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/10 * * * *" # Every 10 minutes
+
+jobs:
+  test:
+    runs-on: ubuntu-slim
+    steps:
+      - name: Print default branch
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          echo "event_name=${{ github.event_name }}"
+          echo "ref_name=${{ github.ref_name }}"
+          echo "default_branch=${DEFAULT_BRANCH}"
